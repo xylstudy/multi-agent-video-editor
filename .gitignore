@@ -9,14 +9,18 @@ build/
 .env
 .env.local
 
-# Large media files
-videos/
+# Large media files (generated / temp)
+viral-structure-engine/data/temp/**/*.mp4
+get_video/output/**/*.mp4
 *.mp4
 *.mov
 *.avi
 *.wav
 *.aac
 *.mkv
+
+# Showcase videos tracked via Git LFS
+!videos/*.mp4
 
 # Temp / cache
 .pytest_cache/
