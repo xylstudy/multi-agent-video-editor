@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" width="720" height="400">
+  <defs>
+    <linearGradient id="bg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0c29"/>
+      <stop offset="100%" style="stop-color:#302b63"/>
+    </linearGradient>
+    <linearGradient id="accent1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00d2ff"/>
+      <stop offset="100%" style="stop-color:#3a7bd5"/>
+    </linearGradient>
+    <filter id="glow1">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="720" height="400" fill="url(#bg1)" rx="8"/>
+  <circle cx="640" cy="60" r="120" fill="#00d2ff" opacity="0.06"/>
+  <circle cx="80" cy="340" r="80" fill="#3a7bd5" opacity="0.08"/>
+  <!-- Decorative grid -->
+  <line x1="0" y1="100" x2="720" y2="100" stroke="#fff" stroke-opacity="0.03" stroke-width="1"/>
+  <line x1="0" y1="200" x2="720" y2="200" stroke="#fff" stroke-opacity="0.03" stroke-width="1"/>
+  <line x1="0" y1="300" x2="720" y2="300" stroke="#fff" stroke-opacity="0.03" stroke-width="1"/>
+  <!-- Play button -->
+  <circle cx="360" cy="200" r="48" fill="url(#accent1)" opacity="0.9" filter="url(#glow1)"/>
+  <polygon points="348,178 348,222 380,200" fill="#fff"/>
+  <!-- Label -->
+  <rect x="240" y="40" width="240" height="32" rx="16" fill="#00d2ff" opacity="0.15" stroke="#00d2ff" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="360" y="56" text-anchor="middle" dominant-baseline="central" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#00d2ff" font-weight="600" letter-spacing="2">编辑迁移 · 规则引擎</text>
+  <!-- Title -->
+  <text x="360" y="280" text-anchor="middle" font-family="'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#e0e0ff" font-weight="600" letter-spacing="1">编辑迁移路线输出</text>
+  <!-- Desc -->
+  <text x="360" y="310" text-anchor="middle" font-family="'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="14" fill="#8888aa">纯规则引擎驱动 · 无需 LLM API · 一键生成</text>
+  <!-- File size -->
+  <rect x="300" y="340" width="120" height="24" rx="12" fill="#fff" opacity="0.06"/>
+  <text x="360" y="352" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" fill="#666688">final_video.mp4 · 50MB</text>
+</svg>

@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0c29"/>
+      <stop offset="50%" style="stop-color:#302b63"/>
+      <stop offset="100%" style="stop-color:#24243e"/>
+    </linearGradient>
+    <linearGradient id="glow1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00d2ff"/>
+      <stop offset="100%" style="stop-color:#3a7bd5"/>
+    </linearGradient>
+    <linearGradient id="glow2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f093fb"/>
+      <stop offset="100%" style="stop-color:#f5576c"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4facfe"/>
+      <stop offset="100%" style="stop-color:#00f2fe"/>
+    </linearGradient>
+    <linearGradient id="subtitle" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#a8edea"/>
+      <stop offset="100%" style="stop-color:#fed6e3"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <filter id="neon">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="400" fill="url(#bg)" rx="16"/>
+
+  <!-- Decorative circles -->
+  <circle cx="100" cy="80" r="60" fill="#3a7bd5" opacity="0.08"/>
+  <circle cx="1100" cy="320" r="80" fill="#f5576c" opacity="0.06"/>
+  <circle cx="950" cy="60" r="40" fill="#00d2ff" opacity="0.1"/>
+
+  <!-- Grid lines -->
+  <line x1="0" y1="100" x2="1200" y2="100" stroke="#ffffff" stroke-opacity="0.02" stroke-width="1"/>
+  <line x1="0" y1="200" x2="1200" y2="200" stroke="#ffffff" stroke-opacity="0.02" stroke-width="1"/>
+  <line x1="0" y1="300" x2="1200" y2="300" stroke="#ffffff" stroke-opacity="0.02" stroke-width="1"/>
+
+  <!-- Main title: CapCut Claw -->
+  <text x="600" y="160" text-anchor="middle" dominant-baseline="central" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="88" font-weight="900" fill="url(#glow1)" filter="url(#shadow)" letter-spacing="4">
+    CapCut Claw
+  </text>
+
+  <!-- Underline accent -->
+  <rect x="380" y="190" width="440" height="4" rx="2" fill="url(#glow2)" opacity="0.7"/>
+
+  <!-- Subtitle: Chinese -->
+  <text x="600" y="235" text-anchor="middle" dominant-baseline="central" font-family="'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif" font-size="28" font-weight="600" fill="url(#subtitle)" filter="url(#neon)" letter-spacing="6">
+    爆款 Vlog 结构迁移引擎
+  </text>
+
+  <!-- Tagline English -->
+  <text x="600" y="275" text-anchor="middle" dominant-baseline="central" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="16" fill="#8a8aaa" letter-spacing="2">
+    Viral Vlog Structure Migration Engine
+  </text>
+
+  <!-- Feature badges -->
+  <g transform="translate(300, 330)">
+    <rect x="0" y="0" width="160" height="36" rx="18" fill="#3a7bd5" opacity="0.2" stroke="#3a7bd5" stroke-width="1" stroke-opacity="0.3"/>
+    <text x="80" y="18" text-anchor="middle" dominant-baseline="central" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#4facfe" font-weight="500">AI 多智能体流水线</text>
+  </g>
+  <g transform="translate(480, 330)">
+    <rect x="0" y="0" width="130" height="36" rx="18" fill="#f5576c" opacity="0.2" stroke="#f5576c" stroke-width="1" stroke-opacity="0.3"/>
+    <text x="65" y="18" text-anchor="middle" dominant-baseline="central" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#f093fb" font-weight="500">30+ 种转场效果</text>
+  </g>
+  <g transform="translate(630, 330)">
+    <rect x="0" y="0" width="130" height="36" rx="18" fill="#00d2ff" opacity="0.2" stroke="#00d2ff" stroke-width="1" stroke-opacity="0.3"/>
+    <text x="65" y="18" text-anchor="middle" dominant-baseline="central" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#00d2ff" font-weight="500">Remotion 渲染引擎</text>
+  </g>
+  <g transform="translate(780, 330)">
+    <rect x="0" y="0" width="130" height="36" rx="18" fill="#a8edea" opacity="0.2" stroke="#a8edea" stroke-width="1" stroke-opacity="0.3"/>
+    <text x="65" y="18" text-anchor="middle" dominant-baseline="central" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#a8edea" font-weight="500">8 种字幕样式</text>
+  </g>
+
+  <!-- Version badge top-right -->
+  <g transform="translate(1050, 30)">
+    <rect x="0" y="0" width="100" height="28" rx="14" fill="#ffffff" opacity="0.05" stroke="#ffffff" stroke-width="0.5" stroke-opacity="0.1"/>
+    <text x="50" y="14" text-anchor="middle" dominant-baseline="central" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#8a8aaa">v0.1.0</text>
+  </g>
+
+  <!-- Python + Node badges top-left -->
+  <g transform="translate(50, 30)">
+    <rect x="0" y="0" width="95" height="28" rx="14" fill="#ffffff" opacity="0.05" stroke="#ffffff" stroke-width="0.5" stroke-opacity="0.1"/>
+    <text x="47.5" y="14" text-anchor="middle" dominant-baseline="central" font-family="'Segoe UI', Arial, sans-serif" font-size="11" fill="#8a8aaa">Python ≥ 3.11</text>
+  </g>
+  <g transform="translate(155, 30)">
+    <rect x="0" y="0" width="95" height="28" rx="14" fill="#ffffff" opacity="0.05" stroke="#ffffff" stroke-width="0.5" stroke-opacity="0.1"/>
+    <text x="47.5" y="14" text-anchor="middle" dominant-baseline="central" font-family="'Segoe UI', Arial, sans-serif" font-size="11" fill="#8a8aaa">Node.js ≥ 18</text>
+  </g>
+</svg>

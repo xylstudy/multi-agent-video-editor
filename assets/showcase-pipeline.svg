@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" width="720" height="400">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a0020"/>
+      <stop offset="100%" style="stop-color:#3d0050"/>
+    </linearGradient>
+    <linearGradient id="accent2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f093fb"/>
+      <stop offset="100%" style="stop-color:#f5576c"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="400" fill="url(#bg2)" rx="8"/>
+  <circle cx="100" cy="80" r="100" fill="#f093fb" opacity="0.05"/>
+  <circle cx="650" cy="350" r="90" fill="#f5576c" opacity="0.06"/>
+  <line x1="0" y1="100" x2="720" y2="100" stroke="#fff" stroke-opacity="0.03" stroke-width="1"/>
+  <line x1="0" y1="200" x2="720" y2="200" stroke="#fff" stroke-opacity="0.03" stroke-width="1"/>
+  <line x1="0" y1="300" x2="720" y2="300" stroke="#fff" stroke-opacity="0.03" stroke-width="1"/>
+  <circle cx="360" cy="200" r="48" fill="url(#accent2)" opacity="0.9"/>
+  <polygon points="348,178 348,222 380,200" fill="#fff"/>
+  <rect x="210" y="40" width="300" height="32" rx="16" fill="#f093fb" opacity="0.15" stroke="#f093fb" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="360" y="56" text-anchor="middle" dominant-baseline="central" font-family="'Segoe UI', Arial, sans-serif" font-size="14" fill="#f093fb" font-weight="600" letter-spacing="2">多智能体流水线 · AI Agent 协作</text>
+  <text x="360" y="280" text-anchor="middle" font-family="'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#f0e0ff" font-weight="600" letter-spacing="1">多智能体流水线输出</text>
+  <text x="360" y="310" text-anchor="middle" font-family="'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="14" fill="#aa88bb">AI 编导生成 · 爆款结构迁移 · 9 Agent 协作</text>
+  <rect x="280" y="340" width="160" height="24" rx="12" fill="#fff" opacity="0.06"/>
+  <text x="360" y="352" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" fill="#886699">北京旅行Vlog · 28MB</text>
+</svg>
