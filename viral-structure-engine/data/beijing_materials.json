@@ -1,0 +1,474 @@
+{
+  "items": [
+    {
+      "id": "mat_000",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\88250e8474df89bdc677ba059048b55c.jpg",
+      "type": "image",
+      "description": "88250e8474df89bdc677ba059048b55c"
+    },
+    {
+      "id": "mat_001",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\北京丨这可能是我花的最值的两块钱…_1_小鹿拍全国_来自小红书网页版.jpg",
+      "type": "image",
+      "description": "北京丨这可能是我花的最值的两块钱…_1_小鹿拍全国_来自小红书网页版"
+    },
+    {
+      "id": "mat_002",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\北京丨这可能是我花的最值的两块钱…_7_小鹿拍全国_来自小红书网页版.jpg",
+      "type": "image",
+      "description": "北京丨这可能是我花的最值的两块钱…_7_小鹿拍全国_来自小红书网页版"
+    },
+    {
+      "id": "mat_003",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210248_45_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210248_45_11"
+    },
+    {
+      "id": "mat_004",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210250_46_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210250_46_11"
+    },
+    {
+      "id": "mat_005",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210252_47_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210252_47_11"
+    },
+    {
+      "id": "mat_006",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210253_48_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210253_48_11"
+    },
+    {
+      "id": "mat_007",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210254_49_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210254_49_11"
+    },
+    {
+      "id": "mat_008",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210255_50_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210255_50_11"
+    },
+    {
+      "id": "mat_009",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210255_51_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210255_51_11"
+    },
+    {
+      "id": "mat_010",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210256_52_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210256_52_11"
+    },
+    {
+      "id": "mat_011",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210304_53_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210304_53_11"
+    },
+    {
+      "id": "mat_012",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210305_54_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210305_54_11"
+    },
+    {
+      "id": "mat_013",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210307_55_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210307_55_11"
+    },
+    {
+      "id": "mat_014",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210308_56_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210308_56_11"
+    },
+    {
+      "id": "mat_015",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210309_57_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210309_57_11"
+    },
+    {
+      "id": "mat_016",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210309_58_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210309_58_11"
+    },
+    {
+      "id": "mat_017",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210310_59_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210310_59_11"
+    },
+    {
+      "id": "mat_018",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210311_60_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210311_60_11"
+    },
+    {
+      "id": "mat_019",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210312_61_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210312_61_11"
+    },
+    {
+      "id": "mat_020",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210327_62_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210327_62_11"
+    },
+    {
+      "id": "mat_021",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210328_63_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210328_63_11"
+    },
+    {
+      "id": "mat_022",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210329_64_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210329_64_11"
+    },
+    {
+      "id": "mat_023",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210330_65_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210330_65_11"
+    },
+    {
+      "id": "mat_024",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210331_66_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210331_66_11"
+    },
+    {
+      "id": "mat_025",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210332_67_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210332_67_11"
+    },
+    {
+      "id": "mat_026",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210333_68_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210333_68_11"
+    },
+    {
+      "id": "mat_027",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210334_69_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210334_69_11"
+    },
+    {
+      "id": "mat_028",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210335_70_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210335_70_11"
+    },
+    {
+      "id": "mat_029",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210345_71_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210345_71_11"
+    },
+    {
+      "id": "mat_030",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210346_72_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210346_72_11"
+    },
+    {
+      "id": "mat_031",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210347_73_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210347_73_11"
+    },
+    {
+      "id": "mat_032",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210348_74_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210348_74_11"
+    },
+    {
+      "id": "mat_033",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210349_75_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210349_75_11"
+    },
+    {
+      "id": "mat_034",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210350_76_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210350_76_11"
+    },
+    {
+      "id": "mat_035",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210350_77_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210350_77_11"
+    },
+    {
+      "id": "mat_036",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\来北京天坛 拍这些机位就够了❗️_1_🐰Double three_来自小红书网页版.jpg",
+      "type": "image",
+      "description": "来北京天坛 拍这些机位就够了❗️_1_🐰Double three_来自小红书网页"
+    },
+    {
+      "id": "mat_037",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\来北京天坛 拍这些机位就够了❗️_2_🐰Double three_来自小红书网页版.jpg",
+      "type": "image",
+      "description": "来北京天坛 拍这些机位就够了❗️_2_🐰Double three_来自小红书网页"
+    },
+    {
+      "id": "mat_038",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\来北京天坛 拍这些机位就够了❗️_3_🐰Double three_来自小红书网页版.jpg",
+      "type": "image",
+      "description": "来北京天坛 拍这些机位就够了❗️_3_🐰Double three_来自小红书网页"
+    }
+  ],
+  "materials": [
+    {
+      "id": "mat_000",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\88250e8474df89bdc677ba059048b55c.jpg",
+      "type": "image",
+      "description": "88250e8474df89bdc677ba059048b55c"
+    },
+    {
+      "id": "mat_001",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\北京丨这可能是我花的最值的两块钱…_1_小鹿拍全国_来自小红书网页版.jpg",
+      "type": "image",
+      "description": "北京丨这可能是我花的最值的两块钱…_1_小鹿拍全国_来自小红书网页版"
+    },
+    {
+      "id": "mat_002",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\北京丨这可能是我花的最值的两块钱…_7_小鹿拍全国_来自小红书网页版.jpg",
+      "type": "image",
+      "description": "北京丨这可能是我花的最值的两块钱…_7_小鹿拍全国_来自小红书网页版"
+    },
+    {
+      "id": "mat_003",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210248_45_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210248_45_11"
+    },
+    {
+      "id": "mat_004",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210250_46_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210250_46_11"
+    },
+    {
+      "id": "mat_005",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210252_47_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210252_47_11"
+    },
+    {
+      "id": "mat_006",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210253_48_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210253_48_11"
+    },
+    {
+      "id": "mat_007",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210254_49_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210254_49_11"
+    },
+    {
+      "id": "mat_008",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210255_50_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210255_50_11"
+    },
+    {
+      "id": "mat_009",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210255_51_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210255_51_11"
+    },
+    {
+      "id": "mat_010",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210256_52_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210256_52_11"
+    },
+    {
+      "id": "mat_011",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210304_53_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210304_53_11"
+    },
+    {
+      "id": "mat_012",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210305_54_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210305_54_11"
+    },
+    {
+      "id": "mat_013",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210307_55_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210307_55_11"
+    },
+    {
+      "id": "mat_014",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210308_56_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210308_56_11"
+    },
+    {
+      "id": "mat_015",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210309_57_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210309_57_11"
+    },
+    {
+      "id": "mat_016",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210309_58_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210309_58_11"
+    },
+    {
+      "id": "mat_017",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210310_59_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210310_59_11"
+    },
+    {
+      "id": "mat_018",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210311_60_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210311_60_11"
+    },
+    {
+      "id": "mat_019",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210312_61_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210312_61_11"
+    },
+    {
+      "id": "mat_020",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210327_62_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210327_62_11"
+    },
+    {
+      "id": "mat_021",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210328_63_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210328_63_11"
+    },
+    {
+      "id": "mat_022",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210329_64_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210329_64_11"
+    },
+    {
+      "id": "mat_023",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210330_65_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210330_65_11"
+    },
+    {
+      "id": "mat_024",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210331_66_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210331_66_11"
+    },
+    {
+      "id": "mat_025",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210332_67_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210332_67_11"
+    },
+    {
+      "id": "mat_026",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210333_68_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210333_68_11"
+    },
+    {
+      "id": "mat_027",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210334_69_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210334_69_11"
+    },
+    {
+      "id": "mat_028",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210335_70_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210335_70_11"
+    },
+    {
+      "id": "mat_029",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210345_71_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210345_71_11"
+    },
+    {
+      "id": "mat_030",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210346_72_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210346_72_11"
+    },
+    {
+      "id": "mat_031",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210347_73_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210347_73_11"
+    },
+    {
+      "id": "mat_032",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210348_74_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210348_74_11"
+    },
+    {
+      "id": "mat_033",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210349_75_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210349_75_11"
+    },
+    {
+      "id": "mat_034",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210350_76_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210350_76_11"
+    },
+    {
+      "id": "mat_035",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\微信图片_20260602210350_77_11.jpg",
+      "type": "image",
+      "description": "微信图片_20260602210350_77_11"
+    },
+    {
+      "id": "mat_036",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\来北京天坛 拍这些机位就够了❗️_1_🐰Double three_来自小红书网页版.jpg",
+      "type": "image",
+      "description": "来北京天坛 拍这些机位就够了❗️_1_🐰Double three_来自小红书网页"
+    },
+    {
+      "id": "mat_037",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\来北京天坛 拍这些机位就够了❗️_2_🐰Double three_来自小红书网页版.jpg",
+      "type": "image",
+      "description": "来北京天坛 拍这些机位就够了❗️_2_🐰Double three_来自小红书网页"
+    },
+    {
+      "id": "mat_038",
+      "path": "E:\\py pbjects\\video_claw\\data\\北京\\来北京天坛 拍这些机位就够了❗️_3_🐰Double three_来自小红书网页版.jpg",
+      "type": "image",
+      "description": "来北京天坛 拍这些机位就够了❗️_3_🐰Double three_来自小红书网页"
+    }
+  ]
+}

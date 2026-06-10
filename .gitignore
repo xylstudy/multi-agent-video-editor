@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+
+# Large media files
+videos/
+*.mp4
+*.mov
+*.avi
+*.wav
+*.aac
+*.mkv
+
+# Temp / cache
+.pytest_cache/
+*.pytest_cache*
+.ipynb_checkpoints/
+
+# Node
+node_modules/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Claude
+.claude/

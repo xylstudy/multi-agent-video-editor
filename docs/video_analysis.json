@@ -1,0 +1,133 @@
+{
+  "file_info": {
+    "filename": "mmexport1779629657186.mp4",
+    "file_path": "E:/py pbjects/video_claw/mmexport1779629657186.mp4",
+    "file_size_bytes": 3307279,
+    "file_size_mb": 3.15,
+    "wechat_export": true,
+    "wechat_export_time": "2026-05-24 21:34:17",
+    "source_platform": "WeChat"
+  },
+  "video_technical": {
+    "duration_seconds": 15.8,
+    "duration_formatted": "0:15",
+    "frame_count": 474,
+    "fps": 30.0,
+    "resolution": "720x1280",
+    "width": 720,
+    "height": 1280,
+    "aspect_ratio": 0.562,
+    "orientation": "portrait",
+    "video_codec": "H.264 (inferred from .mp4 container)",
+    "overall_bitrate_mbps": 1.67
+  },
+  "content_analysis": {
+    "video_type": "travel_vlog",
+    "subject": "highland snow mountain scenery with couples",
+    "location_guess": "Western Sichuan / Tibetan Plateau region (based on landscape and costumes)",
+    "scenes": [
+      {
+        "timestamp_approx": "00:00 - 00:04",
+        "description": "Opening shot of a straight paved road leading toward majestic snow-capped mountains under a bright blue sky with white clouds. A pair of hands appears at the bottom of the frame, suggesting a romantic/travel companion theme."
+      },
+      {
+        "timestamp_approx": "00:04 - 00:10",
+        "description": "A couple dressed in traditional Tibetan/ethnic minority clothing stands with their backs to the camera, gazing at the snow mountain and grassland. The man wears a white inner garment with a turquoise outer robe and fur trim; the woman wears an intricately patterned traditional vest over a dress, with elaborately braided hair adorned with accessories."
+      },
+      {
+        "timestamp_approx": "00:10 - 00:15",
+        "description": "Another couple (or the same couple in different outfits) stands before a mountain lake. The man wears a yellow bucket hat, green and white striped T-shirt, and beige pants; the woman wears a green short-sleeve top and denim skirt. They hold hands while looking at the scenery."
+      }
+    ],
+    "visual_elements": [
+      "Snow-capped mountains (consistent background throughout)",
+      "Alpine grasslands and meadows",
+      "Mountain lake (visible in final scene)",
+      "Paved road (opening shot)",
+      "Blue sky with scattered cumulus clouds",
+      "Traditional ethnic minority costumes",
+      "Casual modern outdoor clothing"
+    ],
+    "mood_tone": "romantic, serene, wanderlust, documentary-style travel memory",
+    "color_palette": [
+      "Dominant blues (sky)",
+      "Greens (grassland, clothing)",
+      "Earth tones (mountains, road)",
+      "White (snow, clouds)"
+    ]
+  },
+  "editing_analysis": {
+    "scene_change_count": 0,
+    "scene_changes_hard_cut": [],
+    "editing_style": "seamless soft-transition montage",
+    "estimated_cuts": 2,
+    "clip_style_estimate": "Soft-transition travel montage with hidden cuts, likely using dissolve or whip-pan techniques to switch subjects while maintaining the same mountain backdrop.",
+    "transitions_detected": [
+      {
+        "type": "hidden_soft_cut",
+        "position": "around 00:04",
+        "description": "Transition from road scene to couple in ethnic costumes. No hard cut detected by histogram analysis, suggesting a dissolve or motion-based transition."
+      },
+      {
+        "type": "hidden_soft_cut",
+        "position": "around 00:10",
+        "description": "Transition from ethnic costume couple to casual clothing couple. The consistent mountain background makes this a classic 'background match cut' or dissolve transition."
+      }
+    ],
+    "editing_techniques": [
+      "Background match cut / seamless transition",
+      "Subject swap while maintaining consistent scenery",
+      "Slow, contemplative pacing (no rapid cuts)",
+      "Vertical/portrait framing optimized for mobile/social media"
+    ],
+    "camera_movement_estimate": "Likely static or very slow pan; the consistent mountain horizon across all frames suggests minimal camera movement, focusing attention on the subjects.",
+    "popular_format_indicators": [
+      "Short-form vertical video (9:16)",
+      "Romantic travel memory format",
+      "Couple/relationship content",
+      "Traditional-to-modern costume contrast (popular on Douyin/Kuaishou/WeChat Channels)"
+    ]
+  },
+  "keyframes": [
+    {
+      "position_percent": 0,
+      "frame_index": 0,
+      "timestamp": "00:00",
+      "description": "Straight road leading to snow mountains, hands reaching into frame from bottom",
+      "avg_color_bgr": [152.27, 134.38, 122.55],
+      "dominant_mood": "open, expansive, inviting"
+    },
+    {
+      "position_percent": 25,
+      "frame_index": 118,
+      "timestamp": "00:03.9",
+      "description": "Traditional costume couple viewing the mountain grassland",
+      "avg_color_bgr": [122.32, 134.46, 127.06],
+      "dominant_mood": "cultural, romantic, timeless"
+    },
+    {
+      "position_percent": 50,
+      "frame_index": 237,
+      "timestamp": "00:07.9",
+      "description": "Traditional costume couple from behind, centered on the mountain peak",
+      "avg_color_bgr": [128.91, 126.79, 113.71],
+      "dominant_mood": "contemplative, scenic, intimate"
+    },
+    {
+      "position_percent": 75,
+      "frame_index": 355,
+      "timestamp": "00:11.8",
+      "description": "Transition phase or casual couple beginning to appear",
+      "avg_color_bgr": [123.15, 128.90, 120.76],
+      "dominant_mood": "transition, continuity"
+    },
+    {
+      "position_percent": 99,
+      "frame_index": 469,
+      "timestamp": "00:15.6",
+      "description": "Casual clothing couple holding hands before mountain lake",
+      "avg_color_bgr": [103.54, 107.11, 97.90],
+      "dominant_mood": "casual, youthful, adventurous"
+    }
+  ]
+}

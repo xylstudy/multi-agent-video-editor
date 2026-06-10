@@ -1,0 +1,830 @@
+{
+  "source_path": "E:\\py pbjects\\video_claw\\mmexport1779629657186.mp4",
+  "duration": 15.8,
+  "resolution": [
+    720,
+    1280
+  ],
+  "shot_count": 16,
+  "structure_summary": "",
+  "hook_summary": "",
+  "key_techniques": [],
+  "vlog_meta": {
+    "narrative_type": "",
+    "structure_type": "",
+    "persona_type": "",
+    "persona_ratio": 0,
+    "hook_method": "",
+    "hook_detail": "",
+    "empty_shot_count": 0,
+    "empty_shot_ratio": 0,
+    "emotion_arc": [],
+    "overall_emotion": "",
+    "key_techniques": []
+  },
+  "shots": [
+    {
+      "index": 0,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "scene_establish",
+      "visual_description": "人物中景，一位年轻女性面对镜头微笑打招呼",
+      "camera_movement": "固定镜头",
+      "shot_size": "medium",
+      "composition": "居中构图",
+      "color_mood": "warm",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "温馨",
+      "structure_purpose": "作为视频第一个镜头，展示人物和所处环境，快速建立场景和Vlog基调。",
+      "has_face": false,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    },
+    {
+      "index": 1,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "scene_establish",
+      "visual_description": "室内温暖家居环境全景，包含沙发、茶几与柔光窗帘",
+      "camera_movement": "固定镜头",
+      "shot_size": "long",
+      "composition": "三分法，前景有虚化绿植，环境层次分明",
+      "color_mood": "warm",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "温馨",
+      "structure_purpose": "紧接人物开场白后展示整体家居环境，快速建立叙事空间，让观众代入生活氛围",
+      "has_face": false,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    },
+    {
+      "index": 2,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "daily_moment",
+      "visual_description": "一个女孩坐在沙发上翻看杂志",
+      "camera_movement": "fixed",
+      "shot_size": "medium_close",
+      "composition": "三分法",
+      "color_mood": "warm",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "温馨",
+      "structure_purpose": "人物在治愈场景中的日常动作，信息量中等，作为Vlog的主要内容填充",
+      "has_face": false,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    },
+    {
+      "index": 3,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "daily_moment",
+      "visual_description": "物品特写（翻开的杂志内页与手部动作）",
+      "camera_movement": "固定镜头",
+      "shot_size": "close_up",
+      "composition": "居中构图",
+      "color_mood": "warm",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "治愈",
+      "structure_purpose": "时长仅1秒，承接前一个阅读动作，展现翻页细节，属于日常片段填充。",
+      "has_face": false,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    },
+    {
+      "index": 4,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "daily_moment",
+      "visual_description": "特写展示翻开的杂志内页，包含图片和标题文字",
+      "camera_movement": "固定镜头",
+      "shot_size": "close_up",
+      "composition": "居中构图，俯拍视角",
+      "color_mood": "warm",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "治愈",
+      "structure_purpose": "紧接上一手翻杂志特写，继续展示阅读细节，属于日常过程的自然铺展，节奏舒缓，信息量中等",
+      "has_face": false,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    },
+    {
+      "index": 5,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "daily_moment",
+      "visual_description": "人物侧面阅读杂志的中景",
+      "camera_movement": "固定镜头",
+      "shot_size": "medium",
+      "composition": "三分法构图，人物位于画面一侧",
+      "color_mood": "warm",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "平静",
+      "structure_purpose": "接续前一个特写镜头，展示人物阅读状态，填充日常叙事，节奏平稳，无强烈情绪冲击。",
+      "has_face": false,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    },
+    {
+      "index": 6,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "transition",
+      "visual_description": "一杯冒着热气的咖啡杯特写",
+      "camera_movement": "固定镜头",
+      "shot_size": "close_up",
+      "composition": "居中构图",
+      "color_mood": "warm",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "治愈",
+      "structure_purpose": "1秒物品空镜，承接阅读氛围，为后续场景切换做情绪缓冲",
+      "has_face": false,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    },
+    {
+      "index": 7,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "info_card",
+      "visual_description": "文字卡",
+      "camera_movement": "固定镜头",
+      "shot_size": "medium",
+      "composition": "居中构图",
+      "color_mood": "warm",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "治愈",
+      "structure_purpose": "前一镜头为治愈热咖啡特写并留白，此处1秒镜头极可能为点题文字卡，传递生活感悟，开启后续叙事。",
+      "has_face": true,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    },
+    {
+      "index": 8,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "scene_establish",
+      "visual_description": "人物中景",
+      "camera_movement": "固定镜头",
+      "shot_size": "medium",
+      "composition": "三分法构图，人物置于右侧，左侧留白为窗外景色",
+      "color_mood": "warm",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "平静",
+      "structure_purpose": "紧随文字卡之后，首次展示独处空间场景，交代环境与氛围",
+      "has_face": false,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    },
+    {
+      "index": 9,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "emotion_peak",
+      "visual_description": "一杯冒着热气的咖啡特写",
+      "camera_movement": "固定镜头",
+      "shot_size": "close_up",
+      "composition": "居中构图，背景虚化",
+      "color_mood": "warm",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "治愈",
+      "structure_purpose": "特写咖啡热气升腾，视觉上强化治愈感，常配合BGM高潮点，提升情绪感染力",
+      "has_face": false,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    },
+    {
+      "index": 10,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "persona",
+      "visual_description": "人物特写：一个人双手捧着咖啡杯，低头微笑或闭眼享受",
+      "camera_movement": "固定镜头",
+      "shot_size": "close_up",
+      "composition": "居中构图，人物面部占据画面中心，背景虚化",
+      "color_mood": "warm",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "温馨",
+      "structure_purpose": "紧接咖啡特写的情绪支点后，用人物享受咖啡的瞬间强化人格感，延续治愈情绪",
+      "has_face": false,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    },
+    {
+      "index": 11,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "transition",
+      "visual_description": "一杯拿铁咖啡放在木桌上，旁边有阳光透过窗帘撒下的光斑",
+      "camera_movement": "固定镜头",
+      "shot_size": "close_up",
+      "composition": "居中构图，有前景虚化",
+      "color_mood": "warm",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "温馨",
+      "structure_purpose": "1秒时长的物品空镜，用于连接前一个品尝特写与后续画面，降低叙事节奏，营造氛围",
+      "has_face": false,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    },
+    {
+      "index": 12,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "closing",
+      "visual_description": "黑场/白场",
+      "camera_movement": "固定镜头",
+      "shot_size": "close_up",
+      "composition": "大面积留白",
+      "color_mood": "neutral",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "平静",
+      "structure_purpose": "在咖啡平静句号后，用黑场作为视频最终收尾，符合Vlog结束模式",
+      "has_face": false,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    },
+    {
+      "index": 13,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "closing",
+      "visual_description": "黑场/白场",
+      "camera_movement": "固定镜头",
+      "shot_size": "long",
+      "composition": "大面积留白",
+      "color_mood": "neutral",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "平静",
+      "structure_purpose": "前一帧为黑场结束，本镜头延续黑场，作为视频的收尾定格",
+      "has_face": false,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    },
+    {
+      "index": 14,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "closing",
+      "visual_description": "黑场/白场",
+      "camera_movement": "固定镜头",
+      "shot_size": "close_up",
+      "composition": "无构图",
+      "color_mood": "neutral",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "平静",
+      "structure_purpose": "位于视频结尾的纯黑场画面，用于收束情绪，给观众平静的结束感",
+      "has_face": false,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    },
+    {
+      "index": 15,
+      "start_time": 0,
+      "end_time": 0,
+      "duration": 0,
+      "shot_type": "closing",
+      "visual_description": "黑场",
+      "camera_movement": "固定镜头",
+      "shot_size": "long",
+      "composition": "无构图",
+      "color_mood": "neutral",
+      "subtitle_text": "",
+      "voiceover_text": "",
+      "transition_in": "cut",
+      "emotion": "平静",
+      "structure_purpose": "该镜头位于视频最末尾，且前一帧已是黑场收尾，延续平静收束感，属于典型的结尾黑场定格。",
+      "has_face": false,
+      "bgm_sync": false,
+      "is_empty_shot": false
+    }
+  ],
+  "raw_structure_analysis": {},
+  "raw_shot_analyses": [
+    {
+      "shot_index": 0,
+      "content": {
+        "main_subject": "人物中景，一位年轻女性面对镜头微笑打招呼",
+        "people_count": 1,
+        "people_description": "正面，微笑，挥手或打招呼动作",
+        "scene_type": "室内，家居客厅",
+        "indoor_outdoor": "indoor",
+        "color_temperature": "warm",
+        "light_quality": "柔和的自然光从窗户射入，整体明亮通透",
+        "has_text_in_frame": false,
+        "text_content": ""
+      },
+      "technique": {
+        "shot_size": "medium",
+        "composition": "居中构图",
+        "camera_movement": "固定镜头",
+        "visual_quality": "高清干净，轻微美颜滤镜"
+      },
+      "structure_role": {
+        "primary_function": "scene_establish",
+        "confidence": 0.7,
+        "reasoning": "作为视频第一个镜头，展示人物和所处环境，快速建立场景和Vlog基调。"
+      },
+      "emotion": "温馨",
+      "one_sentence_summary": "视频开场通过固定机位拍摄人物在温馨的家中打招呼，建立生活感场景并邀请观众进入Vlog叙事。",
+      "has_face": false,
+      "start_time": 0.0,
+      "end_time": 1.0
+    },
+    {
+      "shot_index": 1,
+      "content": {
+        "main_subject": "室内温暖家居环境全景，包含沙发、茶几与柔光窗帘",
+        "people_count": 0,
+        "people_description": "",
+        "scene_type": "客厅",
+        "indoor_outdoor": "indoor",
+        "color_temperature": "warm",
+        "light_quality": "柔和的自然光从窗户透入，光线均匀散射，无强烈阴影",
+        "has_text_in_frame": false,
+        "text_content": ""
+      },
+      "technique": {
+        "shot_size": "long",
+        "composition": "三分法，前景有虚化绿植，环境层次分明",
+        "camera_movement": "固定镜头",
+        "visual_quality": "高清干净，画面锐利，色彩饱和自然"
+      },
+      "structure_role": {
+        "primary_function": "scene_establish",
+        "confidence": 0.9,
+        "reasoning": "紧接人物开场白后展示整体家居环境，快速建立叙事空间，让观众代入生活氛围"
+      },
+      "emotion": "温馨",
+      "one_sentence_summary": "通过一个广角固定镜头展现洒满阳光的客厅，完成从人物到场景的自然过渡，奠定Vlog的治愈基调。",
+      "has_face": false,
+      "start_time": 1.0,
+      "end_time": 2.0
+    },
+    {
+      "shot_index": 2,
+      "content": {
+        "main_subject": "一个女孩坐在沙发上翻看杂志",
+        "people_count": 1,
+        "people_description": "正面，表情平静专注",
+        "scene_type": "客厅",
+        "indoor_outdoor": "indoor",
+        "color_temperature": "warm",
+        "light_quality": "柔和自然光，从窗户洒入，形成温馨光影",
+        "has_text_in_frame": false,
+        "text_content": ""
+      },
+      "technique": {
+        "shot_size": "medium_close",
+        "composition": "三分法",
+        "camera_movement": "fixed",
+        "visual_quality": "高清干净，有轻微光斑虚化"
+      },
+      "structure_role": {
+        "primary_function": "daily_moment",
+        "confidence": 0.8,
+        "reasoning": "人物在治愈场景中的日常动作，信息量中等，作为Vlog的主要内容填充"
+      },
+      "emotion": "温馨",
+      "one_sentence_summary": "女孩在阳光洒落的客厅安静翻看杂志，传递出悠闲治愈的日常氛围",
+      "has_face": false,
+      "start_time": 2.0,
+      "end_time": 3.0
+    },
+    {
+      "shot_index": 3,
+      "content": {
+        "main_subject": "物品特写（翻开的杂志内页与手部动作）",
+        "people_count": 1,
+        "people_description": "一只手轻轻翻动杂志，未见面部",
+        "scene_type": "客厅",
+        "indoor_outdoor": "indoor",
+        "color_temperature": "warm",
+        "light_quality": "自然光，柔和的光影",
+        "has_text_in_frame": false,
+        "text_content": ""
+      },
+      "technique": {
+        "shot_size": "close_up",
+        "composition": "居中构图",
+        "camera_movement": "固定镜头",
+        "visual_quality": "高清干净，有轻微虚化"
+      },
+      "structure_role": {
+        "primary_function": "daily_moment",
+        "confidence": 0.7,
+        "reasoning": "时长仅1秒，承接前一个阅读动作，展现翻页细节，属于日常片段填充。"
+      },
+      "emotion": "治愈",
+      "one_sentence_summary": "特写镜头展示手翻杂志的细节，延续悠闲治愈的日常氛围。",
+      "has_face": false,
+      "start_time": 3.0,
+      "end_time": 4.0
+    },
+    {
+      "shot_index": 4,
+      "content": {
+        "main_subject": "特写展示翻开的杂志内页，包含图片和标题文字",
+        "people_count": 0,
+        "people_description": "",
+        "scene_type": "室内居家环境",
+        "indoor_outdoor": "indoor",
+        "color_temperature": "warm",
+        "light_quality": "柔和的自然光，从窗户方向照入，形成温暖光影",
+        "has_text_in_frame": true,
+        "text_content": "杂志文章标题和部分段落文字"
+      },
+      "technique": {
+        "shot_size": "close_up",
+        "composition": "居中构图，俯拍视角",
+        "camera_movement": "固定镜头",
+        "visual_quality": "高清干净，浅景深使背景轻微虚化，画面细腻"
+      },
+      "structure_role": {
+        "primary_function": "daily_moment",
+        "confidence": 0.85,
+        "reasoning": "紧接上一手翻杂志特写，继续展示阅读细节，属于日常过程的自然铺展，节奏舒缓，信息量中等"
+      },
+      "emotion": "治愈",
+      "one_sentence_summary": "特写杂志内页，用温暖光影和静物感传递阅读时光的治愈氛围。",
+      "has_face": false,
+      "start_time": 4.0,
+      "end_time": 5.0
+    },
+    {
+      "shot_index": 5,
+      "content": {
+        "main_subject": "人物侧面阅读杂志的中景",
+        "people_count": 1,
+        "people_description": "一位年轻女性，侧面，表情专注平静，正在翻看杂志",
+        "scene_type": "家",
+        "indoor_outdoor": "indoor",
+        "color_temperature": "warm",
+        "light_quality": "柔和自然光，可能有窗光或暖灯，营造温馨氛围",
+        "has_text_in_frame": false,
+        "text_content": ""
+      },
+      "technique": {
+        "shot_size": "medium",
+        "composition": "三分法构图，人物位于画面一侧",
+        "camera_movement": "固定镜头",
+        "visual_quality": "高清干净，有轻微虚化背景突出主体"
+      },
+      "structure_role": {
+        "primary_function": "daily_moment",
+        "confidence": 0.7,
+        "reasoning": "接续前一个特写镜头，展示人物阅读状态，填充日常叙事，节奏平稳，无强烈情绪冲击。"
+      },
+      "emotion": "平静",
+      "one_sentence_summary": "固定镜头拍摄人物侧面专注阅读杂志，延续前一个镜头的静物治愈感，营造安静的个人时光。",
+      "has_face": false,
+      "start_time": 5.0,
+      "end_time": 6.0
+    },
+    {
+      "shot_index": 6,
+      "content": {
+        "main_subject": "一杯冒着热气的咖啡杯特写",
+        "people_count": 0,
+        "people_description": "",
+        "scene_type": "家",
+        "indoor_outdoor": "indoor",
+        "color_temperature": "warm",
+        "light_quality": "柔和自然光，侧光照亮蒸汽",
+        "has_text_in_frame": false,
+        "text_content": ""
+      },
+      "technique": {
+        "shot_size": "close_up",
+        "composition": "居中构图",
+        "camera_movement": "固定镜头",
+        "visual_quality": "高清干净，浅景深虚化背景"
+      },
+      "structure_role": {
+        "primary_function": "transition",
+        "confidence": 0.7,
+        "reasoning": "1秒物品空镜，承接阅读氛围，为后续场景切换做情绪缓冲"
+      },
+      "emotion": "治愈",
+      "one_sentence_summary": "热咖啡特写定格安静时光，作为过渡镜头延续治愈感，为叙事段落留白。",
+      "has_face": false,
+      "start_time": 6.0,
+      "end_time": 7.0
+    },
+    {
+      "shot_index": 7,
+      "content": {
+        "main_subject": "文字卡",
+        "people_count": 0,
+        "people_description": "",
+        "scene_type": "室内环境",
+        "indoor_outdoor": "indoor",
+        "color_temperature": "warm",
+        "light_quality": "柔和光",
+        "has_text_in_frame": true,
+        "text_content": "享受独处时光"
+      },
+      "technique": {
+        "shot_size": "medium",
+        "composition": "居中构图",
+        "camera_movement": "固定镜头",
+        "visual_quality": "高清干净"
+      },
+      "structure_role": {
+        "primary_function": "info_card",
+        "confidence": 0.6,
+        "reasoning": "前一镜头为治愈热咖啡特写并留白，此处1秒镜头极可能为点题文字卡，传递生活感悟，开启后续叙事。"
+      },
+      "emotion": "治愈",
+      "one_sentence_summary": "黑底白字的文字卡定格‘享受独处时光’，为视频注入主题文案，延续治愈氛围。",
+      "has_face": true,
+      "start_time": 7.0,
+      "end_time": 8.0
+    },
+    {
+      "shot_index": 8,
+      "content": {
+        "main_subject": "人物中景",
+        "people_count": 1,
+        "people_description": "一人，侧面，表情平静，坐在窗边手持咖啡杯望向窗外",
+        "scene_type": "家",
+        "indoor_outdoor": "indoor",
+        "color_temperature": "warm",
+        "light_quality": "柔和自然光，窗边侧光，画面干净通透",
+        "has_text_in_frame": false,
+        "text_content": ""
+      },
+      "technique": {
+        "shot_size": "medium",
+        "composition": "三分法构图，人物置于右侧，左侧留白为窗外景色",
+        "camera_movement": "固定镜头",
+        "visual_quality": "高清干净，背景有轻微虚化"
+      },
+      "structure_role": {
+        "primary_function": "scene_establish",
+        "confidence": 0.9,
+        "reasoning": "紧随文字卡之后，首次展示独处空间场景，交代环境与氛围"
+      },
+      "emotion": "平静",
+      "one_sentence_summary": "窗边人物独处喝咖啡的安静画面，建立治愈系场景基调",
+      "has_face": false,
+      "start_time": 8.0,
+      "end_time": 9.0
+    },
+    {
+      "shot_index": 9,
+      "content": {
+        "main_subject": "一杯冒着热气的咖啡特写",
+        "people_count": 0,
+        "people_description": "",
+        "scene_type": "室内靠窗的桌子",
+        "indoor_outdoor": "indoor",
+        "color_temperature": "warm",
+        "light_quality": "柔和的自然侧光，带有窗影",
+        "has_text_in_frame": false,
+        "text_content": ""
+      },
+      "technique": {
+        "shot_size": "close_up",
+        "composition": "居中构图，背景虚化",
+        "camera_movement": "固定镜头",
+        "visual_quality": "高清干净，浅景深突出主体"
+      },
+      "structure_role": {
+        "primary_function": "emotion_peak",
+        "confidence": 0.8,
+        "reasoning": "特写咖啡热气升腾，视觉上强化治愈感，常配合BGM高潮点，提升情绪感染力"
+      },
+      "emotion": "治愈",
+      "one_sentence_summary": "一杯热咖啡的特写，通过柔光与热气传递宁静温暖的治愈感，成为视频的情绪支点。",
+      "has_face": false,
+      "start_time": 9.0,
+      "end_time": 10.0
+    },
+    {
+      "shot_index": 10,
+      "content": {
+        "main_subject": "人物特写：一个人双手捧着咖啡杯，低头微笑或闭眼享受",
+        "people_count": 1,
+        "people_description": "正面或微侧，表情平静满足，动作轻嗅或小口品尝咖啡",
+        "scene_type": "家或咖啡厅",
+        "indoor_outdoor": "indoor",
+        "color_temperature": "warm",
+        "light_quality": "柔和的自然光或暖调人工光，有轻微逆光勾勒人物轮廓",
+        "has_text_in_frame": false,
+        "text_content": ""
+      },
+      "technique": {
+        "shot_size": "close_up",
+        "composition": "居中构图，人物面部占据画面中心，背景虚化",
+        "camera_movement": "固定镜头",
+        "visual_quality": "高清干净，浅景深虚化，营造梦幻治愈感"
+      },
+      "structure_role": {
+        "primary_function": "persona_expression",
+        "confidence": 0.8,
+        "reasoning": "紧接咖啡特写的情绪支点后，用人物享受咖啡的瞬间强化人格感，延续治愈情绪"
+      },
+      "emotion": "温馨",
+      "one_sentence_summary": "人物轻嗅或品尝咖啡的特写镜头，通过放松表情和暖柔光影传递治愈温馨感，强化Vlog的人格氛围。",
+      "has_face": false,
+      "start_time": 10.0,
+      "end_time": 11.0
+    },
+    {
+      "shot_index": 11,
+      "content": {
+        "main_subject": "一杯拿铁咖啡放在木桌上，旁边有阳光透过窗帘撒下的光斑",
+        "people_count": 0,
+        "people_description": "",
+        "scene_type": "咖啡厅",
+        "indoor_outdoor": "indoor",
+        "color_temperature": "warm",
+        "light_quality": "柔和的自然光，有窗边光斑效果",
+        "has_text_in_frame": false,
+        "text_content": ""
+      },
+      "technique": {
+        "shot_size": "close_up",
+        "composition": "居中构图，有前景虚化",
+        "camera_movement": "固定镜头",
+        "visual_quality": "高清干净，有轻微光斑和虚化"
+      },
+      "structure_role": {
+        "primary_function": "transition",
+        "confidence": 0.8,
+        "reasoning": "1秒时长的物品空镜，用于连接前一个品尝特写与后续画面，降低叙事节奏，营造氛围"
+      },
+      "emotion": "温馨",
+      "one_sentence_summary": "一杯咖啡静置在桌上，光斑点缀，为Vlog画上平静的句号。",
+      "has_face": false,
+      "start_time": 11.0,
+      "end_time": 12.0
+    },
+    {
+      "shot_index": 12,
+      "content": {
+        "main_subject": "黑场/白场",
+        "people_count": 0,
+        "people_description": "",
+        "scene_type": "无场景",
+        "indoor_outdoor": "unknown",
+        "color_temperature": "neutral",
+        "light_quality": "无光影",
+        "has_text_in_frame": false,
+        "text_content": ""
+      },
+      "technique": {
+        "shot_size": "close_up",
+        "composition": "大面积留白",
+        "camera_movement": "固定镜头",
+        "visual_quality": "高清干净"
+      },
+      "structure_role": {
+        "primary_function": "closing_moment",
+        "confidence": 0.9,
+        "reasoning": "在咖啡平静句号后，用黑场作为视频最终收尾，符合Vlog结束模式"
+      },
+      "emotion": "平静",
+      "one_sentence_summary": "黑场结束画面，为Vlog画上平静的句号。",
+      "has_face": false,
+      "start_time": 12.0,
+      "end_time": 13.0
+    },
+    {
+      "shot_index": 13,
+      "content": {
+        "main_subject": "黑场/白场",
+        "people_count": 0,
+        "people_description": "",
+        "scene_type": "",
+        "indoor_outdoor": "unknown",
+        "color_temperature": "neutral",
+        "light_quality": "",
+        "has_text_in_frame": false,
+        "text_content": ""
+      },
+      "technique": {
+        "shot_size": "long",
+        "composition": "大面积留白",
+        "camera_movement": "固定镜头",
+        "visual_quality": "纯黑画面"
+      },
+      "structure_role": {
+        "primary_function": "closing_moment",
+        "confidence": 0.95,
+        "reasoning": "前一帧为黑场结束，本镜头延续黑场，作为视频的收尾定格"
+      },
+      "emotion": "平静",
+      "one_sentence_summary": "黑场画面作为视频结尾，给观众带来平静的收束感。",
+      "has_face": false,
+      "start_time": 13.0,
+      "end_time": 14.0
+    },
+    {
+      "shot_index": 14,
+      "content": {
+        "main_subject": "黑场/白场",
+        "people_count": 0,
+        "people_description": "",
+        "scene_type": "无场景",
+        "indoor_outdoor": "unknown",
+        "color_temperature": "neutral",
+        "light_quality": "无光影",
+        "has_text_in_frame": false,
+        "text_content": ""
+      },
+      "technique": {
+        "shot_size": "close_up",
+        "composition": "无构图",
+        "camera_movement": "固定镜头",
+        "visual_quality": "纯黑场画面"
+      },
+      "structure_role": {
+        "primary_function": "closing_moment",
+        "confidence": 0.95,
+        "reasoning": "位于视频结尾的纯黑场画面，用于收束情绪，给观众平静的结束感"
+      },
+      "emotion": "平静",
+      "one_sentence_summary": "纯黑场画面作为视频收尾，延续前一帧的平静收束感，让情绪自然落地。",
+      "has_face": false,
+      "start_time": 14.0,
+      "end_time": 15.0
+    },
+    {
+      "shot_index": 15,
+      "content": {
+        "main_subject": "黑场",
+        "people_count": 0,
+        "people_description": "",
+        "scene_type": "无场景",
+        "indoor_outdoor": "unknown",
+        "color_temperature": "neutral",
+        "light_quality": "无光影",
+        "has_text_in_frame": false,
+        "text_content": ""
+      },
+      "technique": {
+        "shot_size": "long",
+        "composition": "无构图",
+        "camera_movement": "固定镜头",
+        "visual_quality": "纯黑场，无画面内容"
+      },
+      "structure_role": {
+        "primary_function": "closing_moment",
+        "confidence": 0.95,
+        "reasoning": "该镜头位于视频最末尾，且前一帧已是黑场收尾，延续平静收束感，属于典型的结尾黑场定格。"
+      },
+      "emotion": "平静",
+      "one_sentence_summary": "纯黑场画面自然收束视频，为观众留下平和的余韵。",
+      "has_face": false,
+      "start_time": 15.0,
+      "end_time": 15.8
+    }
+  ]
+}

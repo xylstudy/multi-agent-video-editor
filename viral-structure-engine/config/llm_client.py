@@ -1,0 +1,228 @@
+import asyncio
+import base64
+import json
+import logging
+from pathlib import Path
+from typing import Optional
+
+import httpx
+
+from config import settings
+
+logger = logging.getLogger(__name__)
+
+
+class LLMTools:
+    def __init__(
+        self,
+        api_key: str = "",
+        base_url: str = "",
+        model: str = "kimi-2.6",
+    ):
+        self.api_key = api_key or settings.MOONSHOT_API_KEY
+        self.base_url = base_url or settings.MOONSHOT_BASE_URL
+        self.model = model
+        self.chat_url = f"{self.base_url}/chat/completions"
+
+    async def chat(
+        self,
+        prompt: str,
+        system: str = "",
+        response_format: str = "",
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+    ) -> str:
+        if not self.api_key:
+            logger.warning("No API key configured, returning mock response")
+            return self._mock_response(prompt)
+
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": prompt})
+
+        body = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }
+
+        if response_format == "json":
+            body["response_format"] = {"type": "json_object"}
+
+        return await self._post(body)
+
+    async def chat_with_video(
+        self,
+        prompt: str,
+        video_path: str,
+        system: str = "",
+        response_format: str = "",
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+    ) -> str:
+        """发送视频+音频到多模态模型（如 Qwen3-OMNI-Flash），模型可同时看画面和听声音"""
+        if not self.api_key:
+            logger.warning("No API key configured, returning mock response")
+            return self._mock_response(prompt)
+
+        p = Path(video_path)
+        if not p.exists():
+            raise FileNotFoundError(f"Video not found: {video_path}")
+        with open(p, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode("utf-8")
+        ext = p.suffix.lower()
+        mime = f"video/{ext.lstrip('.')}" if ext != ".mp4" else "video/mp4"
+
+        content_parts = [
+            {"type": "text", "text": prompt},
+            {
+                "type": "video_url",
+                "video_url": {"url": f"data:{mime};base64,{b64}"},
+            },
+        ]
+
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": content_parts})
+
+        body = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }
+
+        if response_format == "json":
+            body["response_format"] = {"type": "json_object"}
+
+        return await self._post(body)
+
+    async def chat_with_images(
+        self,
+        prompt: str,
+        image_paths: list[str],
+        system: str = "",
+        response_format: str = "",
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+    ) -> str:
+        if not self.api_key:
+            logger.warning("No API key configured, returning mock response")
+            return self._mock_response(prompt)
+
+        content_parts = [{"type": "text", "text": prompt}]
+        for img_path in image_paths:
+            p = Path(img_path)
+            if not p.exists():
+                logger.warning(f"Image not found: {img_path}")
+                continue
+            with open(p, "rb") as f:
+                b64 = base64.b64encode(f.read()).decode("utf-8")
+            ext = p.suffix.lower()
+            mime = "image/png" if ext == ".png" else "image/jpeg"
+            content_parts.append({
+                "type": "image_url",
+                "image_url": {"url": f"data:{mime};base64,{b64}"},
+            })
+
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": content_parts})
+
+        body = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }
+
+        if response_format == "json":
+            body["response_format"] = {"type": "json_object"}
+
+        return await self._post(body)
+
+    async def _post(self, body: dict) -> str:
+        for attempt in range(10):
+            try:
+                async with httpx.AsyncClient(timeout=settings.LLM_TIMEOUT) as client:
+                    resp = await client.post(
+                        self.chat_url,
+                        headers={
+                            "Authorization": f"Bearer {self.api_key}",
+                            "Content-Type": "application/json",
+                        },
+                        json=body,
+                    )
+                    if resp.status_code == 400 and "response_format" in body:
+                        logger.warning("response_format not supported, retrying without it")
+                        del body["response_format"]
+                        continue
+                    resp.raise_for_status()
+                    data = resp.json()
+                    return data["choices"][0]["message"]["content"]
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 429:
+                    wait = min(30, (attempt + 1) * 5)
+                    logger.warning(f"Rate limited (429), waiting {wait}s before retry")
+                    await asyncio.sleep(wait)
+                    continue
+                logger.warning(f"LLM call attempt {attempt + 1} failed: {e}")
+                if attempt >= 5:
+                    raise
+            except (httpx.TimeoutException, httpx.ConnectError) as e:
+                logger.warning(f"LLM call attempt {attempt + 1} failed (network): {e}")
+                await asyncio.sleep(3)
+                if attempt >= 5:
+                    raise
+            except Exception as e:
+                logger.warning(f"LLM call attempt {attempt + 1} failed: {e}")
+                if attempt >= 5:
+                    raise
+
+    def parse_json(self, text: str) -> dict:
+        import re
+        # 移除 BOM 和不可见控制字符（保留换行空格）
+        text = text.strip()
+        text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
+        # 修复 DeepSeek 偶发的编码问题
+        text = text.encode("utf-8", errors="surrogateescape").decode("utf-8", errors="replace")
+        if text.startswith("```json"):
+            text = text[7:]
+        if text.startswith("```"):
+            text = text[3:]
+        if text.endswith("```"):
+            text = text[:-3]
+        text = text.strip()
+        # 查找并提取 JSON 对象（丢弃前后非 JSON 文本）
+        brace_start = text.find("{")
+        brace_end = text.rfind("}")
+        if brace_start >= 0 and brace_end > brace_start:
+            text = text[brace_start:brace_end + 1]
+        # 尝试标准解析
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            pass
+        # 尝试修复常见问题后重试
+        text = re.sub(r",\s*}", "}", text)
+        text = re.sub(r",\s*]", "]", text)
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            pass
+        # 最后手段：输出原始字节诊断
+        raw = text.encode("utf-8")
+        raise json.JSONDecodeError(
+            f"JSON 解析失败，前200字符: {text[:200]} (hex: {raw[:100].hex()})",
+            text, 0,
+        )
+
+    def _mock_response(self, prompt: str) -> str:
+        return json.dumps({
+            "note": "mock response — no LLM API configured",
+            "message": "Set ZHIPU_API_KEY in .env file to use real LLM",
+        })

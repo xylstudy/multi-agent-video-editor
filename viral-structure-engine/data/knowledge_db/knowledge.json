@@ -1,0 +1,1597 @@
+[
+  {
+    "id": "k_0",
+    "type": "transition_type",
+    "title": "硬切",
+    "content": "Cut",
+    "structured_data": {
+      "id": "cut",
+      "suitability": {
+        "fast": 5,
+        "medium": 5,
+        "slow": 4
+      },
+      "best_for": [
+        "任意场景，默认转场",
+        "节奏快速切换"
+      ],
+      "duration_hint_frames": 0
+    },
+    "tags": [
+      "transition",
+      "cut",
+      "任意场景，默认转场",
+      "节奏快速切换"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_1",
+    "type": "transition_type",
+    "title": "淡入",
+    "content": "Fade",
+    "structured_data": {
+      "id": "fade",
+      "suitability": {
+        "fast": 2,
+        "medium": 4,
+        "slow": 5
+      },
+      "best_for": [
+        "开场",
+        "收尾",
+        "慢节奏情绪段落"
+      ],
+      "duration_hint_frames": 10
+    },
+    "tags": [
+      "transition",
+      "fade",
+      "开场",
+      "收尾",
+      "慢节奏情绪段落"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_2",
+    "type": "transition_type",
+    "title": "溶解",
+    "content": "Dissolve",
+    "structured_data": {
+      "id": "dissolve",
+      "suitability": {
+        "fast": 1,
+        "medium": 3,
+        "slow": 5
+      },
+      "best_for": [
+        "回忆闪回",
+        "时间流逝",
+        "梦幻感段落"
+      ],
+      "duration_hint_frames": 15
+    },
+    "tags": [
+      "transition",
+      "dissolve",
+      "回忆闪回",
+      "时间流逝",
+      "梦幻感段落"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_3",
+    "type": "transition_type",
+    "title": "放大入场",
+    "content": "Zoom In",
+    "structured_data": {
+      "id": "zoom_in",
+      "suitability": {
+        "fast": 4,
+        "medium": 5,
+        "slow": 3
+      },
+      "best_for": [
+        "特写镜头",
+        "人物出场",
+        "细节强调"
+      ],
+      "duration_hint_frames": 10
+    },
+    "tags": [
+      "transition",
+      "zoom_in",
+      "特写镜头",
+      "人物出场",
+      "细节强调"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_4",
+    "type": "transition_type",
+    "title": "缩小入场",
+    "content": "Zoom Out",
+    "structured_data": {
+      "id": "zoom_out",
+      "suitability": {
+        "fast": 3,
+        "medium": 5,
+        "slow": 4
+      },
+      "best_for": [
+        "全景展示",
+        "空间介绍",
+        "环境建立"
+      ],
+      "duration_hint_frames": 10
+    },
+    "tags": [
+      "transition",
+      "zoom_out",
+      "全景展示",
+      "空间介绍",
+      "环境建立"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_5",
+    "type": "transition_type",
+    "title": "闪白",
+    "content": "Flash White",
+    "structured_data": {
+      "id": "flash_white",
+      "suitability": {
+        "fast": 5,
+        "medium": 4,
+        "slow": 1
+      },
+      "best_for": [
+        "快节奏卡点",
+        "时间压缩",
+        "场景切换"
+      ],
+      "duration_hint_frames": 8
+    },
+    "tags": [
+      "transition",
+      "flash_white",
+      "快节奏卡点",
+      "时间压缩",
+      "场景切换"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_6",
+    "type": "transition_type",
+    "title": "闪黑",
+    "content": "Flash Black",
+    "structured_data": {
+      "id": "flash_black",
+      "suitability": {
+        "fast": 3,
+        "medium": 4,
+        "slow": 5
+      },
+      "best_for": [
+        "结束感",
+        "严肃段落",
+        "夜间场景切换"
+      ],
+      "duration_hint_frames": 8
+    },
+    "tags": [
+      "transition",
+      "flash_black",
+      "结束感",
+      "严肃段落",
+      "夜间场景切换"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_7",
+    "type": "transition_type",
+    "title": "左滑入",
+    "content": "Slide Left",
+    "structured_data": {
+      "id": "slide",
+      "suitability": {
+        "fast": 4,
+        "medium": 5,
+        "slow": 3
+      },
+      "best_for": [
+        "平行场景切换",
+        "推进叙事"
+      ],
+      "duration_hint_frames": 14
+    },
+    "tags": [
+      "transition",
+      "slide",
+      "平行场景切换",
+      "推进叙事"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_8",
+    "type": "transition_type",
+    "title": "右滑入",
+    "content": "Slide Right",
+    "structured_data": {
+      "id": "slide_right",
+      "suitability": {
+        "fast": 4,
+        "medium": 5,
+        "slow": 3
+      },
+      "best_for": [
+        "返回/回顾",
+        "倒叙"
+      ],
+      "duration_hint_frames": 14
+    },
+    "tags": [
+      "transition",
+      "slide_right",
+      "返回/回顾",
+      "倒叙"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_9",
+    "type": "transition_type",
+    "title": "上滑入",
+    "content": "Slide Up",
+    "structured_data": {
+      "id": "slide_up",
+      "suitability": {
+        "fast": 4,
+        "medium": 4,
+        "slow": 3
+      },
+      "best_for": [
+        "向上运动",
+        "轻快过渡"
+      ],
+      "duration_hint_frames": 14
+    },
+    "tags": [
+      "transition",
+      "slide_up",
+      "向上运动",
+      "轻快过渡"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_10",
+    "type": "transition_type",
+    "title": "下滑入",
+    "content": "Slide Down",
+    "structured_data": {
+      "id": "slide_down",
+      "suitability": {
+        "fast": 4,
+        "medium": 4,
+        "slow": 3
+      },
+      "best_for": [
+        "向下俯视",
+        "降落感"
+      ],
+      "duration_hint_frames": 14
+    },
+    "tags": [
+      "transition",
+      "slide_down",
+      "向下俯视",
+      "降落感"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_11",
+    "type": "transition_type",
+    "title": "左擦除",
+    "content": "Wipe Left",
+    "structured_data": {
+      "id": "wipe_left",
+      "suitability": {
+        "fast": 3,
+        "medium": 4,
+        "slow": 5
+      },
+      "best_for": [
+        "切换前后对比",
+        "地图/地点切换"
+      ],
+      "duration_hint_frames": 12
+    },
+    "tags": [
+      "transition",
+      "wipe_left",
+      "切换前后对比",
+      "地图/地点切换"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_12",
+    "type": "transition_type",
+    "title": "右擦除",
+    "content": "Wipe Right",
+    "structured_data": {
+      "id": "wipe_right",
+      "suitability": {
+        "fast": 3,
+        "medium": 4,
+        "slow": 5
+      },
+      "best_for": [
+        "时间推进",
+        "线性叙事过渡"
+      ],
+      "duration_hint_frames": 12
+    },
+    "tags": [
+      "transition",
+      "wipe_right",
+      "时间推进",
+      "线性叙事过渡"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_13",
+    "type": "transition_type",
+    "title": "模糊清晰",
+    "content": "Blur In",
+    "structured_data": {
+      "id": "blur_in",
+      "suitability": {
+        "fast": 2,
+        "medium": 4,
+        "slow": 5
+      },
+      "best_for": [
+        "梦境/回忆",
+        "对焦过程",
+        "唯美段落"
+      ],
+      "duration_hint_frames": 14
+    },
+    "tags": [
+      "transition",
+      "blur_in",
+      "梦境/回忆",
+      "对焦过程",
+      "唯美段落"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_14",
+    "type": "transition_type",
+    "title": "旋转入场",
+    "content": "Rotate In",
+    "structured_data": {
+      "id": "rotate_in",
+      "suitability": {
+        "fast": 3,
+        "medium": 4,
+        "slow": 5
+      },
+      "best_for": [
+        "创意转场",
+        "轻松活泼段落"
+      ],
+      "duration_hint_frames": 14
+    },
+    "tags": [
+      "transition",
+      "rotate_in",
+      "创意转场",
+      "轻松活泼段落"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_15",
+    "type": "transition_type",
+    "title": "甩镜头",
+    "content": "Whip Pan",
+    "structured_data": {
+      "id": "whip",
+      "suitability": {
+        "fast": 5,
+        "medium": 3,
+        "slow": 1
+      },
+      "best_for": [
+        "快节奏城市街拍",
+        "连续动作切换",
+        "抖音热门风格"
+      ],
+      "duration_hint_frames": 10
+    },
+    "tags": [
+      "transition",
+      "whip",
+      "快节奏城市街拍",
+      "连续动作切换",
+      "抖音热门风格"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_16",
+    "type": "transition_type",
+    "title": "圆形展开",
+    "content": "Circle Reveal",
+    "structured_data": {
+      "id": "circle_reveal",
+      "suitability": {
+        "fast": 2,
+        "medium": 4,
+        "slow": 5
+      },
+      "best_for": [
+        "聚光灯效果",
+        "焦点引入",
+        "特写强调"
+      ],
+      "duration_hint_frames": 15
+    },
+    "tags": [
+      "transition",
+      "circle_reveal",
+      "聚光灯效果",
+      "焦点引入",
+      "特写强调"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_17",
+    "type": "transition_type",
+    "title": "缩放闪光",
+    "content": "Zoom Flash",
+    "structured_data": {
+      "id": "zoom_flash",
+      "suitability": {
+        "fast": 5,
+        "medium": 4,
+        "slow": 1
+      },
+      "best_for": [
+        "音乐卡点爆发",
+        "高潮段落入场",
+        "快剪"
+      ],
+      "duration_hint_frames": 8
+    },
+    "tags": [
+      "transition",
+      "zoom_flash",
+      "音乐卡点爆发",
+      "高潮段落入场",
+      "快剪"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_18",
+    "type": "transition_type",
+    "title": "故障抖动",
+    "content": "Glitch",
+    "structured_data": {
+      "id": "glitch",
+      "suitability": {
+        "fast": 5,
+        "medium": 3,
+        "slow": 1
+      },
+      "best_for": [
+        "科技感",
+        "城市霓虹",
+        "节奏中断/变速点"
+      ],
+      "duration_hint_frames": 10
+    },
+    "tags": [
+      "transition",
+      "glitch",
+      "科技感",
+      "城市霓虹",
+      "节奏中断/变速点"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_19",
+    "type": "transition_type",
+    "title": "360°旋转",
+    "content": "Spin",
+    "structured_data": {
+      "id": "spin",
+      "suitability": {
+        "fast": 4,
+        "medium": 4,
+        "slow": 2
+      },
+      "best_for": [
+        "创意转场",
+        "城市全景切换",
+        "派对/活泼段落"
+      ],
+      "duration_hint_frames": 14
+    },
+    "tags": [
+      "transition",
+      "spin",
+      "创意转场",
+      "城市全景切换",
+      "派对/活泼段落"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_20",
+    "type": "transition_type",
+    "title": "重度缩放",
+    "content": "Zoom Heavy",
+    "structured_data": {
+      "id": "zoom_heavy",
+      "suitability": {
+        "fast": 5,
+        "medium": 3,
+        "slow": 1
+      },
+      "best_for": [
+        "爆点入场",
+        "音乐鼓点卡点",
+        "高潮时刻"
+      ],
+      "duration_hint_frames": 8
+    },
+    "tags": [
+      "transition",
+      "zoom_heavy",
+      "爆点入场",
+      "音乐鼓点卡点",
+      "高潮时刻"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_21",
+    "type": "transition_type",
+    "title": "彩色漏光",
+    "content": "Light Leak",
+    "structured_data": {
+      "id": "light_leak",
+      "suitability": {
+        "fast": 3,
+        "medium": 4,
+        "slow": 4
+      },
+      "best_for": [
+        "复古胶片感",
+        "日落/暖色调段落",
+        "旅行回忆"
+      ],
+      "duration_hint_frames": 14
+    },
+    "tags": [
+      "transition",
+      "light_leak",
+      "复古胶片感",
+      "日落/暖色调段落",
+      "旅行回忆"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_22",
+    "type": "transition_type",
+    "title": "冻结帧+RGB偏移",
+    "content": "Freeze Frame",
+    "structured_data": {
+      "id": "freeze_frame",
+      "suitability": {
+        "fast": 4,
+        "medium": 3,
+        "slow": 1
+      },
+      "best_for": [
+        "瞬间定格强调",
+        "节奏骤停",
+        "酷炫效果"
+      ],
+      "duration_hint_frames": 8
+    },
+    "tags": [
+      "transition",
+      "freeze_frame",
+      "瞬间定格强调",
+      "节奏骤停",
+      "酷炫效果"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_23",
+    "type": "effect_type",
+    "title": "胶片颗粒",
+    "content": "CSS噪点纹理覆盖层，模拟胶片质感",
+    "structured_data": {
+      "id": "film_grain",
+      "component": "FilmGrain",
+      "file": "src/components/Effects.tsx",
+      "params": {
+        "opacity": {
+          "type": "number",
+          "default": 0.15,
+          "range": [
+            0,
+            1
+          ],
+          "description": "颗粒强度"
+        },
+        "type": {
+          "type": "enum",
+          "default": "film",
+          "values": [
+            "film",
+            "dust"
+          ],
+          "description": "film=细腻颗粒, dust=粗粝灰尘"
+        }
+      }
+    },
+    "tags": [
+      "effect",
+      "film_grain",
+      "FilmGrain"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city"
+    ],
+    "best_when": "",
+    "confidence": 0.85,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_24",
+    "type": "effect_type",
+    "title": "变速时间重映射",
+    "content": "将线性帧映射到非线性进度，实现变速感知",
+    "structured_data": {
+      "id": "speed_ramp",
+      "component": "useSpeedRamp",
+      "file": "src/components/Effects.tsx",
+      "params": {
+        "rampType": {
+          "type": "enum",
+          "default": "smooth",
+          "values": [
+            {
+              "value": "slow_fast",
+              "description": "开始慢→逐渐加速（抖音常见）"
+            },
+            {
+              "value": "fast_slow",
+              "description": "开始快→逐渐减速（子弹时间感）"
+            },
+            {
+              "value": "beat_hit",
+              "description": "节拍点前后加速，形成爆发感"
+            },
+            {
+              "value": "smooth",
+              "description": "缓入缓出匀速"
+            }
+          ]
+        },
+        "beatFrame": {
+          "type": "number",
+          "default": null,
+          "description": "beat_hit模式下的节拍帧位置"
+        }
+      }
+    },
+    "tags": [
+      "effect",
+      "speed_ramp",
+      ""
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city"
+    ],
+    "best_when": "",
+    "confidence": 0.85,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_25",
+    "type": "effect_type",
+    "title": "运动模糊",
+    "content": "方向性运动模糊，模拟快速移动拖影",
+    "structured_data": {
+      "id": "motion_blur",
+      "component": "MotionBlur",
+      "file": "src/components/Effects.tsx",
+      "params": {
+        "intensity": {
+          "type": "number",
+          "default": 0,
+          "range": [
+            0,
+            1
+          ],
+          "description": "模糊强度"
+        },
+        "direction": {
+          "type": "enum",
+          "default": "horizontal",
+          "values": [
+            "horizontal",
+            "vertical"
+          ]
+        }
+      }
+    },
+    "tags": [
+      "effect",
+      "motion_blur",
+      "MotionBlur"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city"
+    ],
+    "best_when": "",
+    "confidence": 0.85,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_26",
+    "type": "effect_type",
+    "title": "强化甩镜头",
+    "content": "比普通whip更快的加速度+更重运动模糊+轻微旋转",
+    "structured_data": {
+      "id": "whip_pan_enhanced",
+      "component": "useWhipPanEnhanced",
+      "file": "src/components/Effects.tsx",
+      "params": {
+        "direction": {
+          "type": "enum",
+          "default": "right",
+          "values": [
+            "left",
+            "right"
+          ]
+        }
+      }
+    },
+    "tags": [
+      "effect",
+      "whip_pan_enhanced",
+      ""
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city"
+    ],
+    "best_when": "",
+    "confidence": 0.85,
+    "source_summary": "抖音旅行Vlog剪辑手法分析"
+  },
+  {
+    "id": "k_27",
+    "type": "editing_technique",
+    "title": "浮动升起",
+    "content": "前景从底部滑入并淡入，配合弹性缓动",
+    "structured_data": {
+      "id": "float_up",
+      "category": "foreground_reveal",
+      "duration_hint_frames": 20
+    },
+    "tags": [
+      "foreground_reveal",
+      "float_up"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "city"
+    ],
+    "best_when": "",
+    "confidence": 0.8,
+    "source_summary": "前景分割展示效果"
+  },
+  {
+    "id": "k_28",
+    "type": "editing_technique",
+    "title": "缩放弹入",
+    "content": "前景从0.3倍放大到1倍，弹簧弹性效果",
+    "structured_data": {
+      "id": "scale_burst",
+      "category": "foreground_reveal",
+      "duration_hint_frames": 20
+    },
+    "tags": [
+      "foreground_reveal",
+      "scale_burst"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "city"
+    ],
+    "best_when": "",
+    "confidence": 0.8,
+    "source_summary": "前景分割展示效果"
+  },
+  {
+    "id": "k_29",
+    "type": "editing_technique",
+    "title": "3D透视旋转",
+    "content": "前景绕Y轴旋转+亮度变化，模拟立体感",
+    "structured_data": {
+      "id": "tilt_3d",
+      "category": "foreground_reveal",
+      "duration_hint_frames": 20
+    },
+    "tags": [
+      "foreground_reveal",
+      "tilt_3d"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "city"
+    ],
+    "best_when": "",
+    "confidence": 0.8,
+    "source_summary": "前景分割展示效果"
+  },
+  {
+    "id": "k_30",
+    "type": "editing_technique",
+    "title": "发光淡入",
+    "content": "前景带金色辉光+亮度爆发再消退",
+    "structured_data": {
+      "id": "glow_fade",
+      "category": "foreground_reveal",
+      "duration_hint_frames": 20
+    },
+    "tags": [
+      "foreground_reveal",
+      "glow_fade"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "city"
+    ],
+    "best_when": "",
+    "confidence": 0.8,
+    "source_summary": "前景分割展示效果"
+  },
+  {
+    "id": "k_31",
+    "type": "editing_technique",
+    "title": "视差漂移",
+    "content": "前景缓慢正弦波动漂移，产生空间层次感",
+    "structured_data": {
+      "id": "parallax",
+      "category": "foreground_reveal",
+      "duration_hint_frames": 20
+    },
+    "tags": [
+      "foreground_reveal",
+      "parallax"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "city"
+    ],
+    "best_when": "",
+    "confidence": 0.8,
+    "source_summary": "前景分割展示效果"
+  },
+  {
+    "id": "k_32",
+    "type": "editing_technique",
+    "title": "分裂合拢",
+    "content": "前景从clip-path裁切开始，逐渐展开显示",
+    "structured_data": {
+      "id": "split",
+      "category": "foreground_reveal",
+      "duration_hint_frames": 20
+    },
+    "tags": [
+      "foreground_reveal",
+      "split"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "city"
+    ],
+    "best_when": "",
+    "confidence": 0.8,
+    "source_summary": "前景分割展示效果"
+  },
+  {
+    "id": "k_33",
+    "type": "editing_technique",
+    "title": "模糊变清晰",
+    "content": "前景从模糊到清晰",
+    "structured_data": {
+      "id": "blur_in",
+      "category": "foreground_reveal",
+      "duration_hint_frames": 20
+    },
+    "tags": [
+      "foreground_reveal",
+      "blur_in"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "city"
+    ],
+    "best_when": "",
+    "confidence": 0.8,
+    "source_summary": "前景分割展示效果"
+  },
+  {
+    "id": "k_34",
+    "type": "editing_technique",
+    "title": "打字机效果",
+    "content": "文字逐字出现，带闪烁光标",
+    "structured_data": {
+      "id": "typewriter",
+      "category": "subtitle_style",
+      "animation_type": "per_character"
+    },
+    "tags": [
+      "subtitle",
+      "typewriter"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.85,
+    "source_summary": "Vlog字幕样式库"
+  },
+  {
+    "id": "k_35",
+    "type": "editing_technique",
+    "title": "霓虹发光",
+    "content": "霓虹色彩+辉光发光，颜色周期性变化",
+    "structured_data": {
+      "id": "neon_sign",
+      "category": "subtitle_style",
+      "animation_type": "fade"
+    },
+    "tags": [
+      "subtitle",
+      "neon_sign"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.85,
+    "source_summary": "Vlog字幕样式库"
+  },
+  {
+    "id": "k_36",
+    "type": "editing_technique",
+    "title": "渐变色背景条",
+    "content": "渐变背景条展开→文字滑入",
+    "structured_data": {
+      "id": "gradient_bar",
+      "category": "subtitle_style",
+      "animation_type": "container_reveal"
+    },
+    "tags": [
+      "subtitle",
+      "gradient_bar"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.85,
+    "source_summary": "Vlog字幕样式库"
+  },
+  {
+    "id": "k_37",
+    "type": "editing_technique",
+    "title": "弹簧缩放弹入",
+    "content": "文字从1.5倍弹簧缩放到正常",
+    "structured_data": {
+      "id": "scale_bounce",
+      "category": "subtitle_style",
+      "animation_type": "bounce"
+    },
+    "tags": [
+      "subtitle",
+      "scale_bounce"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.85,
+    "source_summary": "Vlog字幕样式库"
+  },
+  {
+    "id": "k_38",
+    "type": "editing_technique",
+    "title": "裁切滑入",
+    "content": "clip-path从右到左裁切展开+微妙滑入",
+    "structured_data": {
+      "id": "slide_crop",
+      "category": "subtitle_style",
+      "animation_type": "clip_reveal"
+    },
+    "tags": [
+      "subtitle",
+      "slide_crop"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.85,
+    "source_summary": "Vlog字幕样式库"
+  },
+  {
+    "id": "k_39",
+    "type": "editing_technique",
+    "title": "文字掉落",
+    "content": "每个字从上方掉落，错开延迟",
+    "structured_data": {
+      "id": "letter_fall",
+      "category": "subtitle_style",
+      "animation_type": "per_character_delayed"
+    },
+    "tags": [
+      "subtitle",
+      "letter_fall"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.85,
+    "source_summary": "Vlog字幕样式库"
+  },
+  {
+    "id": "k_40",
+    "type": "editing_technique",
+    "title": "波浪摆动",
+    "content": "渐变文字+每个字波浪浮动",
+    "structured_data": {
+      "id": "wave",
+      "category": "subtitle_style",
+      "animation_type": "per_character_wave"
+    },
+    "tags": [
+      "subtitle",
+      "wave"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.85,
+    "source_summary": "Vlog字幕样式库"
+  },
+  {
+    "id": "k_41",
+    "type": "editing_technique",
+    "title": "电影上下黑条",
+    "content": "上下黑条从两侧滑入，文字在底部黑条中淡入",
+    "structured_data": {
+      "id": "cinematic",
+      "category": "subtitle_style",
+      "animation_type": "letterbox_reveal"
+    },
+    "tags": [
+      "subtitle",
+      "cinematic"
+    ],
+    "applicable_vlog_types": [
+      "travel",
+      "daily",
+      "city",
+      "cinematic"
+    ],
+    "best_when": "",
+    "confidence": 0.85,
+    "source_summary": "Vlog字幕样式库"
+  },
+  {
+    "id": "k_42",
+    "type": "packaging_style",
+    "title": "抖音旅行快节奏",
+    "content": "每镜2-3秒\n高频转场\n甩镜头为主\n音乐卡点\n速度变化多",
+    "structured_data": {
+      "id": "douyin_travel_fast",
+      "recommended_transitions": [
+        "whip",
+        "zoom_flash",
+        "flash_white",
+        "glitch",
+        "zoom_heavy"
+      ],
+      "recommended_effects": [
+        "speed_ramp(beat_hit)",
+        "motion_blur"
+      ],
+      "recommended_subtitle_styles": [
+        "neon_sign",
+        "wave",
+        "scale_bounce"
+      ],
+      "bgm_style": "电子/流行, 120+BPM",
+      "hook_strategy": "前3秒高能画面+大标题"
+    },
+    "tags": [
+      "style_profile",
+      "douyin_travel_fast",
+      "重庆",
+      "大连",
+      "Payphone",
+      "长沙"
+    ],
+    "applicable_vlog_types": [
+      "travel"
+    ],
+    "best_when": "",
+    "confidence": 0.8,
+    "source_summary": "抖音旅行Vlog风格分析"
+  },
+  {
+    "id": "k_43",
+    "type": "packaging_style",
+    "title": "抖音旅行电影感",
+    "content": "每镜3-5秒\n慢节奏情绪渲染\n电影调色\n全景为主",
+    "structured_data": {
+      "id": "douyin_travel_cinematic",
+      "recommended_transitions": [
+        "fade",
+        "dissolve",
+        "blur_in",
+        "light_leak",
+        "circle_reveal"
+      ],
+      "recommended_effects": [
+        "film_grain",
+        "speed_ramp(slow_fast)"
+      ],
+      "recommended_subtitle_styles": [
+        "cinematic",
+        "slide_crop",
+        "typewriter"
+      ],
+      "bgm_style": "氛围/原声, 80-100BPM",
+      "hook_strategy": "远景空镜+字幕推入"
+    },
+    "tags": [
+      "style_profile",
+      "douyin_travel_cinematic",
+      "新疆",
+      "香港",
+      "巴厘岛"
+    ],
+    "applicable_vlog_types": [
+      "travel"
+    ],
+    "best_when": "",
+    "confidence": 0.8,
+    "source_summary": "抖音旅行Vlog风格分析"
+  },
+  {
+    "id": "k_44",
+    "type": "packaging_style",
+    "title": "抖音旅行创意风",
+    "content": "前景分离展示\n多层叠加\n特效字幕\n360旋转/甩镜头混合",
+    "structured_data": {
+      "id": "douyin_travel_creative",
+      "recommended_transitions": [
+        "spin",
+        "zoom_heavy",
+        "light_leak",
+        "freeze_frame",
+        "glitch"
+      ],
+      "recommended_effects": [
+        "film_grain",
+        "speed_ramp(beat_hit)",
+        "whip_pan_enhanced"
+      ],
+      "recommended_subtitle_styles": [
+        "gradient_bar",
+        "neon_sign",
+        "letter_fall"
+      ],
+      "bgm_style": "混合, 100-130BPM",
+      "hook_strategy": "前景+背景分离+旋转入场"
+    },
+    "tags": [
+      "style_profile",
+      "douyin_travel_creative",
+      "西安",
+      "北京"
+    ],
+    "applicable_vlog_types": [
+      "travel"
+    ],
+    "best_when": "",
+    "confidence": 0.8,
+    "source_summary": "抖音旅行Vlog风格分析"
+  },
+  {
+    "id": "k_45",
+    "type": "editing_technique",
+    "title": "前3秒抓眼球",
+    "content": "hook镜头必须在3秒内出现强视觉冲击（大标题/震撼空镜/快速切换）",
+    "structured_data": {
+      "source": "所有分析视频"
+    },
+    "tags": [
+      "key_technique",
+      "所有分析视频"
+    ],
+    "applicable_vlog_types": [
+      "travel"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog通用手法"
+  },
+  {
+    "id": "k_46",
+    "type": "editing_technique",
+    "title": "音乐卡点",
+    "content": "转场、特效、字幕变化对齐音乐重音/鼓点",
+    "structured_data": {
+      "source": "重庆、大连、Payphone、长沙"
+    },
+    "tags": [
+      "key_technique",
+      "重庆",
+      "大连",
+      "Payphone",
+      "长沙"
+    ],
+    "applicable_vlog_types": [
+      "travel"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog通用手法"
+  },
+  {
+    "id": "k_47",
+    "type": "editing_technique",
+    "title": "5段式情绪设计",
+    "content": "开场→展开→高潮→回落→收尾，高潮位于60-70%位置",
+    "structured_data": {
+      "source": "新疆、香港、巴厘岛"
+    },
+    "tags": [
+      "key_technique",
+      "新疆",
+      "香港",
+      "巴厘岛"
+    ],
+    "applicable_vlog_types": [
+      "travel"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog通用手法"
+  },
+  {
+    "id": "k_48",
+    "type": "editing_technique",
+    "title": "前景背景分离",
+    "content": "使用阿里云分割API将建筑/物体从照片中分离，独立动画",
+    "structured_data": {
+      "source": "西安、北京"
+    },
+    "tags": [
+      "key_technique",
+      "西安",
+      "北京"
+    ],
+    "applicable_vlog_types": [
+      "travel"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog通用手法"
+  },
+  {
+    "id": "k_49",
+    "type": "editing_technique",
+    "title": "速度对比",
+    "content": "快慢交替产生节奏感——快段落用1-2秒镜头，慢段落用3-5秒",
+    "structured_data": {
+      "source": "所有分析视频"
+    },
+    "tags": [
+      "key_technique",
+      "所有分析视频"
+    ],
+    "applicable_vlog_types": [
+      "travel"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog通用手法"
+  },
+  {
+    "id": "k_50",
+    "type": "editing_technique",
+    "title": "转场不做重复",
+    "content": "相邻分镜避免使用相同转场，保持视觉新鲜感",
+    "structured_data": {
+      "source": "大连、Payphone、长沙"
+    },
+    "tags": [
+      "key_technique",
+      "大连",
+      "Payphone",
+      "长沙"
+    ],
+    "applicable_vlog_types": [
+      "travel"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog通用手法"
+  },
+  {
+    "id": "k_51",
+    "type": "editing_technique",
+    "title": "胶片质感",
+    "content": "胶片颗粒+漏光+暖色调，营造旅行回忆感",
+    "structured_data": {
+      "source": "新疆、巴厘岛"
+    },
+    "tags": [
+      "key_technique",
+      "新疆",
+      "巴厘岛"
+    ],
+    "applicable_vlog_types": [
+      "travel"
+    ],
+    "best_when": "",
+    "confidence": 0.9,
+    "source_summary": "抖音旅行Vlog通用手法"
+  }
+]

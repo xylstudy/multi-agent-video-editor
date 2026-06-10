@@ -1,0 +1,27 @@
+{
+  "name": "viral-structure-remotion",
+  "version": "1.0.0",
+  "description": "Remotion renderer for Viral Structure Engine",
+  "scripts": {
+    "start": "remotion studio",
+    "build": "remotion render",
+    "render": "remotion render src/Root.tsx VideoScheme out/video.mp4"
+  },
+  "dependencies": {
+    "@remotion/captions": "4.0.473",
+    "@remotion/cli": "4.0.473",
+    "@remotion/google-fonts": "4.0.473",
+    "@remotion/media": "4.0.473",
+    "@remotion/player": "4.0.473",
+    "@remotion/renderer": "4.0.473",
+    "@remotion/transitions": "4.0.473",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "remotion": "4.0.473"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "esbuild": "^0.28.0",
+    "typescript": "^5.3.0"
+  }
+}

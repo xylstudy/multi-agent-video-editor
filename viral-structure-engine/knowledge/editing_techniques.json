@@ -1,0 +1,409 @@
+{
+  "meta": {
+    "version": "1.0",
+    "source": "分析11个抖音热门旅行vlog总结",
+    "analyzed_videos": ["重庆", "大连", "Payphone", "新疆", "香港", "长沙", "巴厘岛", "西安", "北京"],
+    "description": "系统可用剪辑手法注册表 — 供 Planner/Renderer Agent 和 Remotion 组件自主引用"
+  },
+  "transitions": {
+    "cut": {
+      "name": "硬切",
+      "name_en": "Cut",
+      "suitability": { "fast": 5, "medium": 5, "slow": 4 },
+      "best_for": ["任意场景，默认转场", "节奏快速切换"],
+      "avoid_when": "需要情绪过渡时",
+      "duration_hint_frames": 0
+    },
+    "fade": {
+      "name": "淡入",
+      "name_en": "Fade",
+      "suitability": { "fast": 2, "medium": 4, "slow": 5 },
+      "best_for": ["开场", "收尾", "慢节奏情绪段落"],
+      "duration_hint_frames": 10
+    },
+    "dissolve": {
+      "name": "溶解",
+      "name_en": "Dissolve",
+      "suitability": { "fast": 1, "medium": 3, "slow": 5 },
+      "best_for": ["回忆闪回", "时间流逝", "梦幻感段落"],
+      "duration_hint_frames": 15
+    },
+    "zoom_in": {
+      "name": "放大入场",
+      "name_en": "Zoom In",
+      "suitability": { "fast": 4, "medium": 5, "slow": 3 },
+      "best_for": ["特写镜头", "人物出场", "细节强调"],
+      "duration_hint_frames": 10
+    },
+    "zoom_out": {
+      "name": "缩小入场",
+      "name_en": "Zoom Out",
+      "suitability": { "fast": 3, "medium": 5, "slow": 4 },
+      "best_for": ["全景展示", "空间介绍", "环境建立"],
+      "duration_hint_frames": 10
+    },
+    "flash_white": {
+      "name": "闪白",
+      "name_en": "Flash White",
+      "suitability": { "fast": 5, "medium": 4, "slow": 1 },
+      "best_for": ["快节奏卡点", "时间压缩", "场景切换"],
+      "duration_hint_frames": 8
+    },
+    "flash_black": {
+      "name": "闪黑",
+      "name_en": "Flash Black",
+      "suitability": { "fast": 3, "medium": 4, "slow": 5 },
+      "best_for": ["结束感", "严肃段落", "夜间场景切换"],
+      "duration_hint_frames": 8
+    },
+    "slide": {
+      "name": "左滑入",
+      "name_en": "Slide Left",
+      "suitability": { "fast": 4, "medium": 5, "slow": 3 },
+      "best_for": ["平行场景切换", "推进叙事"],
+      "duration_hint_frames": 14
+    },
+    "slide_right": {
+      "name": "右滑入",
+      "name_en": "Slide Right",
+      "suitability": { "fast": 4, "medium": 5, "slow": 3 },
+      "best_for": ["返回/回顾", "倒叙"],
+      "duration_hint_frames": 14
+    },
+    "slide_up": {
+      "name": "上滑入",
+      "name_en": "Slide Up",
+      "suitability": { "fast": 4, "medium": 4, "slow": 3 },
+      "best_for": ["向上运动", "轻快过渡"],
+      "duration_hint_frames": 14
+    },
+    "slide_down": {
+      "name": "下滑入",
+      "name_en": "Slide Down",
+      "suitability": { "fast": 4, "medium": 4, "slow": 3 },
+      "best_for": ["向下俯视", "降落感"],
+      "duration_hint_frames": 14
+    },
+    "wipe_left": {
+      "name": "左擦除",
+      "name_en": "Wipe Left",
+      "suitability": { "fast": 3, "medium": 4, "slow": 5 },
+      "best_for": ["切换前后对比", "地图/地点切换"],
+      "duration_hint_frames": 12
+    },
+    "wipe_right": {
+      "name": "右擦除",
+      "name_en": "Wipe Right",
+      "suitability": { "fast": 3, "medium": 4, "slow": 5 },
+      "best_for": ["时间推进", "线性叙事过渡"],
+      "duration_hint_frames": 12
+    },
+    "blur_in": {
+      "name": "模糊清晰",
+      "name_en": "Blur In",
+      "suitability": { "fast": 2, "medium": 4, "slow": 5 },
+      "best_for": ["梦境/回忆", "对焦过程", "唯美段落"],
+      "duration_hint_frames": 14
+    },
+    "rotate_in": {
+      "name": "旋转入场",
+      "name_en": "Rotate In",
+      "suitability": { "fast": 3, "medium": 4, "slow": 5 },
+      "best_for": ["创意转场", "轻松活泼段落"],
+      "duration_hint_frames": 14
+    },
+    "whip": {
+      "name": "甩镜头",
+      "name_en": "Whip Pan",
+      "suitability": { "fast": 5, "medium": 3, "slow": 1 },
+      "best_for": ["快节奏城市街拍", "连续动作切换", "抖音热门风格"],
+      "duration_hint_frames": 10
+    },
+    "circle_reveal": {
+      "name": "圆形展开",
+      "name_en": "Circle Reveal",
+      "suitability": { "fast": 2, "medium": 4, "slow": 5 },
+      "best_for": ["聚光灯效果", "焦点引入", "特写强调"],
+      "duration_hint_frames": 15
+    },
+    "zoom_flash": {
+      "name": "缩放闪光",
+      "name_en": "Zoom Flash",
+      "suitability": { "fast": 5, "medium": 4, "slow": 1 },
+      "best_for": ["音乐卡点爆发", "高潮段落入场", "快剪"],
+      "duration_hint_frames": 8
+    },
+    "glitch": {
+      "name": "故障抖动",
+      "name_en": "Glitch",
+      "suitability": { "fast": 5, "medium": 3, "slow": 1 },
+      "best_for": ["科技感", "城市霓虹", "节奏中断/变速点"],
+      "avoid_when": "温馨/浪漫段落",
+      "duration_hint_frames": 10
+    },
+    "spin": {
+      "name": "360°旋转",
+      "name_en": "Spin",
+      "suitability": { "fast": 4, "medium": 4, "slow": 2 },
+      "best_for": ["创意转场", "城市全景切换", "派对/活泼段落"],
+      "duration_hint_frames": 14
+    },
+    "zoom_heavy": {
+      "name": "重度缩放",
+      "name_en": "Zoom Heavy",
+      "suitability": { "fast": 5, "medium": 3, "slow": 1 },
+      "best_for": ["爆点入场", "音乐鼓点卡点", "高潮时刻"],
+      "duration_hint_frames": 8
+    },
+    "light_leak": {
+      "name": "彩色漏光",
+      "name_en": "Light Leak",
+      "suitability": { "fast": 3, "medium": 4, "slow": 4 },
+      "best_for": ["复古胶片感", "日落/暖色调段落", "旅行回忆"],
+      "duration_hint_frames": 14
+    },
+    "freeze_frame": {
+      "name": "冻结帧+RGB偏移",
+      "name_en": "Freeze Frame",
+      "suitability": { "fast": 4, "medium": 3, "slow": 1 },
+      "best_for": ["瞬间定格强调", "节奏骤停", "酷炫效果"],
+      "duration_hint_frames": 8
+    }
+  },
+  "effects": {
+    "film_grain": {
+      "name": "胶片颗粒",
+      "component": "FilmGrain",
+      "file": "src/components/Effects.tsx",
+      "description": "CSS噪点纹理覆盖层，模拟胶片质感",
+      "params": {
+        "opacity": { "type": "number", "default": 0.15, "range": [0, 1], "description": "颗粒强度" },
+        "type": { "type": "enum", "default": "film", "values": ["film", "dust"], "description": "film=细腻颗粒, dust=粗粝灰尘" }
+      },
+      "best_for": ["胶片感vlog", "回忆段落", "复古风格", "增加质感"],
+      "duration_hint_frames": 0
+    },
+    "speed_ramp": {
+      "name": "变速时间重映射",
+      "hook": "useSpeedRamp",
+      "file": "src/components/Effects.tsx",
+      "description": "将线性帧映射到非线性进度，实现变速感知",
+      "params": {
+        "rampType": {
+          "type": "enum", "default": "smooth",
+          "values": [
+            { "value": "slow_fast", "description": "开始慢→逐渐加速（抖音常见）" },
+            { "value": "fast_slow", "description": "开始快→逐渐减速（子弹时间感）" },
+            { "value": "beat_hit", "description": "节拍点前后加速，形成爆发感" },
+            { "value": "smooth", "description": "缓入缓出匀速" }
+          ]
+        },
+        "beatFrame": { "type": "number", "default": null, "description": "beat_hit模式下的节拍帧位置" }
+      },
+      "best_for": ["卡点变速", "高潮加速", "慢动作减速", "节奏变化"],
+      "usage_note": "需要配音乐节拍使用；beat_hit模式需先检测BPM"
+    },
+    "motion_blur": {
+      "name": "运动模糊",
+      "component": "MotionBlur",
+      "file": "src/components/Effects.tsx",
+      "description": "方向性运动模糊，模拟快速移动拖影",
+      "params": {
+        "intensity": { "type": "number", "default": 0, "range": [0, 1], "description": "模糊强度" },
+        "direction": { "type": "enum", "default": "horizontal", "values": ["horizontal", "vertical"] }
+      },
+      "best_for": ["高速运动镜头", "甩镜头辅助", "增加动感"],
+      "duration_hint_frames": 0
+    },
+    "whip_pan_enhanced": {
+      "name": "强化甩镜头",
+      "hook": "useWhipPanEnhanced",
+      "file": "src/components/Effects.tsx",
+      "description": "比普通whip更快的加速度+更重运动模糊+轻微旋转",
+      "params": {
+        "direction": { "type": "enum", "default": "right", "values": ["left", "right"] }
+      },
+      "best_for": ["快节奏城市切换", "连续场景过渡", "抖音热门风格"],
+      "duration_hint_frames": 10
+    }
+  },
+  "foreground_reveal_effects": {
+    "float_up": {
+      "name": "浮动升起",
+      "description": "前景从底部滑入并淡入，配合弹性缓动",
+      "best_for": ["建筑/物体从背景中分离升起"],
+      "duration_hint_frames": 20
+    },
+    "scale_burst": {
+      "name": "缩放弹入",
+      "description": "前景从0.3倍放大到1倍，弹簧弹性效果",
+      "best_for": ["强调某个主体的出现"],
+      "duration_hint_frames": 20
+    },
+    "tilt_3d": {
+      "name": "3D透视旋转",
+      "description": "前景绕Y轴旋转+亮度变化，模拟立体感",
+      "best_for": ["建筑/结构展示"],
+      "duration_hint_frames": 20
+    },
+    "glow_fade": {
+      "name": "发光淡入",
+      "description": "前景带金色辉光+亮度爆发再消退",
+      "best_for": ["神圣/壮观场景", "日落景色"],
+      "duration_hint_frames": 20
+    },
+    "parallax": {
+      "name": "视差漂移",
+      "description": "前景缓慢正弦波动漂移，产生空间层次感",
+      "best_for": ["前后景分离展示", "增加画面层次"],
+      "duration_hint_frames": 20
+    },
+    "split": {
+      "name": "分裂合拢",
+      "description": "前景从clip-path裁切开始，逐渐展开显示",
+      "best_for": ["对比展示", "从局部到全貌"],
+      "duration_hint_frames": 20
+    },
+    "blur_in": {
+      "name": "模糊变清晰",
+      "description": "前景从模糊到清晰",
+      "best_for": ["对焦过程", "回忆闪入"],
+      "duration_hint_frames": 20
+    }
+  },
+  "subtitle_styles": {
+    "typewriter": {
+      "name": "打字机效果",
+      "description": "文字逐字出现，带闪烁光标",
+      "best_for": ["叙事旁白", "故事讲述"],
+      "animation_type": "per_character"
+    },
+    "neon_sign": {
+      "name": "霓虹发光",
+      "description": "霓虹色彩+辉光发光，颜色周期性变化",
+      "best_for": ["城市夜景", "活泼段落", "年轻化风格"],
+      "animation_type": "fade"
+    },
+    "gradient_bar": {
+      "name": "渐变色背景条",
+      "description": "渐变背景条展开→文字滑入",
+      "best_for": ["标题展示", "信息突出"],
+      "animation_type": "container_reveal"
+    },
+    "scale_bounce": {
+      "name": "弹簧缩放弹入",
+      "description": "文字从1.5倍弹簧缩放到正常",
+      "best_for": ["活泼风格", "青少年内容"],
+      "animation_type": "bounce"
+    },
+    "slide_crop": {
+      "name": "裁切滑入",
+      "description": "clip-path从右到左裁切展开+微妙滑入",
+      "best_for": ["优雅风格", "美食/旅行展示"],
+      "animation_type": "clip_reveal"
+    },
+    "letter_fall": {
+      "name": "文字掉落",
+      "description": "每个字从上方掉落，错开延迟",
+      "best_for": ["轻松幽默", "游戏感"],
+      "animation_type": "per_character_delayed"
+    },
+    "wave": {
+      "name": "波浪摆动",
+      "description": "渐变文字+每个字波浪浮动",
+      "best_for": ["音乐类内容", "动感风格"],
+      "animation_type": "per_character_wave"
+    },
+    "cinematic": {
+      "name": "电影上下黑条",
+      "description": "上下黑条从两侧滑入，文字在底部黑条中淡入",
+      "best_for": ["电影感段落", "庄重/感人时刻"],
+      "animation_type": "letterbox_reveal"
+    }
+  },
+  "style_profiles": {
+    "douyin_travel_fast": {
+      "name": "抖音旅行快节奏",
+      "source_videos": ["重庆", "大连", "Payphone", "长沙"],
+      "characteristics": ["每镜2-3秒", "高频转场", "甩镜头为主", "音乐卡点", "速度变化多"],
+      "recommended_transitions": ["whip", "zoom_flash", "flash_white", "glitch", "zoom_heavy"],
+      "recommended_effects": ["speed_ramp(beat_hit)", "motion_blur"],
+      "recommended_subtitle_styles": ["neon_sign", "wave", "scale_bounce"],
+      "bgm_style": "电子/流行, 120+BPM",
+      "hook_strategy": "前3秒高能画面+大标题"
+    },
+    "douyin_travel_cinematic": {
+      "name": "抖音旅行电影感",
+      "source_videos": ["新疆", "香港", "巴厘岛"],
+      "characteristics": ["每镜3-5秒", "慢节奏情绪渲染", "电影调色", "全景为主"],
+      "recommended_transitions": ["fade", "dissolve", "blur_in", "light_leak", "circle_reveal"],
+      "recommended_effects": ["film_grain", "speed_ramp(slow_fast)"],
+      "recommended_subtitle_styles": ["cinematic", "slide_crop", "typewriter"],
+      "bgm_style": "氛围/原声, 80-100BPM",
+      "hook_strategy": "远景空镜+字幕推入"
+    },
+    "douyin_travel_creative": {
+      "name": "抖音旅行创意风",
+      "source_videos": ["西安", "北京"],
+      "characteristics": ["前景分离展示", "多层叠加", "特效字幕", "360旋转/甩镜头混合"],
+      "recommended_transitions": ["spin", "zoom_heavy", "light_leak", "freeze_frame", "glitch"],
+      "recommended_effects": ["film_grain", "speed_ramp(beat_hit)", "whip_pan_enhanced"],
+      "recommended_foreground_reveals": ["float_up", "tilt_3d", "glow_fade", "parallax"],
+      "recommended_subtitle_styles": ["gradient_bar", "neon_sign", "letter_fall"],
+      "bgm_style": "混合, 100-130BPM",
+      "hook_strategy": "前景+背景分离+旋转入场"
+    }
+  },
+  "shot_type_transition_mapping": {
+    "hook": { "recommended": ["zoom_heavy", "zoom_flash", "whip", "flash_white"], "avoid": ["dissolve", "fade"] },
+    "scene_establish": { "recommended": ["fade", "blur_in", "zoom_out", "slide"], "avoid": ["glitch", "freeze_frame"] },
+    "daily_moment": { "recommended": ["cut", "slide", "fade", "zoom_in"], "avoid": [] },
+    "emotion_peak": { "recommended": ["zoom_flash", "zoom_heavy", "whip", "spin"], "avoid": ["dissolve", "fade"] },
+    "transition": { "recommended": ["whip", "slide", "spin", "glitch", "flash_white"], "avoid": [] },
+    "closing": { "recommended": ["fade", "dissolve", "blur_in", "flash_black"], "avoid": ["glitch", "zoom_heavy"] },
+    "persona": { "recommended": ["zoom_in", "fade", "blur_in", "circle_reveal"], "avoid": ["glitch", "freeze_frame"] },
+    "info_card": { "recommended": ["cut", "slide_up", "fade"], "avoid": ["glitch", "spin"] }
+  },
+  "scene_rhythm_transition_density": {
+    "快": { "transition_frequency": "frequent", "every_n_shots": 1, "recommended_types": ["cut", "whip", "flash_white", "zoom_flash", "glitch"] },
+    "中": { "transition_frequency": "moderate", "every_n_shots": 2, "recommended_types": ["slide", "zoom_in", "fade", "spin", "light_leak"] },
+    "慢": { "transition_frequency": "sparse", "every_n_shots": 3, "recommended_types": ["fade", "dissolve", "blur_in", "circle_reveal"] }
+  },
+  "key_techniques_from_analysis": [
+    {
+      "technique": "前3秒抓眼球",
+      "detail": "hook镜头必须在3秒内出现强视觉冲击（大标题/震撼空镜/快速切换）",
+      "source": "所有分析视频"
+    },
+    {
+      "technique": "音乐卡点",
+      "detail": "转场、特效、字幕变化对齐音乐重音/鼓点",
+      "source": "重庆、大连、Payphone、长沙"
+    },
+    {
+      "technique": "5段式情绪设计",
+      "detail": "开场→展开→高潮→回落→收尾，高潮位于60-70%位置",
+      "source": "新疆、香港、巴厘岛"
+    },
+    {
+      "technique": "前景背景分离",
+      "detail": "使用阿里云分割API将建筑/物体从照片中分离，独立动画",
+      "source": "西安、北京"
+    },
+    {
+      "technique": "速度对比",
+      "detail": "快慢交替产生节奏感——快段落用1-2秒镜头，慢段落用3-5秒",
+      "source": "所有分析视频"
+    },
+    {
+      "technique": "转场不做重复",
+      "detail": "相邻分镜避免使用相同转场，保持视觉新鲜感",
+      "source": "大连、Payphone、长沙"
+    },
+    {
+      "technique": "胶片质感",
+      "detail": "胶片颗粒+漏光+暖色调，营造旅行回忆感",
+      "source": "新疆、巴厘岛"
+    }
+  ]
+}
