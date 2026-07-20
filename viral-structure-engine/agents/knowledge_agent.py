@@ -11,6 +11,10 @@ logger = logging.getLogger(__name__)
 
 
 class KnowledgeAgent(BaseAgent):
+    def _build_observe_prompt(self, state: dict, history: list) -> str:
+        task_desc = state.get("task_description", "提炼视频结构知识")
+        return f"任务：{task_desc}\n已执行 {len(history)} 步"
+
     async def extract_knowledge(
         self, video_structure_json: str, category: str, duration: float
     ) -> list[KnowledgeEntry]:

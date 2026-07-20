@@ -15,14 +15,15 @@ from aliyunsdkcore.client import AcsClient
 from aliyunsdkimageseg.request.v20191230.SegmentCommonImageRequest import SegmentCommonImageRequest
 
 # ===== Config =====
-ACCESS_KEY = "LTAI5t9yF5XMqiPVQ724aJjm"
-ACCESS_SECRET = "GVehTU8jHDef0E5NqgPYGbE3Aqx9OM"
-REGION = "cn-shanghai"
-BUCKET_NAME = "video-seg-3270e1a5"
-OSS_ENDPOINT = f"https://oss-{REGION}.aliyuncs.com"
+# 阿里云凭证请通过环境变量或 .env 文件配置，切勿硬编码到源码中。
+ACCESS_KEY = os.getenv("ALIYUN_ACCESS_KEY_ID", "")
+ACCESS_SECRET = os.getenv("ALIYUN_ACCESS_KEY_SECRET", "")
+REGION = os.getenv("ALIYUN_REGION", "cn-shanghai")
+BUCKET_NAME = os.getenv("ALIYUN_BUCKET_NAME", "video-seg-3270e1a5")
+OSS_ENDPOINT = os.getenv("ALIYUN_OSS_ENDPOINT", f"https://oss-{REGION}.aliyuncs.com")
 
-PHOTOS_DIR = "remotion/public/photos"
-OUTPUT_DIR = "remotion/public/segmented"
+PHOTOS_DIR = os.getenv("SEGMENT_PHOTOS_DIR", "remotion/public/photos")
+OUTPUT_DIR = os.getenv("SEGMENT_OUTPUT_DIR", "remotion/public/segmented")
 MAX_WORKERS = 4  # parallel uploads & API calls
 
 
@@ -30,8 +31,20 @@ def ensure_dir(d):
     os.makedirs(d, exist_ok=True)
 
 
+def _require_credentials():
+    """检查阿里云凭证是否已配置，未配置则抛出清晰错误。"""
+    if not ACCESS_KEY or not ACCESS_SECRET:
+        raise RuntimeError(
+            "阿里云凭证未配置。请在 viral-structure-engine/.env 中设置:\n"
+            "  ALIYUN_ACCESS_KEY_ID=你的AccessKeyId\n"
+            "  ALIYUN_ACCESS_KEY_SECRET=你的AccessKeySecret\n"
+            "并执行 `python -m dotenv` 或重启终端以加载环境变量。"
+        )
+
+
 def init_oss():
     """Initialize OSS bucket."""
+    _require_credentials()
     auth = oss2.Auth(ACCESS_KEY, ACCESS_SECRET)
     bucket = oss2.Bucket(auth, OSS_ENDPOINT, BUCKET_NAME)
     return bucket
@@ -191,6 +204,7 @@ def process_all_photos():
 
     # Initialize OSS and API client
     bucket = init_oss()
+    _require_credentials()
     client = AcsClient(ACCESS_KEY, ACCESS_SECRET, REGION)
 
     # Process in parallel

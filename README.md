@@ -147,6 +147,14 @@ ZHIPU_BASE_URL=https://open.bigmodel.cn/api/paas/v4
 
 # Moonshot/Kimi — 备选 LLM
 MOONSHOT_API_KEY=sk-your-key
+
+# 阿里云 — 前景分割（segment_aliyun.py）
+# 需开通 OSS 和图像分割（SegmentCommonImage）服务
+ALIYUN_ACCESS_KEY_ID=your-access-key-id
+ALIYUN_ACCESS_KEY_SECRET=your-access-key-secret
+ALIYUN_REGION=cn-shanghai
+ALIYUN_BUCKET_NAME=video-seg-3270e1a5
+ALIYUN_OSS_ENDPOINT=https://oss-cn-shanghai.aliyuncs.com
 ```
 
 ### 2.4 运行方式
@@ -591,9 +599,9 @@ interface StoryboardFrame {
 ### 7.1 API Key 安全
 
 - **环境变量加载**：所有 API Key 通过 `.env` 文件加载，使用 `python-dotenv`
-- **不硬编码密钥**：代码中不包含生产密钥（`segment_aliyun.py` 中的密钥是 demo 用途，需替换）
+- **不硬编码密钥**：代码中不包含生产密钥；`segment_aliyun.py` 从 `ALIYUN_ACCESS_KEY_ID` / `ALIYUN_ACCESS_KEY_SECRET` 读取
 - **无 Key 降级**：`LLMTools` 在检测不到 API Key 时返回 mock JSON，流水线安全退出而非崩溃
-- **密钥分类**：DeepSeek（文本推理）、Zhipu（视觉理解）、Moonshot（备选）三个密钥独立配置
+- **密钥分类**：DeepSeek（文本推理）、Zhipu（视觉理解）、Moonshot（备选）、阿里云（前景分割）四个密钥独立配置
 
 ### 7.2 调用安全与容错
 

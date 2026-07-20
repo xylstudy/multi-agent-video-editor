@@ -1,4 +1,5 @@
 """视频分析：GLM-4.6V 多模态（画面+音频）逐镜头分析 + 结构分析"""
+import argparse
 import asyncio
 import json
 import logging
@@ -15,13 +16,41 @@ from tools.face_tools import FaceTools
 from tools.audio_tools import AudioTools
 from agents.analyst import AnalystAgent
 
+PROJECT_ROOT = Path(__file__).resolve().parent
+DEFAULT_VIDEO_PATH = PROJECT_ROOT / "data" / "samples" / "viral.mp4"
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="视频分析：GLM-4.6V 多模态逐镜头分析 + 结构分析")
+    parser.add_argument(
+        "--video",
+        type=str,
+        default=str(DEFAULT_VIDEO_PATH),
+        help="待分析的爆款视频路径（默认: data/samples/viral.mp4）",
+    )
+    parser.add_argument(
+        "--topic",
+        type=str,
+        default="北京旅行Vlog",
+        help="目标视频主题（默认: 北京旅行Vlog）",
+    )
+    parser.add_argument(
+        "--run-id",
+        type=str,
+        default="video_analysis_demo",
+        help="运行 ID / 输出目录名（默认: video_analysis_demo）",
+    )
+    return parser.parse_args()
+
 
 async def main():
-    video_path = "E:/py pbjects/video_claw/mmexport1779631125302.mp4"
-    target_topic = "北京旅行Vlog"
+    args = parse_args()
+
+    video_path = args.video
+    target_topic = args.topic
 
     # 输出目录
-    out = OutputManager(run_id="video_analysis_demo")
+    out = OutputManager(run_id=args.run_id)
     logger.info(f"输出目录: {out.run_dir}")
 
     # GLM-4.6V：多模态分析（画面+音频）

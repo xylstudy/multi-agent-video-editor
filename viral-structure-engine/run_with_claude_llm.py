@@ -1,3 +1,4 @@
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -8,21 +9,57 @@ from tools.video_tools import VideoTools
 from tools.face_tools import FaceTools
 from agents.analyst import AnalystAgent
 
-VIDEO_PATH = r"E:\py pbjects\video_claw\mmexport1779631125302.mp4"
+PROJECT_ROOT = Path(__file__).resolve().parent
+DEFAULT_VIDEO_PATH = PROJECT_ROOT / "data" / "samples" / "viral.mp4"
+DEFAULT_SHOT_ANALYSES = PROJECT_ROOT / "data" / "output" / "claude_shot_analyses.json"
+DEFAULT_STRUCTURE_ANALYSIS = PROJECT_ROOT / "data" / "output" / "claude_structure_analysis.json"
+DEFAULT_OUTPUT = PROJECT_ROOT / "data" / "output" / "analysis_result_claude.json"
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="使用 Claude 预分析结果组装 VideoStructure")
+    parser.add_argument(
+        "--video",
+        type=str,
+        default=str(DEFAULT_VIDEO_PATH),
+        help="原始视频路径（默认: data/samples/viral.mp4）",
+    )
+    parser.add_argument(
+        "--shot-analyses",
+        type=str,
+        default=str(DEFAULT_SHOT_ANALYSES),
+        help="Claude 镜头分析结果路径（默认: data/output/claude_shot_analyses.json）",
+    )
+    parser.add_argument(
+        "--structure-analysis",
+        type=str,
+        default=str(DEFAULT_STRUCTURE_ANALYSIS),
+        help="Claude 结构分析结果路径（默认: data/output/claude_structure_analysis.json）",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default=str(DEFAULT_OUTPUT),
+        help="输出路径（默认: data/output/analysis_result_claude.json）",
+    )
+    return parser.parse_args()
 
 
 def run_analysis():
+    args = parse_args()
+
+    video_path = args.video
     video = VideoTools()
     face = FaceTools()
     analyst = AnalystAgent(None, video, face)
 
-    info = video.get_video_info(VIDEO_PATH)
-    scenes = video.detect_scene_changes(VIDEO_PATH, threshold=0.3)
+    info = video.get_video_info(video_path)
+    scenes = video.detect_scene_changes(video_path, threshold=0.3)
 
     # 读取我（Claude）生成的分析结果
-    with open("data/output/claude_shot_analyses.json", "r", encoding="utf-8") as f:
+    with open(args.shot_analyses, "r", encoding="utf-8") as f:
         shot_analyses = json.load(f)
-    with open("data/output/claude_structure_analysis.json", "r", encoding="utf-8") as f:
+    with open(args.structure_analysis, "r", encoding="utf-8") as f:
         structure_analysis = json.load(f)
 
     # 对齐时间
@@ -33,7 +70,7 @@ def run_analysis():
 
     # 组装 VideoStructure
     video_structure = analyst.build_video_structure(
-        VIDEO_PATH, info["duration"], info["width"], info["height"],
+        video_path, info["duration"], info["width"], info["height"],
         shot_analyses, structure_analysis, "",
     )
 
@@ -41,7 +78,7 @@ def run_analysis():
     print("=" * 70)
     print("爆款结构迁移引擎 — Analyst Agent 单视频分析 (Claude 替代 LLM)")
     print("=" * 70)
-    print(f"视频路径: {VIDEO_PATH}")
+    print(f"视频路径: {video_path}")
     print(f"\n[视频基本信息]:")
     print(f"   分辨率: {info['width']}x{info['height']}")
     print(f"   帧率: {info['fps']:.2f} fps")
@@ -93,7 +130,7 @@ def run_analysis():
         "raw_shot_analyses": shot_analyses,
     }
 
-    output_path = Path("data/output/analysis_result_claude.json")
+    output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)

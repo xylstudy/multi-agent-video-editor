@@ -1,5 +1,9 @@
 """快速端到端流程：利用现有分析 + 新素材 + 剪辑手法学识 → 生成方案 → Remotion 渲染"""
-import asyncio, json, logging, sys
+import argparse
+import asyncio
+import json
+import logging
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -13,29 +17,66 @@ from config.output_manager import OutputManager
 from agents.planner import PlannerAgent
 from knowledge.techniques_loader import get_summary
 
-REMOTION_DIR = Path(__file__).resolve().parent / "remotion"
+PROJECT_ROOT = Path(__file__).resolve().parent
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="快速端到端结构迁移 Pipeline")
+    parser.add_argument(
+        "--struct",
+        type=str,
+        default=str(PROJECT_ROOT / "data" / "runs" / "video_analysis_demo" / "analyst" / "video_structure.json"),
+        help="视频结构分析结果路径（默认: data/runs/video_analysis_demo/analyst/video_structure.json）",
+    )
+    parser.add_argument(
+        "--struct-analysis",
+        type=str,
+        default=str(PROJECT_ROOT / "data" / "runs" / "video_analysis_demo" / "analyst" / "structure_analysis.json"),
+        help="结构分析详细结果路径（默认: data/runs/video_analysis_demo/analyst/structure_analysis.json）",
+    )
+    parser.add_argument(
+        "--photo-dir",
+        type=str,
+        default=str(PROJECT_ROOT / "data" / "北京"),
+        help="用户照片素材目录（默认: data/北京）",
+    )
+    parser.add_argument(
+        "--topic",
+        type=str,
+        default="北京旅行Vlog",
+        help="目标视频主题（默认: 北京旅行Vlog）",
+    )
+    parser.add_argument(
+        "--run-id",
+        type=str,
+        default="pipeline_e2e_techniques",
+        help="本次运行 ID（默认: pipeline_e2e_techniques）",
+    )
+    return parser.parse_args()
 
 
 async def main():
-    run_id = "pipeline_e2e_techniques"
+    args = parse_args()
+
+    run_id = args.run_id
     out = OutputManager(run_id=run_id)
     logger.info(f"输出目录: {out.run_dir}")
 
     # ===== 1. 加载现有视频结构分析 =====
     logger.info("=" * 60)
     logger.info("1. 加载视频结构分析")
-    struct_path = Path("data/runs/video_analysis_demo/analyst/video_structure.json")
+    struct_path = Path(args.struct)
     struct = json.loads(struct_path.read_text(encoding="utf-8"))
     logger.info(f"   视频: {struct.get('source_video', '?')}")
     logger.info(f"   时长: {struct.get('duration', 0):.1f}s, 镜头: {len(struct.get('shots', []))}")
 
-    struct_analysis_path = Path("data/runs/video_analysis_demo/analyst/structure_analysis.json")
+    struct_analysis_path = Path(args.struct_analysis)
     struct_analysis = json.loads(struct_analysis_path.read_text(encoding="utf-8")) if struct_analysis_path.exists() else {}
 
     # ===== 2. 加载素材 =====
     logger.info("=" * 60)
-    logger.info("2. 加载用户素材 (39张北京照片)")
-    photo_dir = Path(r"E:\py pbjects\video_claw\data\北京")
+    logger.info("2. 加载用户素材")
+    photo_dir = Path(args.photo_dir)
     photo_paths = sorted([p for p in photo_dir.glob("*") if p.suffix.lower() in (".jpg", ".jpeg", ".png")])
     inventory = {
         "items": [
@@ -63,7 +104,7 @@ async def main():
     structure_summary = json.dumps(struct, ensure_ascii=False)
     structure_analysis_json = json.dumps(struct_analysis, ensure_ascii=False)
 
-    skeleton = await planner._extract_skeleton(structure_summary, "北京旅行Vlog", "", structure_analysis=structure_analysis_json)
+    skeleton = await planner._extract_skeleton(structure_summary, args.topic, "", structure_analysis=structure_analysis_json)
     out.save_json("planner", "skeleton.json", skeleton)
     logger.info(f"   骨架: {skeleton.get('structure_type', '?')}")
 
@@ -79,12 +120,12 @@ async def main():
     # manually inject techniques into the generate call
     scheme_data = await planner._generate_scheme(
         json.dumps(skeleton, ensure_ascii=False), inv_json,
-        "北京旅行Vlog", "", preferences,
+        args.topic, "", preferences,
         material_type_hint="全部为静态照片素材，需要做 Ken Burns 运镜。建议每镜用不同照片。",
     )
     out.save_json("planner", "scheme_raw.json", scheme_data)
 
-    scheme = planner.build_scheme(scheme_data, "北京旅行Vlog", iteration=0)
+    scheme = planner.build_scheme(scheme_data, args.topic, iteration=0)
     out.save_json("planner", "scheme.json", scheme)
     logger.info(f"   方案: {scheme.title}, {len(scheme.storyboard)} 个分镜, {scheme.target_duration}s")
 
@@ -117,65 +158,17 @@ async def main():
         d = decisions_map.get(frame.get("index", -1), {})
         frame["render_component"] = d.get("render_component", "auto")
 
-    import subprocess, threading, socket, shutil, tempfile
-    from http.server import HTTPServer, SimpleHTTPRequestHandler
-
-    # 启动本地 HTTP 服务提供素材访问
-    media_root = Path(tempfile.mkdtemp(prefix="vse_media_"))
-    material_map = {}
-    for m in inventory["items"]:
-        src = Path(m["path"])
-        if src.exists():
-            ext = src.suffix.lower() or ".jpg"
-            dst = media_root / f"{m['id']}{ext}"
-            if not dst.exists():
-                shutil.copy2(src, dst)
-            material_map[m["id"]] = f"/{m['id']}{ext}"
-    logger.info(f"   素材复制: {len(material_map)} 个到临时目录")
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.bind(("127.0.0.1", 0))
-    port = sock.getsockname()[1]
-    sock.close()
-
-    class _Handler(SimpleHTTPRequestHandler):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, directory=str(media_root), **kwargs)
-        def log_message(self, fmt, *args):
-            pass
-
-    httpd = HTTPServer(("127.0.0.1", port), _Handler)
-    httpd_thread = threading.Thread(target=httpd.serve_forever, daemon=True)
-    httpd_thread.start()
-    logger.info(f"   HTTP 素材服务: http://127.0.0.1:{port}")
-
-    http_map = {mid: f"http://127.0.0.1:{port}{path}" for mid, path in material_map.items()}
-    input_props = {"scheme": scheme_dict, "material_map": http_map}
-
-    props_file = REMOTION_DIR / "input_props_e2e.json"
-    props_file.write_text(json.dumps(input_props, ensure_ascii=False), encoding="utf-8")
+    from tools.remotion_renderer import render_with_remotion
 
     output = str((out.run_dir / "final_video.mp4").resolve())
-    entry = (REMOTION_DIR / "src/index.ts").resolve().as_posix()
-    npx_cmd = "npx.cmd"
-    cmd = [npx_cmd, "remotion", "render", entry, "VideoScheme", output,
-           "--props", str(props_file), "--overwrite"]
+    result_path = render_with_remotion(scheme_dict, inventory["items"], output, timeout=600)
 
-    logger.info(f"   {' '.join(cmd)}")
-    try:
-        result = subprocess.run(cmd, cwd=str(REMOTION_DIR), capture_output=True, text=True, timeout=600)
-        if result.returncode != 0:
-            logger.error(f"Remotion 渲染失败: {result.stderr[-800:]}")
-        else:
-            size_mb = Path(output).stat().st_size / 1024 / 1024
-            logger.info(f"   [OK] 渲染完成: {output}")
-            logger.info(f"   [OK] 大小: {size_mb:.1f}MB")
-    except subprocess.TimeoutExpired:
-        logger.error("Remotion 渲染超时")
-    finally:
-        props_file.unlink(missing_ok=True)
-        httpd.shutdown()
-        shutil.rmtree(media_root, ignore_errors=True)
+    if result_path:
+        size_mb = Path(result_path).stat().st_size / 1024 / 1024
+        logger.info(f"   [OK] 渲染完成: {result_path}")
+        logger.info(f"   [OK] 大小: {size_mb:.1f}MB")
+    else:
+        logger.error("   Remotion 渲染失败")
 
     logger.info("=" * 60)
     logger.info("端到端流程完成")

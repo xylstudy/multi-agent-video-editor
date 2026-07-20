@@ -23,6 +23,7 @@ from config import settings
 from tools.video_tools import VideoTools
 from tools.face_tools import FaceTools
 from tools.audio_tools import AudioTools
+from tools.remotion_renderer import render_with_remotion
 
 logger = logging.getLogger(__name__)
 
@@ -614,105 +615,10 @@ def _safe_filename(name: str, fallback: str = "vlog") -> str:
 
 
 async def _render_with_remotion(scheme, inventory) -> str | None:
-    """用 Remotion 渲染完整视频，返回输出路径或 None"""
-    import subprocess, json, sys, shutil, os, socket, threading, time
-    from pathlib import Path
-    from http.server import HTTPServer, SimpleHTTPRequestHandler
-
-    remotion_dir = Path(__file__).resolve().parent.parent / "remotion"
-    if not remotion_dir.exists():
-        logger.warning(f"Remotion 目录不存在: {remotion_dir}")
-        return None
-
+    """用 Remotion 渲染完整视频，返回输出路径或 None。"""
     scheme_dict = scheme.to_dict() if hasattr(scheme, "to_dict") else scheme
-
-    # 1) 将素材收集到临时目录，并启动 HTTP 服务器供 Remotion 加载
-    #    （Chrome 禁止 file:// 协议，Remotion render 不提供 public/ 静态文件）
-    import tempfile
-    media_root = Path(tempfile.mkdtemp(prefix="vse_media_"))
-    material_map = {}
-    if inventory:
-        for m in getattr(inventory, "items", getattr(inventory, "materials", [])):
-            mid = getattr(m, "id", "")
-            mpath = getattr(m, "path", "")
-            if mid and mpath:
-                src = Path(mpath)
-                if src.exists():
-                    ext = src.suffix.lower() or ".jpg"
-                    dst = media_root / f"{mid}{ext}"
-                    shutil.copy2(src, dst)
-                    material_map[mid] = f"/{mid}{ext}"
-
-    # 2) 找空闲端口，启动 HTTP 服务器（带正确 MIME type）
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.bind(("127.0.0.1", 0))
-    port = sock.getsockname()[1]
-    sock.close()
-
-    class _Handler(SimpleHTTPRequestHandler):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, directory=str(media_root), **kwargs)
-        def log_message(self, fmt, *args):
-            pass
-        # 常见媒体扩展的 MIME type 映射，防止 Chrome 拒绝加载
-        _mime_map = {
-            ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
-            ".webp": "image/webp", ".gif": "image/gif", ".bmp": "image/bmp",
-            ".mp4": "video/mp4", ".webm": "video/webm", ".mov": "video/quicktime",
-            ".wav": "audio/wav", ".mp3": "audio/mpeg", ".aac": "audio/aac",
-            ".m4a": "audio/mp4", ".ogg": "audio/ogg",
-        }
-        def guess_type(self, path):
-            _, ext = os.path.splitext(path)
-            return self._mime_map.get(ext.lower()) or super().guess_type(path)
-
-    httpd = HTTPServer(("127.0.0.1", port), _Handler)
-    httpd_thread = threading.Thread(target=httpd.serve_forever, daemon=True)
-    httpd_thread.start()
-
-    # 用 http:// URL 替换文件路径
-    http_map = {mid: f"http://127.0.0.1:{port}{path}"
-                for mid, path in material_map.items()}
-
-    input_props = {"scheme": scheme_dict, "material_map": http_map}
-
-    props_file = remotion_dir / f"input_props_{abs(hash(str(input_props)))}_{hash(json.dumps(scheme_dict.get('storyboard', []), sort_keys=True))}.json"
-    props_file.write_text(json.dumps(input_props, ensure_ascii=False), encoding="utf-8")
-
     output = str(settings.OUTPUT_DIR / f"{_safe_filename(scheme_dict.get('title', 'vlog'))}.mp4")
-    entry = (remotion_dir / "src/index.ts").resolve().as_posix()
-
-    npx_cmd = "npx.cmd" if sys.platform == "win32" else "npx"
-    cmd = [npx_cmd, "remotion", "render", entry, "VideoScheme", output,
-           f"--props={props_file}", "--overwrite", "--log=verbose"]
-
-    logger.info(f"Remotion: {' '.join(cmd)}")
-    try:
-        result = subprocess.run(cmd, cwd=str(remotion_dir), capture_output=True, text=False, timeout=1800)
-        if result.returncode == 0:
-            logger.info(f"Remotion 渲染完成: {output}")
-            return output
-
-        # 将完整 stderr 保存到运行目录
-        safe_title = _safe_filename(scheme_dict.get("title", "remotion"), "remotion")
-        log_dir = settings.RUNS_DIR / safe_title
-        log_dir.mkdir(parents=True, exist_ok=True)
-        ts = time.strftime("%Y%m%d_%H%M%S")
-        err_path = log_dir / f"remotion_error_{ts}.log"
-        full_stderr = result.stderr.decode("utf-8", errors="replace")
-        err_path.write_text(full_stderr, encoding="utf-8")
-        logger.warning(f"Remotion 渲染失败，完整日志已保存: {err_path}")
-        # 日志末尾 800 字符快速预览
-        tail = full_stderr[-800:]
-        logger.warning(f"Remotion stderr (尾段): {tail}")
-    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
-        logger.warning(f"Remotion 异常: {e}")
-    finally:
-        props_file.unlink(missing_ok=True)
-        httpd.shutdown()
-        shutil.rmtree(media_root, ignore_errors=True)
-
-    return None
+    return render_with_remotion(scheme, inventory, output)
 
 
 async def _render_fallback(scheme, inventory, audio_path=None) -> str | None:

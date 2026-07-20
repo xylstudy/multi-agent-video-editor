@@ -1,4 +1,5 @@
 """单独测试 GLM-4.6V 视频画面理解能力"""
+import argparse
 import asyncio
 import json
 import logging
@@ -11,9 +12,30 @@ from config.llm_client import LLMTools
 from config import settings
 from tools.video_tools import VideoTools
 
+PROJECT_ROOT = Path(__file__).resolve().parent
+DEFAULT_VIDEO_PATH = PROJECT_ROOT / "data" / "samples" / "viral.mp4"
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="单独测试 GLM-4.6V 视频画面理解能力")
+    parser.add_argument(
+        "--video",
+        type=str,
+        default=str(DEFAULT_VIDEO_PATH),
+        help="待测试视频路径（默认: data/samples/viral.mp4）",
+    )
+    parser.add_argument(
+        "--topic",
+        type=str,
+        default="北京旅行Vlog",
+        help="视频主题（默认: 北京旅行Vlog）",
+    )
+    return parser.parse_args()
+
 
 async def main():
-    video_path = "E:/py pbjects/video_claw/mmexport1779631125302.mp4"
+    args = parse_args()
+    video_path = args.video
 
     # 1. 初始化 LLM（智谱 GLM-4.6V）
     llm = LLMTools(
@@ -48,7 +70,7 @@ async def main():
 - 镜头序号: {i}
 - 时间范围: {scene['start']:.1f}s - {scene['end']:.1f}s
 - 视频总时长: {info['duration']:.1f}s
-- 视频主题: 北京旅行Vlog
+- 视频主题: {args.topic}
 
 请分析：
 1. 画面内容（main_subject、people_count、场景描述）

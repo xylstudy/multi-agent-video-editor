@@ -1,0 +1,53 @@
+import logging
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app_config import ALLOWED_ORIGINS
+from database import create_db_and_tables
+from queue_manager import queue
+from routers import auth, api_keys, genes, knowledge, materials, projects, stats, tasks, works
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    create_db_and_tables()
+    queue.start()
+    yield
+
+
+app = FastAPI(
+    title="Video Claw Web API",
+    description="爆款 Vlog 结构迁移引擎 Web 化 API",
+    version="0.1.0",
+    lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(auth.router)
+app.include_router(api_keys.router)
+app.include_router(projects.router)
+app.include_router(materials.router)
+app.include_router(tasks.router)
+app.include_router(genes.router)
+app.include_router(knowledge.router)
+app.include_router(works.router)
+app.include_router(stats.router)
+
+
+@app.get("/api/health")
+def health():
+    return {"status": "ok"}

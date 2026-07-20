@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import json
 import logging
@@ -12,10 +13,31 @@ logger = logging.getLogger(__name__)
 import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
-VIDEO_PATH = r"E:\py pbjects\video_claw\mmexport1779631125302.mp4"
+PROJECT_ROOT = Path(__file__).resolve().parent
+DEFAULT_VIDEO_PATH = PROJECT_ROOT / "data" / "samples" / "viral.mp4"
+DEFAULT_OUTPUT_PATH = PROJECT_ROOT / "data" / "output" / "analysis_result.json"
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="爆款 Vlog 单视频结构分析")
+    parser.add_argument(
+        "--video",
+        type=str,
+        default=str(DEFAULT_VIDEO_PATH),
+        help="待分析的爆款视频路径（默认: data/samples/viral.mp4）",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default=str(DEFAULT_OUTPUT_PATH),
+        help="分析结果输出路径（默认: data/output/analysis_result.json）",
+    )
+    return parser.parse_args()
 
 
 async def analyze_video():
+    args = parse_args()
+
     from config.llm_client import LLMTools
     from tools.video_tools import VideoTools
     from tools.face_tools import FaceTools
@@ -33,7 +55,7 @@ async def analyze_video():
     audio = AudioTools()
     analyst = AnalystAgent(llm, video, face, audio)
 
-    video_path = VIDEO_PATH
+    video_path = args.video
 
     print("=" * 70)
     print("爆款结构迁移引擎 — Analyst Agent 单视频分析")
@@ -180,7 +202,7 @@ async def analyze_video():
         "raw_shot_analyses": shot_analyses,
     }
 
-    output_path = Path("data/output/analysis_result_2.json")
+    output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)

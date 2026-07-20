@@ -3,16 +3,14 @@
 包含评估-迭代闭环：
   合成 → 评估迁移质量 → 不达标则自动调整参数 → 重新合成
 """
+import argparse
 import json
 import logging
 import math
 import subprocess
 import sys
-import threading
-import urllib.parse
 from collections import Counter
 from copy import deepcopy
-from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -23,9 +21,27 @@ from tools.video_tools import VideoTools, _find_ffmpeg
 
 REMOTION_DIR = Path(__file__).resolve().parent / "remotion"
 PROJECT_ROOT = Path(__file__).resolve().parent
+DEFAULT_VIRAL_VIDEO = PROJECT_ROOT / "data" / "samples" / "viral.mp4"
 
 MAX_ITERATIONS = 3
 QUALITY_THRESHOLD = 0.82
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="编辑迁移：用爆款视频节奏驱动照片生成 Vlog")
+    parser.add_argument(
+        "--viral-video",
+        type=str,
+        default=str(DEFAULT_VIRAL_VIDEO),
+        help="爆款参考视频路径（默认: data/samples/viral.mp4）",
+    )
+    parser.add_argument(
+        "--run-id",
+        type=str,
+        default="editing_transfer",
+        help="本次运行 ID（默认: editing_transfer）",
+    )
+    return parser.parse_args()
 
 
 # ============================================================
@@ -476,57 +492,7 @@ def auto_adjust_params(scores, current_beats_per_shot, current_transition_pools)
 
 
 # ============================================================
-# 6. 启动素材 HTTP 服务
-# ============================================================
-def start_material_server(port: int, material_map: dict) -> HTTPServer:
-    class _Handler(BaseHTTPRequestHandler):
-        _files: dict = {}
-
-        def do_GET(self):
-            path = urllib.parse.urlparse(self.path).path
-            stem = path.lstrip("/")
-            mat_id = Path(stem).stem
-
-            file_path = self._files.get(mat_id)
-            if not file_path or not Path(file_path).exists():
-                self.send_response(404)
-                self.end_headers()
-                self.wfile.write(b"Not found")
-                return
-
-            ext = Path(file_path).suffix.lower()
-            content_types = {
-                ".mp4": "video/mp4", ".mov": "video/quicktime",
-                ".webm": "video/webm",
-                ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
-                ".png": "image/png", ".webp": "image/webp",
-                ".aac": "audio/aac", ".mp3": "audio/mpeg",
-                ".wav": "audio/wav", ".m4a": "audio/mp4",
-            }
-            ct = content_types.get(ext, "application/octet-stream")
-
-            try:
-                data = Path(file_path).read_bytes()
-                self.send_response(200)
-                self.send_header("Content-Type", ct)
-                self.send_header("Content-Length", str(len(data)))
-                self.send_header("Access-Control-Allow-Origin", "*")
-                self.end_headers()
-                self.wfile.write(data)
-            except Exception as e:
-                self.send_response(500)
-                self.end_headers()
-                self.wfile.write(str(e).encode())
-
-        def log_message(self, fmt, *args):
-            pass
-
-    _Handler._files = dict(material_map)
-    return HTTPServer(("127.0.0.1", port), _Handler)
-
-
-# ============================================================
-# 7. 构建素材路径映射
+# 6. 构建素材路径映射
 # ============================================================
 def build_material_map(photos, audio_path: str) -> dict:
     material_map = {}
@@ -545,8 +511,10 @@ def build_material_map(photos, audio_path: str) -> dict:
 # 主流程（含评估-迭代闭环）
 # ============================================================
 def main():
-    viral_video = "E:/py pbjects/video_claw/mmexport1779631125302.mp4"
-    run_id = "editing_transfer"
+    args = parse_args()
+
+    viral_video = args.viral_video
+    run_id = args.run_id
 
     out = OutputManager(run_id=run_id)
     logger.info(f"输出目录: {out.run_dir}")
@@ -691,76 +659,43 @@ def main():
     out.save_json("editing", "scheme.json", scheme)
     logger.info(f"方案: {len(storyboard)} 个分镜, {actual_duration:.1f}s, 迁移评分={scores['overall']:.3f}")
 
-    # ---- 7. 构建素材映射 ----
+    # ---- 6. 构建素材映射 ----
     logger.info("=" * 60)
-    logger.info("7. 构建素材路径映射")
+    logger.info("6. 构建素材路径映射")
     local_material_map = build_material_map(photos, audio_path)
     out.save_json("editing", "material_map.json", local_material_map)
 
-    # ---- 8. 启动 HTTP 服务 + Remotion 渲染 ----
+    # ---- 7. Remotion 渲染 ----
     logger.info("=" * 60)
-    logger.info("8. 启动素材 HTTP 服务")
-    http_server = start_material_server(19999, local_material_map)
-    server_thread = threading.Thread(target=http_server.serve_forever, daemon=True)
-    server_thread.start()
+    logger.info("7. Remotion 渲染")
 
-    def _url_for(mid: str, local_path: str) -> str:
-        ext = Path(local_path).suffix
-        return f"http://127.0.0.1:19999/{mid}{ext}"
+    from tools.remotion_renderer import render_with_remotion
 
-    http_material_map = {
-        mid: _url_for(mid, local_path)
-        for mid, local_path in local_material_map.items()
+    output = str((out.run_dir / "final_video.mp4").resolve())
+    # 把音频也作为素材传入，确保 Remotion 能拿到 BGM
+    materials_for_render = photos + [{"id": "_viral_audio", "path": audio_path}] if audio_path else photos
+    result_path = render_with_remotion(scheme, materials_for_render, output, timeout=600)
+
+    if not result_path:
+        logger.error("Remotion 渲染失败")
+        return
+
+    size_mb = Path(result_path).stat().st_size / 1024 / 1024
+    logger.info(f"[OK] 渲染完成: {result_path}")
+    logger.info(f"[OK] 文件大小: {size_mb:.1f}MB")
+
+    summary = {
+        "shots": len(storyboard),
+        "title": scheme["title"],
+        "output": result_path,
+        "size_mb": round(size_mb, 1),
+        "method": "remotion_editing_transfer",
+        "photo_count": len(local_material_map) - 1,
+        "audio_source": "viral_video",
+        "total_duration": round(actual_duration, 1),
+        "migration_score": scores["overall"],
     }
-
-    logger.info("=" * 60)
-    logger.info("9. Remotion 渲染")
-    try:
-        input_props = {"scheme": scheme, "material_map": http_material_map}
-
-        props_file = REMOTION_DIR / f"input_props_{run_id}.json"
-        props_file.write_text(json.dumps(input_props, ensure_ascii=False), encoding="utf-8")
-        logger.info(f"inputProps 已写入: {props_file}")
-
-        entry = (REMOTION_DIR / "src/index.ts").resolve().as_posix()
-        output = str((out.run_dir / "final_video.mp4").resolve())
-
-        npx_cmd = "npx.cmd" if sys.platform == "win32" else "npx"
-        cmd = [npx_cmd, "remotion", "render", entry, "VideoScheme", output,
-               "--props", str(props_file), "--overwrite"]
-
-        logger.info(f"  {' '.join(cmd)}")
-        result = subprocess.run(cmd, cwd=str(REMOTION_DIR),
-                                capture_output=True, text=True,
-                                encoding="utf-8", errors="replace", timeout=600)
-
-        props_file.unlink(missing_ok=True)
-
-        if result.returncode != 0:
-            stderr = result.stderr[-1500:] if result.stderr else "unknown error"
-            logger.error(f"Remotion 渲染失败: {stderr}")
-            return
-
-        size_mb = Path(output).stat().st_size / 1024 / 1024
-        logger.info(f"[OK] 渲染完成: {output}")
-        logger.info(f"[OK] 文件大小: {size_mb:.1f}MB")
-
-        summary = {
-            "shots": len(storyboard),
-            "title": scheme["title"],
-            "output": output,
-            "size_mb": round(size_mb, 1),
-            "method": "remotion_editing_transfer",
-            "photo_count": len(http_material_map) - 1,
-            "audio_source": "viral_video",
-            "total_duration": round(actual_duration, 1),
-            "migration_score": scores["overall"],
-        }
-        out.save_json("editing", "render_summary.json", summary)
-
-    finally:
-        http_server.shutdown()
-        logger.info("HTTP 服务已关闭")
+    out.save_json("editing", "render_summary.json", summary)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """目标重渲染：加载 scheme_v2 和 inventory 用 FFmpeg 渲染最终视频。"""
-import json, logging, sys
+import argparse
+import json
+import logging
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -12,11 +15,29 @@ from models.material import MaterialInventory
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
-RUN_DIR = Path("data/runs/20260607_162312_北京旅行Vlog")
-REFERENCE_VIDEO = "E:/py pbjects/teste_video/mmexport1779631125302.mp4"
+PROJECT_ROOT = Path(__file__).resolve().parent
+DEFAULT_RUN_DIR = PROJECT_ROOT / "data" / "runs" / "20260607_162312_北京旅行Vlog"
+DEFAULT_REFERENCE_VIDEO = PROJECT_ROOT / "data" / "samples" / "viral.mp4"
 
-def load_scheme_v2():
-    path = RUN_DIR / "planner" / "scheme_v2.json"
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="加载 scheme_v2 和 inventory 用 FFmpeg 重渲染")
+    parser.add_argument(
+        "--run-dir",
+        type=str,
+        default=str(DEFAULT_RUN_DIR),
+        help="包含 planner/scheme_v2.json 和 material/inventory.json 的运行目录",
+    )
+    parser.add_argument(
+        "--reference-video",
+        type=str,
+        default=str(DEFAULT_REFERENCE_VIDEO),
+        help="参考视频路径，用于提取 BGM（默认: data/samples/viral.mp4）",
+    )
+    return parser.parse_args()
+
+def load_scheme_v2(run_dir: Path):
+    path = run_dir / "planner" / "scheme_v2.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     from models.scheme import VideoScheme, StoryboardFrame
     from models.video_structure import ShotType, TransitionType
@@ -75,8 +96,8 @@ def load_scheme_v2():
         audio_config=data.get("audio_config", {}),
     )
 
-def load_inventory():
-    path = RUN_DIR / "material" / "inventory.json"
+def load_inventory(run_dir: Path):
+    path = run_dir / "material" / "inventory.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     from models.material import MaterialItem, MaterialType, MaterialQuality
     items = []
@@ -101,9 +122,9 @@ def load_inventory():
         ))
     return MaterialInventory(items=items)
 
-def extract_audio():
+def extract_audio(reference_video: str):
     vt = VideoTools()
-    audio_path = vt.extract_audio(REFERENCE_VIDEO)
+    audio_path = vt.extract_audio(reference_video)
     if audio_path and Path(audio_path).exists():
         logger.info(f"音频已提取: {Path(audio_path).name}")
         return audio_path
@@ -111,8 +132,11 @@ def extract_audio():
     return None
 
 def main():
-    scheme = load_scheme_v2()
-    inventory = load_inventory()
+    args = parse_args()
+    run_dir = Path(args.run_dir)
+
+    scheme = load_scheme_v2(run_dir)
+    inventory = load_inventory(run_dir)
     logger.info(f"Loaded scheme: {scheme.title} ({len(scheme.storyboard)} frames)")
     logger.info(f"Loaded inventory: {len(inventory.items)} items")
 
@@ -123,7 +147,7 @@ def main():
         if bg_id and bg_id not in existing_ids:
             logger.warning(f"  Frame {frame.index}: material {bg_id} not in inventory!")
 
-    audio_path = extract_audio()
+    audio_path = extract_audio(args.reference_video)
 
     renderer = FFMpegRenderer()
     output = renderer.render(scheme, inventory, audio_path)

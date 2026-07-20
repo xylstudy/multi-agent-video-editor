@@ -10,6 +10,7 @@ import { ForegroundSplitShowcase } from "./ForegroundSplit";
 import { BeijingVlogSegmented } from "./BeijingVlogSegmented";
 import { VlogTechniquesShowcase } from "./VlogTechniquesShowcase";
 import { BeijingVlogVariety, BEIJING_VARIETY_DURATION } from "./BeijingVlogVariety";
+import { TechniqueDemo, getDemoDuration, type TechniqueDemoProps } from "./TechniqueDemo";
 
 const fps = 30;
 
@@ -110,6 +111,20 @@ export const Root: React.FC = () => {
         fps={fps}
         width={1080}
         height={1920}
+      />
+      {/* 知识库单条技法演示：540x960 小尺寸，DesignFrame 内部按 1080x1920 设计坐标渲染 */}
+      <Composition
+        id="TechniqueDemo"
+        component={TechniqueDemo as unknown as React.FC<Record<string, unknown>>}
+        durationInFrames={80}
+        fps={fps}
+        width={540}
+        height={960}
+        defaultProps={{ kind: "transition", tech_id: "fade", title: "淡入" } as TechniqueDemoProps as unknown as Record<string, unknown>}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: getDemoDuration((props as unknown as TechniqueDemoProps).kind),
+          props,
+        })}
       />
     </>
   );

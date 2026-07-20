@@ -2,6 +2,7 @@
 爆款结构迁移 — 北京照片 Pipeline
 加载 Kimi 的分析结果 + 北京照片，运行 material_manager → planner → creative → reviewer
 """
+import argparse
 import asyncio
 import json
 import logging
@@ -26,11 +27,44 @@ from models.video_structure import VideoStructure
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("pipeline")
 
-# ===== 配置 =====
-KIMI_ANALYSIS_PATH = Path(__file__).parent / "data" / "output" / "analysis_result_claude.json"
-BEIJING_PHOTO_DIR = Path("E:/py pbjects/video_claw/data/北京")
-TARGET_TOPIC = "北京旅行Vlog"
-OUTPUT_DIR = Path(__file__).parent / "data" / "output"
+PROJECT_ROOT = Path(__file__).resolve().parent
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="北京照片爆款结构迁移 Pipeline")
+    parser.add_argument(
+        "--analysis",
+        type=str,
+        default=str(PROJECT_ROOT / "data" / "output" / "analysis_result_claude.json"),
+        help="Kimi/Claude 结构分析结果路径（默认: data/output/analysis_result_claude.json）",
+    )
+    parser.add_argument(
+        "--photo-dir",
+        type=str,
+        default=str(PROJECT_ROOT / "data" / "北京"),
+        help="北京照片目录（默认: data/北京）",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default=str(PROJECT_ROOT / "data" / "output"),
+        help="中间产物与最终视频输出目录（默认: data/output）",
+    )
+    parser.add_argument(
+        "--topic",
+        type=str,
+        default="北京旅行Vlog",
+        help="目标视频主题（默认: 北京旅行Vlog）",
+    )
+    return parser.parse_args()
+
+
+# ===== 配置（由命令行参数覆盖）=====
+args = parse_args()
+KIMI_ANALYSIS_PATH = Path(args.analysis)
+BEIJING_PHOTO_DIR = Path(args.photo_dir)
+TARGET_TOPIC = args.topic
+OUTPUT_DIR = Path(args.output_dir)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # ===== Prompt / 模型配置 =====

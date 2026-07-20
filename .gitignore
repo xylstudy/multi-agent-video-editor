@@ -40,3 +40,11 @@ Thumbs.db
 
 # Claude
 .claude/
+
+# Web 运行数据（用户上传/数据库/演示产物）
+web/backend/storage/
+web/backend/app.db
+
+# 引擎运行产物
+viral-structure-engine/data/runs/
+viral-structure-engine/data/temp/

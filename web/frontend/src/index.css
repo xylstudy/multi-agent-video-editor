@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+/* ===== Design Tokens ===== */
+:root {
+  /* Core palette — deep violet-to-cyan gradient feel */
+  --color-page:          #0c0c14;
+  --color-surface:       #14141f;
+  --color-surface-2:     #1c1c2b;
+  --color-surface-3:    #24243a;
+  --color-border:        #2a2a42;
+  --color-border-light:  #35355a;
+
+  /* Text */
+  --color-text:          #e8e8f0;
+  --color-text-secondary: #8888a8;
+  --color-text-tertiary: #5a5a7a;
+
+  /* Primary — vivid violet */
+  --color-primary:       #7c5cfc;
+  --color-primary-hover: #9478ff;
+  --color-primary-soft:  rgba(124, 92, 252, 0.12);
+  --color-primary-ring:  rgba(124, 92, 252, 0.35);
+
+  /* Accent — electric cyan */
+  --color-accent:        #00d4ff;
+  --color-accent-soft:   rgba(0, 212, 255, 0.12);
+
+  /* Semantic */
+  --color-success:       #34d399;
+  --color-success-soft:  rgba(52, 211, 153, 0.12);
+  --color-warn:          #fbbf24;
+  --color-warn-soft:     rgba(251, 191, 36, 0.12);
+  --color-danger:        #f87171;
+  --color-danger-soft:   rgba(248, 113, 113, 0.12);
+
+  /* Shadows */
+  --shadow-sm:   0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md:   0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg:   0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 20px rgba(124, 92, 252, 0.15);
+
+  /* Misc */
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --radius-xl:  20px;
+
+  /* Surface glass */
+  --glass-bg:   rgba(20, 20, 31, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-blur: blur(20px);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Roboto, sans-serif;
+  background-color: var(--color-page);
+  color: var(--color-text);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ===== Focus Ring ===== */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-light);
+}
+
+/* ===== Animations ===== */
+@keyframes vc-pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.vc-pulse-dot {
+  animation: vc-pulse-dot 1.4s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.vc-fade-in {
+  animation: fade-in 0.35s ease-out both;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(124, 92, 252, 0.15); }
+  50%      { box-shadow: 0 0 20px rgba(124, 92, 252, 0.3); }
+}
+
+/* ===== Gradient Backgrounds ===== */
+.vc-bg-hero {
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(124, 92, 252, 0.08), transparent),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(0, 212, 255, 0.06), transparent),
+    var(--color-page);
+}
+
+.vc-bg-surface {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124, 92, 252, 0.04), transparent),
+    var(--color-surface);
+}
+
+/* ===== Log Terminal ===== */
+.log-terminal {
+  font-family: "JetBrains Mono", "SF Mono", Consolas, "Courier New", monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+.log-terminal::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+/* ===== Select / Option Dark Support ===== */
+select {
+  color-scheme: dark;
+}
+select option {
+  background-color: #1c1c2b;
+  color: #e8e8f0;
+}
+
+/* ===== Selection ===== */
+::selection {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-hover);
+}

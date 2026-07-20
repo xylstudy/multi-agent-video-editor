@@ -263,7 +263,7 @@ const SubtitleCinematic: React.FC<{ text: string; frame: number }> = ({ text, fr
 
 // ===== Subtitle Router =====
 
-const SceneSubtitle: React.FC<{ text: string; frame: number; style: SubtitleStyle }> = ({ text, frame, style }) => {
+export const SceneSubtitle: React.FC<{ text: string; frame: number; style: SubtitleStyle }> = ({ text, frame, style }) => {
   const fadeOut = interpolate(frame, [45, 55], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return (
     <div style={{ opacity: fadeOut }}>
