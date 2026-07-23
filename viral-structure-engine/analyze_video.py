@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import json
 import logging
+import shutil
 import sys
 from pathlib import Path
 
@@ -16,6 +17,16 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 PROJECT_ROOT = Path(__file__).resolve().parent
 DEFAULT_VIDEO_PATH = PROJECT_ROOT / "data" / "samples" / "viral.mp4"
 DEFAULT_OUTPUT_PATH = PROJECT_ROOT / "data" / "output" / "analysis_result.json"
+
+# 结构化事件前缀：Web 后端逐行读取子进程 stdout，借此解析分析进度。
+# 普通 print 保持人类可读，事件行保持机器可解析，两者互不干扰。
+EVENT_PREFIX = "__GENE_EVENT__"
+
+
+def _emit(event_type: str, **data):
+    """输出一条结构化进度事件（单行 JSON），供 Web 后端解析展示。"""
+    payload = {"type": event_type, **data}
+    print(f"{EVENT_PREFIX}{json.dumps(payload, ensure_ascii=False)}", flush=True)
 
 
 def parse_args():
@@ -73,8 +84,12 @@ async def analyze_video():
         print(f"   帧率: {info['fps']:.2f} fps")
         print(f"   时长: {info['duration']:.2f} 秒")
         print(f"   总帧数: {info['total_frames']}")
+        _emit("video_info", width=info["width"], height=info["height"],
+              fps=round(info["fps"], 2), duration=round(info["duration"], 2),
+              total_frames=info["total_frames"])
     except Exception as e:
         print(f"获取视频信息失败: {e}")
+        _emit("error", stage="video_info", message=str(e))
         return
 
     try:
@@ -83,9 +98,14 @@ async def analyze_video():
         print(f"   检测到 {len(scenes)} 个镜头")
         for i, s in enumerate(scenes):
             print(f"   镜头 {i+1}: {s['start']:.1f}s → {s['end']:.1f}s (时长 {s['duration']:.1f}s)")
+        _emit("scenes", count=len(scenes),
+              shots=[{"start": round(s["start"], 2), "end": round(s["end"], 2),
+                      "duration": round(s["duration"], 2)} for s in scenes])
     except Exception as e:
         print(f"镜头切分失败: {e}")
         scenes = [{"start": 0.0, "end": info["duration"], "duration": info["duration"]}]
+        _emit("scenes", count=1, shots=[{"start": 0.0, "end": round(info["duration"], 2),
+              "duration": round(info["duration"], 2)}], fallback=True)
 
     transcript = ""
     try:
@@ -95,22 +115,39 @@ async def analyze_video():
         try:
             transcript = audio.transcribe(audio_path)
             print(f"   语音转写完成: {len(transcript)} 字")
+            _emit("audio", status="ok", transcript_chars=len(transcript))
         except Exception as e:
             print(f"   语音转写失败 (whisper 可能未安装): {e}")
+            _emit("audio", status="skipped", message=f"语音转写跳过: {e}")
     except Exception as e:
         print(f"   音频提取失败: {e}")
+        _emit("audio", status="skipped", message=f"音频提取失败: {e}")
+
+    # 关键帧保存目录：从 --output 路径推导（基因场景下即 gene 目录）
+    frames_dir = Path(args.output).parent / "frames"
 
     print(f"\n[逐镜头分析] (共 {len(scenes)} 个镜头, 将调用 DeepSeek)...")
     shot_analyses = []
     for i, scene in enumerate(scenes):
         prev_desc = shot_analyses[-1].get("one_sentence_summary", "") if shot_analyses else ""
         print(f"\n   ▶ 分析镜头 {i+1}/{len(scenes)} ({scene['start']:.1f}s-{scene['end']:.1f}s)...")
+        _emit("shot_start", index=i, total=len(scenes),
+              start=round(scene["start"], 2), end=round(scene["end"], 2))
 
         mid_time = (scene["start"] + scene["end"]) / 2
         frame_path = None
+        frame_name = None
         try:
             frame_path = video.extract_frame(video_path, mid_time)
             has_face = face.has_face(frame_path)
+            # 保存一份关键帧到输出目录，供前端展示缩略图
+            try:
+                frames_dir.mkdir(parents=True, exist_ok=True)
+                frame_name = f"shot_{i:03d}.jpg"
+                shutil.copy2(frame_path, frames_dir / frame_name)
+            except Exception as ce:
+                print(f"      关键帧保存失败: {ce}")
+                frame_name = None
         except Exception as e:
             print(f"      抽帧失败: {e}")
             has_face = False
@@ -130,6 +167,12 @@ async def analyze_video():
             sf = result.get("structure_role", {})
             print(f"      功能: {sf.get('primary_function', '?')} | 情绪: {result.get('emotion', '?')}")
             print(f"      摘要: {result.get('one_sentence_summary', '')[:60]}")
+            _emit("shot_result", index=i, total=len(scenes),
+                  start=round(scene["start"], 2), end=round(scene["end"], 2),
+                  function=sf.get("primary_function", ""),
+                  emotion=result.get("emotion", ""),
+                  summary=result.get("one_sentence_summary", ""),
+                  has_face=has_face, frame=frame_name)
         except Exception as e:
             print(f"      解析失败: {e}")
             shot_analyses.append({
@@ -139,8 +182,12 @@ async def analyze_video():
                 "has_face": has_face,
                 "one_sentence_summary": "分析失败",
             })
+            _emit("shot_failed", index=i, total=len(scenes), message=str(e),
+                  start=round(scene["start"], 2), end=round(scene["end"], 2),
+                  frame=frame_name)
 
     print(f"\n📊 全局结构分析 (调用 DeepSeek)...")
+    _emit("structure_start", total_shots=len(shot_analyses))
     shot_text = json.dumps(shot_analyses, ensure_ascii=False)
     prompt = build_structure_analysis_prompt(
         info["duration"], info["width"], info["height"],
@@ -152,6 +199,12 @@ async def analyze_video():
     except Exception as e:
         print(f"结构分析解析失败: {e}")
         structure = {}
+    st = structure.get("structure_type", {}) if isinstance(structure, dict) else {}
+    _emit("structure_done",
+          category=st.get("category", ""),
+          narrative_type=structure.get("narrative_type", "") if isinstance(structure, dict) else "",
+          overall_emotion=structure.get("overall_emotion", "") if isinstance(structure, dict) else "",
+          overall_summary=structure.get("overall_summary", "") if isinstance(structure, dict) else "")
 
     print(f"\n[组装 VideoStructure 对象]...")
     video_structure = analyst.build_video_structure(
@@ -207,6 +260,7 @@ async def analyze_video():
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
     print(f"\n💾 完整分析结果已保存至: {output_path.resolve()}")
+    _emit("done", output=str(output_path.resolve()), shot_count=len(video_structure.shots))
 
 
 def build_shot_analysis_prompt(shot_index, start_time, end_time, total_duration, prev_frame_desc):

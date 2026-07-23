@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 from typing import Optional
 
+from pydantic import field_validator
 from sqlmodel import Field, Relationship, SQLModel, Column
 from sqlalchemy import String, DateTime, Text, JSON
 
@@ -199,6 +200,8 @@ class Gene(SQLModel, table=True):
     video_path: str = ""  # 存储的参考视频副本
     report_path: str = ""  # analysis_result.json 路径
     error_message: Optional[str] = None
+    progress: int = Field(default=0)  # 提取进度 0-100
+    progress_logs: list = Field(default_factory=list, sa_column=Column(JSON))  # 提取过程事件日志
 
     # 摘要字段（报告解析后填充，供列表卡片展示）
     duration: float = 0.0
@@ -223,4 +226,14 @@ class GeneRead(SQLModel):
     overall_emotion: str
     hook_method: str
     error_message: Optional[str]
+    progress: int
+    progress_logs: list
     created_at: datetime
+
+    @field_validator("progress", "progress_logs", mode="before")
+    @classmethod
+    def _none_to_default(cls, v, info):
+        # 历史行新列可能是 NULL，兜底为默认值，避免整列序列化 500
+        if v is None:
+            return [] if info.field_name == "progress_logs" else 0
+        return v

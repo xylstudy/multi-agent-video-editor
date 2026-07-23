@@ -9,6 +9,7 @@ import {
   EmptyState,
   Field,
   InfoBar,
+  ProgressBar,
   SectionHeader,
   StatusPill,
   TextInput,
@@ -19,6 +20,31 @@ const GENE_STATUS = {
   analyzing: '分析中',
   done: '已完成',
   failed: '失败',
+}
+
+/* 从进度日志推导当前阶段的可读描述（用于分析中的卡片） */
+const STAGE_LABELS = {
+  video_info: '读取视频信息',
+  scenes: '镜头切分',
+  audio: '音频处理',
+  shot_start: '逐镜头分析',
+  shot_result: '逐镜头分析',
+  shot_failed: '逐镜头分析',
+  structure_start: '全局结构分析',
+  structure_done: '全局结构分析',
+  done: '收尾',
+}
+
+function latestStageLabel(g) {
+  const events = (g.progress_logs || []).filter((l) => l.type !== 'log')
+  if (!events.length) return '正在启动分析...'
+  const last = events[events.length - 1]
+  if (last.type === 'shot_start' || last.type === 'shot_result' || last.type === 'shot_failed') {
+    const d = last.data || {}
+    const done = last.type === 'shot_start' ? (d.index ?? 0) : (d.index ?? 0) + 1
+    return `逐镜头分析 ${done}/${d.total ?? '?'}`
+  }
+  return STAGE_LABELS[last.type] || '分析中'
 }
 
 function formatDate(iso) {
@@ -209,9 +235,13 @@ export default function Genes() {
                 ) : g.status === 'failed' ? (
                   <p className="mt-4 line-clamp-2 text-xs text-[#fca5a5]">{g.error_message}</p>
                 ) : (
-                  <p className="mt-4 text-xs text-[#8888a8]">
-                    正在逐镜头拆解视频结构，请稍候...
-                  </p>
+                  <div className="mt-4">
+                    <div className="mb-1.5 flex items-center justify-between text-xs">
+                      <span className="text-[#8888a8]">{latestStageLabel(g)}</span>
+                      <span className="text-[#5a5a7a]">{g.progress || 0}%</span>
+                    </div>
+                    <ProgressBar value={g.progress || 0} />
+                  </div>
                 )}
 
                 <div className="mt-4 flex items-center justify-between border-t border-[#2a2a42] pt-3">

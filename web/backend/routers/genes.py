@@ -5,6 +5,7 @@ from typing import Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
+from fastapi.responses import FileResponse
 from sqlmodel import Session, select
 
 from app_config import STORAGE_ROOT
@@ -111,6 +112,26 @@ def get_gene_video(
     if not gene.video_path or not Path(gene.video_path).exists():
         raise HTTPException(status_code=404, detail="视频文件不存在")
     return range_file_response(request, gene.video_path, media_type="video/mp4")
+
+
+@router.get("/{gene_id}/frames/{filename}")
+def get_gene_frame(
+    gene_id: int,
+    filename: str,
+    current_user: User = Depends(get_current_user_media),
+    session: Session = Depends(get_session),
+):
+    """提取过程中保存的镜头关键帧缩略图（analyze_video.py 写入 frames/）。"""
+    gene = _get_owned_gene(gene_id, current_user.id, session)
+    # 防路径穿越：仅允许纯文件名
+    if Path(filename).name != filename or ".." in filename:
+        raise HTTPException(status_code=400, detail="非法文件名")
+    if not gene.video_path:
+        raise HTTPException(status_code=404, detail="关键帧不存在")
+    frame_path = Path(gene.video_path).parent / "frames" / filename
+    if not frame_path.exists():
+        raise HTTPException(status_code=404, detail="关键帧不存在")
+    return FileResponse(frame_path, media_type="image/jpeg")
 
 
 @router.delete("/{gene_id}", status_code=status.HTTP_204_NO_CONTENT)

@@ -1,13 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   BookOpen,
+  Check,
+  ChevronDown,
+  ChevronUp,
   Clapperboard,
   Dna,
   Loader2,
   Music,
   Scissors,
   Sparkles,
+  Terminal,
   Trash2,
   Zap,
 } from 'lucide-react'
@@ -17,6 +21,7 @@ import {
   Button,
   Card,
   InfoBar,
+  ProgressBar,
   SectionHeader,
   StatusPill,
 } from '../components/ui.jsx'
@@ -67,6 +72,195 @@ function RhythmChart({ points = [] }) {
         </div>
       ))}
     </div>
+  )
+}
+
+/* ---------- 分析过程实时视图 ---------- */
+
+const ANALYSIS_STAGES = [
+  { key: 'video_info', label: '视频信息' },
+  { key: 'scenes', label: '镜头切分' },
+  { key: 'audio', label: '音频处理' },
+  { key: 'shots', label: '逐镜头分析' },
+  { key: 'structure', label: '全局结构分析' },
+]
+
+/* 事件类型 → 阶段序号（done 返回 5 表示全部完成） */
+function stageIndexOf(type) {
+  if (type === 'video_info') return 0
+  if (type === 'scenes') return 1
+  if (type === 'audio') return 2
+  if (type === 'shot_start' || type === 'shot_result' || type === 'shot_failed') return 3
+  if (type === 'structure_start' || type === 'structure_done') return 4
+  if (type === 'done') return 5
+  return -1
+}
+
+function formatLogTime(iso) {
+  if (!iso) return ''
+  const t = iso.split('T')[1] || ''
+  return t.slice(0, 8)
+}
+
+function StageStepper({ currentStage, shotProgress }) {
+  return (
+    <div className="flex items-center">
+      {ANALYSIS_STAGES.map((stage, i) => {
+        const state = i < currentStage ? 'done' : i === currentStage ? 'active' : 'todo'
+        return (
+          <div key={stage.key} className="flex flex-1 items-center last:flex-none">
+            <div className="flex flex-col items-center gap-1.5">
+              <div
+                className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs transition-colors ${
+                  state === 'done'
+                    ? 'border-[#34d399] bg-[rgba(52,211,153,0.12)] text-[#6ee7b7]'
+                    : state === 'active'
+                      ? 'border-[#7c5cfc] bg-[rgba(124,92,252,0.15)] text-[#b49aff]'
+                      : 'border-[#2a2a42] bg-[#1c1c2b] text-[#5a5a7a]'
+                }`}
+              >
+                {state === 'done' ? (
+                  <Check size={14} />
+                ) : state === 'active' ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  i + 1
+                )}
+              </div>
+              <span
+                className={`whitespace-nowrap text-[10px] ${
+                  state === 'active' ? 'text-[#b49aff]' : state === 'done' ? 'text-[#6ee7b7]' : 'text-[#5a5a7a]'
+                }`}
+              >
+                {stage.label}
+                {stage.key === 'shots' && state === 'active' && shotProgress
+                  ? ` ${shotProgress}`
+                : ''}
+              </span>
+            </div>
+            {i < ANALYSIS_STAGES.length - 1 && (
+              <div className={`mx-2 mb-5 h-px flex-1 ${i < currentStage ? 'bg-[#34d399]' : 'bg-[#2a2a42]'}`} />
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+/* 分析过程中实时出现的镜头卡片 */
+function ShotLiveCard({ ev, geneId }) {
+  const d = ev.data || {}
+  const failed = ev.type === 'shot_failed'
+  return (
+    <div className="flex gap-3 rounded-xl border border-[#2a2a42] bg-[#1c1c2b] p-3 vc-fade-in">
+      {d.frame && (
+        <img
+          src={mediaUrl(`/genes/${geneId}/frames/${d.frame}`)}
+          alt={`镜头 ${(d.index ?? 0) + 1}`}
+          className="h-20 w-12 shrink-0 rounded-lg bg-black object-cover"
+          onError={(e) => { e.currentTarget.style.display = 'none' }}
+        />
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-xs font-bold text-[#5a5a7a]">#{(d.index ?? 0) + 1}</span>
+          <span className="text-xs text-[#5a5a7a]">{d.start}s–{d.end}s</span>
+          {failed ? (
+            <Badge color="red">分析失败</Badge>
+          ) : (
+            <>
+              {d.function && <Badge color="blue">{d.function}</Badge>}
+              {d.emotion && <Badge color="green">{d.emotion}</Badge>}
+              {d.has_face && <Badge color="purple">人脸</Badge>}
+            </>
+          )}
+        </div>
+        {d.summary && <p className="mt-1.5 line-clamp-2 text-xs text-[#c8c8e0]">{d.summary}</p>}
+        {failed && d.message && <p className="mt-1.5 line-clamp-2 text-xs text-[#fca5a5]">{d.message}</p>}
+      </div>
+    </div>
+  )
+}
+
+/* 原始日志控制台（自动滚到底部） */
+function LogConsole({ logs }) {
+  const ref = useRef(null)
+  useEffect(() => {
+    if (ref.current) ref.current.scrollTop = ref.current.scrollHeight
+  }, [logs.length])
+  return (
+    <div
+      ref={ref}
+      className="max-h-56 overflow-y-auto rounded-xl bg-[#0d0d15] p-3 font-mono text-[11px] leading-relaxed text-[#5a5a7a]"
+    >
+      {logs.length === 0 ? (
+        <div>等待子进程输出...</div>
+      ) : (
+        logs.map((l, i) => (
+          <div key={i} className={l.type === 'log' ? '' : 'text-[#66e0ff]'}>
+            <span className="text-[#3d3d5c]">{formatLogTime(l.time)} </span>
+            {l.message}
+          </div>
+        ))
+      )}
+    </div>
+  )
+}
+
+/* 分析中主视图：步进条 + 进度条 + 镜头卡片流 + 日志 */
+function AnalysisProgress({ gene }) {
+  const [showLogs, setShowLogs] = useState(false)
+  const logs = gene.progress_logs || []
+  const events = logs.filter((l) => l.type !== 'log')
+  const currentStage = events.reduce((m, e) => Math.max(m, stageIndexOf(e.type)), -1)
+  const scenesEv = events.find((e) => e.type === 'scenes')
+  const totalShots = scenesEv?.data?.count ?? null
+  const shotEvents = events.filter((e) => e.type === 'shot_result' || e.type === 'shot_failed')
+  const shotProgress = totalShots != null ? `${shotEvents.length}/${totalShots}` : null
+
+  return (
+    <>
+      <Card className="mb-6 p-5">
+        <SectionTitle icon={Dna}>正在提取视频基因</SectionTitle>
+        <div className="mb-4">
+          <StageStepper currentStage={currentStage} shotProgress={shotProgress} />
+        </div>
+        <div className="mb-2 flex items-center justify-between text-xs">
+          <span className="text-[#8888a8]">
+            {events.length ? events[events.length - 1].message : '正在启动分析子进程...'}
+          </span>
+          <span className="shrink-0 text-[#5a5a7a]">{gene.progress || 0}%</span>
+        </div>
+        <ProgressBar value={gene.progress || 0} />
+        <button
+          onClick={() => setShowLogs((v) => !v)}
+          className="mt-4 flex items-center gap-1.5 text-xs text-[#8888a8] transition-colors hover:text-[#c8c8e0]"
+        >
+          <Terminal size={13} />
+          详细日志
+          {showLogs ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+        </button>
+        {showLogs && (
+          <div className="mt-3">
+            <LogConsole logs={logs} />
+          </div>
+        )}
+      </Card>
+
+      {shotEvents.length > 0 && (
+        <Card className="mb-6 p-5">
+          <SectionTitle icon={Clapperboard}>
+            逐镜头分析结果（{shotEvents.length}{totalShots != null ? ` / ${totalShots}` : ''}）
+          </SectionTitle>
+          <div className="space-y-2.5">
+            {shotEvents.map((ev, i) => (
+              <ShotLiveCard key={i} ev={ev} geneId={gene.id} />
+            ))}
+          </div>
+        </Card>
+      )}
+    </>
   )
 }
 
@@ -163,21 +357,21 @@ export default function GeneDetail() {
 
       {/* 分析中 / 失败状态 */}
       {gene.status !== 'done' && (
-        <Card className="mb-6 flex items-center gap-4 p-6">
+        <>
           {gene.status === 'failed' ? (
-            <InfoBar type="error">{gene.error_message || '提取失败'}</InfoBar>
+            <Card className="mb-6 p-5">
+              <InfoBar type="error">{gene.error_message || '提取失败'}</InfoBar>
+              {(gene.progress_logs || []).length > 0 && (
+                <div className="mt-4">
+                  <SectionTitle icon={Terminal}>失败前的分析日志</SectionTitle>
+                  <LogConsole logs={gene.progress_logs} />
+                </div>
+              )}
+            </Card>
           ) : (
-            <>
-              <Loader2 size={20} className="animate-spin text-[#66e0ff]" />
-              <div>
-                <p className="text-sm font-medium text-[#e8e8f0]">正在提取视频基因...</p>
-                <p className="mt-0.5 text-xs text-[#5a5a7a]">
-                  逐镜头分析通常需要几分钟，页面会自动刷新
-                </p>
-              </div>
-            </>
+            <AnalysisProgress gene={gene} />
           )}
-        </Card>
+        </>
       )}
 
       {/* 视频预览 */}
@@ -311,6 +505,12 @@ export default function GeneDetail() {
               <ul className="divide-y divide-[#2a2a42]">
                 {report.shots.map((s, i) => (
                   <li key={i} className="flex items-start gap-3 py-2.5">
+                    <img
+                      src={mediaUrl(`/genes/${gene.id}/frames/shot_${String(s.index ?? i).padStart(3, '0')}.jpg`)}
+                      alt={`镜头 ${(s.index ?? i) + 1}`}
+                      className="mt-0.5 h-16 w-10 shrink-0 rounded-md bg-black object-cover"
+                      onError={(e) => { e.currentTarget.style.display = 'none' }}
+                    />
                     <span className="mt-0.5 w-8 shrink-0 text-xs font-bold text-[#5a5a7a]">
                       {(s.index ?? i) + 1}
                     </span>

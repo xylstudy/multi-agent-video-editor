@@ -9,15 +9,15 @@ import { SceneSubtitle } from "./ForegroundSplit";
 import type { TransitionType } from "./types/schema";
 
 // ================================================================
-//  TechniqueDemo — 知识库单条技法演示
+//  TechniqueDemo — 知识库单条技法演示（教学优先，不是成片示例）
 //
 //  通过 props 指定演示类型与技法 ID，为知识库每个条目渲染独立短片：
-//  - transition: 23 种转场（A 照片 → 转场 → B 照片）
-//  - reveal:     7 种前景揭示特效（背景 + 前景分离动画）
-//  - subtitle:   8 种字幕样式
-//  - effect:     胶片颗粒 / 变速 / 运动模糊 / 强化甩镜头
-//  - packaging:  3 种包装风格预设组合（转场+字幕+颗粒）
-//  - montage / beat / emotion_arc / variety: 抽象剪辑原则演示
+//  - transition: 23 种转场（A/B 画面编码 + 放慢转场 + 教学时间轴）
+//  - reveal:     7 种前景揭示（前景发光轮廓标注 + 放慢循环 2 次 + 时间轴）
+//  - subtitle:   8 种字幕样式（固定示例文案与技法名分离，循环 2 次）
+//  - effect:     胶片颗粒/变速/运动模糊/强化甩镜头（前半原片 → 后半特效，前后对比）
+//  - packaging:  3 种包装风格预设（配方清单 + 转场名弹标 + 场景链时间轴）
+//  - montage / beat / emotion_arc / variety: 抽象剪辑原则演示（统一教学时间轴）
 //
 //  所有场景在 1080x1920 设计坐标下构建，合成注册为 540x960，
 //  由 DesignFrame 整体 scale(0.5) —— 布局与生产渲染完全一致。
@@ -33,15 +33,15 @@ export interface TechniqueDemoProps {
 
 export function getDemoDuration(kind: string): number {
   switch (kind) {
-    case "transition": return 90;  // 教学版: 30 A段 + 30 放慢转场 + 30 B段（硬切为 4 段循环）
-    case "reveal": return 80;
-    case "subtitle": return 75;
-    case "effect": return 80;
-    case "packaging": return 94;   // 3 场景链: 3*36 - 14
-    case "montage": return 85;
+    case "transition": return 90;  // 30 A段 + 30 放慢转场 + 30 B段（硬切为 4 段循环）
+    case "reveal": return 120;     // (背景15 + 揭示30 + 合成15) × 2 循环
+    case "subtitle": return 150;   // 75f × 2 循环
+    case "effect": return 90;      // 原片 45 + 特效 45 前后对比
+    case "packaging": return 116;  // 3 场景链: 44 + 28*2 + 16（见 PackagingDemo）
+    case "montage": return 85;     // 大标题 18 + 快切 54 + 定格 13
     case "beat": return 135;       // 8 拍 × 15f + 15f 尾
-    case "emotion_arc": return 160;
-    case "variety": return 104;    // 5 场景链: 5*28 - 3*12
+    case "emotion_arc": return 160;// 5 段: 30×4 + 40
+    case "variety": return 158;    // 5 场景链: 26 + (14+12)*3 + 14 + 40
     default: return 75;
   }
 }
@@ -110,6 +110,27 @@ const DemoLabel: React.FC<{ title: string; sub?: string }> = ({ title, sub }) =>
           {sub}
         </span>
       )}
+    </div>
+  );
+};
+
+/** 右上角阶段角标（原片/特效、背景/前景） */
+const PhaseBadge: React.FC<{ text: string; color: string }> = ({ text, color }) => (
+  <div style={{ position: "absolute", top: 170, right: 48, zIndex: 30, backgroundColor: color, borderRadius: 10, padding: "8px 24px", border: "3px solid rgba(255,255,255,0.75)", boxShadow: "0 4px 14px rgba(0,0,0,0.5)", pointerEvents: "none" }}>
+    <span style={{ color: "#fff", fontSize: 26, fontWeight: 800, fontFamily: "'PingFang SC','Microsoft YaHei',sans-serif", letterSpacing: 4 }}>
+      {text}
+    </span>
+  </div>
+);
+
+/** 运动方向箭头（教学标注） */
+const DirectionArrow: React.FC<{ dir: "left" | "right" }> = ({ dir }) => {
+  const right = dir === "right";
+  return (
+    <div style={{ position: "absolute", top: "50%", [right ? "right" : "left"]: 70, transform: "translateY(-50%)", display: "flex", alignItems: "center", zIndex: 25, pointerEvents: "none", opacity: 0.9 }}>
+      {!right && <div style={{ width: 0, height: 0, borderTop: "22px solid transparent", borderBottom: "22px solid transparent", borderRight: "34px solid #facc15" }} />}
+      <div style={{ width: 90, height: 14, backgroundColor: "#facc15" }} />
+      {right && <div style={{ width: 0, height: 0, borderTop: "22px solid transparent", borderBottom: "22px solid transparent", borderLeft: "34px solid #facc15" }} />}
     </div>
   );
 };
@@ -239,7 +260,16 @@ const CutLoopDemo: React.FC<{ techId: string; title: string }> = ({ techId, titl
   );
 };
 
-// ===== reveal: 背景 + 前景揭示特效 =====
+// ===== reveal: 前景揭示（教学版） =====
+//
+// 教学设计：
+// - 揭示动作放慢到 30 帧，完整循环 2 次（背景 15f → 揭示 30f → 合成 15f）
+// - 前景带发光轮廓 + 右上角「前景」角标，观众一眼认出被揭示对象
+// - 底部时间轴标注「背景 → 揭示·技法名 → 合成」
+
+const REVEAL_CYCLE = 60;
+const REVEAL_BG = 15;
+const REVEAL_DUR = 30;
 
 const useRevealStyle = (reveal: string, revealFrame: number, revealDur: number): React.CSSProperties => {
   const { fps } = useVideoConfig();
@@ -259,42 +289,120 @@ const useRevealStyle = (reveal: string, revealFrame: number, revealDur: number):
 
 const RevealDemo: React.FC<{ techId: string; title: string }> = ({ techId, title }) => {
   const frame = useCurrentFrame();
-  const revealStart = 10;
-  const revealFrame = Math.max(0, frame - revealStart);
-  const fgStyle = useRevealStyle(techId, revealFrame, 22);
+  const local = frame % REVEAL_CYCLE;
+  const fgVisible = local >= REVEAL_BG;
+  const revealFrame = Math.min(Math.max(0, local - REVEAL_BG), REVEAL_DUR);
+  // parallax 是持续漂移型，不截断帧号，让它在合成阶段继续漂
+  const styleFrame = techId === "parallax" ? Math.max(0, local - REVEAL_BG) : revealFrame;
+  const fgStyle = useRevealStyle(techId, styleFrame, REVEAL_DUR);
+  const seg = (label: string, frames: number, color: string, isTransition?: boolean): TimelineSeg => ({ label, frames, color, isTransition });
   return (
     <DesignFrame>
       <PhotoScene img={BG_FOR_FG} />
       <AbsoluteFill style={{ background: "linear-gradient(0deg, rgba(0,0,0,0.3) 0%, transparent 40%, transparent 70%, rgba(0,0,0,0.15) 100%)", pointerEvents: "none" }} />
-      {frame >= revealStart && (
-        <AbsoluteFill style={fgStyle}>
-          <Img src={staticFile(FG_IMG)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      {fgVisible && (
+        /* 发光轮廓：标出"前景"到底在哪 */
+        <AbsoluteFill style={{ filter: "drop-shadow(0 0 20px rgba(34,211,238,0.9))", pointerEvents: "none" }}>
+          <AbsoluteFill style={fgStyle}>
+            <Img src={staticFile(FG_IMG)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </AbsoluteFill>
         </AbsoluteFill>
       )}
-      <DemoLabel title={title} sub={`前景揭示 · ${techId}`} />
+      <PhaseBadge text={fgVisible ? "前景" : "背景"} color={fgVisible ? "#0891b2" : "#4b5563"} />
+      <TransitionTimeline segments={[
+        seg("背景", REVEAL_BG, "#4b5563"),
+        seg(`揭示 · ${title}`, REVEAL_DUR, "#facc15", true),
+        seg("合成", REVEAL_CYCLE - REVEAL_BG - REVEAL_DUR, "#10b981"),
+        seg("背景", REVEAL_BG, "#4b5563"),
+        seg(`揭示 · ${title}`, REVEAL_DUR, "#facc15", true),
+        seg("合成", REVEAL_CYCLE - REVEAL_BG - REVEAL_DUR, "#10b981"),
+      ]} />
+      <DemoLabel title={title} sub={`前景揭示 · ${techId} · 循环 2 次`} />
     </DesignFrame>
   );
 };
 
-// ===== subtitle: 照片 + 字幕样式 =====
+// ===== subtitle: 字幕样式（教学版） =====
+//
+// 教学设计：
+// - 固定示例文案「示例字幕 ABC123」，与顶部技法名标签区分开——谁是被演示对象一目了然
+// - 动画完整播放后整体循环 1 次（typewriter 等慢动画也能看全）
+
+const SUB_CYCLE = 75;
 
 const SubtitleDemo: React.FC<{ techId: string; title: string }> = ({ techId, title }) => {
   const frame = useCurrentFrame();
+  const local = frame % SUB_CYCLE;
   return (
     <DesignFrame>
       <PhotoScene img={PHOTOS[2]} />
-      <SceneSubtitle text={title} frame={frame} style={techId as never} />
-      <DemoLabel title={title} sub={`字幕样式 · ${techId}`} />
+      <SceneSubtitle text="示例字幕 ABC123" frame={local} style={techId as never} />
+      <DemoLabel title={title} sub={`字幕样式 · ${techId} · 示例文案循环 2 次`} />
     </DesignFrame>
   );
 };
 
-// ===== effect: 胶片颗粒 / 变速 / 运动模糊 / 强化甩镜头 =====
+// ===== effect: 特效（前后对比教学版） =====
+//
+// 教学设计：
+// - 前半段原片（右上角「原片」灰标）→ 后半段特效（「特效」蓝标），同机位素材直接对比
+// - 变速加「匀速/变速」双进度条，把不可见的时间重映射画出来
+// - 运动模糊 / 甩镜头加运动方向箭头
+// - 颗粒类在演示中加大强度（生产 0.18 在 540×960 下不易察觉，演示提到 0.3+ ）
 
-const SpeedRampPhoto: React.FC<{ rampType: "beat_hit" | "slow_fast" }> = ({ rampType }) => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-  const p = useSpeedRamp({ frame, duration: durationInFrames, rampType });
+const EFFECT_PHASE = 45;
+
+/** 匀速缩放（speed_ramp 对照组，与变速组起止参数一致） */
+const LinearZoomPhoto: React.FC<{ img: string; f: number; duration: number }> = ({ img, f, duration }) => {
+  const z = interpolate(f, [0, duration], [1, 1.35], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const y = interpolate(f, [0, duration], [0, -60], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  return (
+    <AbsoluteFill style={{ backgroundColor: "#000" }}>
+      <Img src={staticFile(img)} style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${z}) translateY(${y}px)` }} />
+    </AbsoluteFill>
+  );
+};
+
+/** 匀速平移（motion_blur 对照组） */
+const SlidePhoto: React.FC<{ img: string; f: number; duration: number }> = ({ img, f, duration }) => {
+  const x = interpolate(f, [0, duration], [120, -120], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  return (
+    <AbsoluteFill style={{ backgroundColor: "#000" }}>
+      <AbsoluteFill style={{ transform: `translateX(${x}px)` }}>
+        <Img src={staticFile(img)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};
+
+/** 慢速平移（whip_pan 对照组） */
+const PanPhoto: React.FC<{ img: string; f: number; duration: number }> = ({ img, f, duration }) => {
+  const x = interpolate(f, [0, duration], [60, -60], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  return (
+    <AbsoluteFill style={{ backgroundColor: "#000" }}>
+      <AbsoluteFill style={{ transform: `translateX(${x}px)` }}>
+        <Img src={staticFile(img)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};
+
+/** 匀速/变速双进度条：把时间重映射可视化 */
+const RampBars: React.FC<{ linear: number; ramp: number }> = ({ linear, ramp }) => (
+  <div style={{ position: "absolute", left: 48, right: 48, bottom: 160, zIndex: 25, display: "flex", flexDirection: "column", gap: 14, pointerEvents: "none" }}>
+    {[{ label: "匀速", v: linear, c: "#9ca3af" }, { label: "变速", v: ramp, c: "#facc15" }].map((b) => (
+      <div key={b.label} style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <span style={{ width: 64, color: "#fff", fontSize: 22, fontWeight: 700, fontFamily: "'PingFang SC','Microsoft YaHei',sans-serif", textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>{b.label}</span>
+        <div style={{ flex: 1, height: 18, borderRadius: 9, backgroundColor: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.35)", overflow: "hidden" }}>
+          <div style={{ width: `${Math.min(1, Math.max(0, b.v)) * 100}%`, height: "100%", backgroundColor: b.c }} />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+const SpeedRampPhoto: React.FC<{ rampType: "beat_hit" | "slow_fast"; f: number; duration: number; showBars?: boolean }> = ({ rampType, f, duration, showBars }) => {
+  const p = useSpeedRamp({ frame: f, duration, rampType });
   const z = interpolate(p, [0, 1], [1, 1.35], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const y = interpolate(p, [0, 1], [0, -60], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return (
@@ -303,15 +411,14 @@ const SpeedRampPhoto: React.FC<{ rampType: "beat_hit" | "slow_fast" }> = ({ ramp
         src={staticFile(PHOTOS[3])}
         style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${z}) translateY(${y}px)` }}
       />
+      {showBars && <RampBars linear={f / duration} ramp={p} />}
     </AbsoluteFill>
   );
 };
 
-const MotionBlurPhoto: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-  const x = interpolate(frame, [0, durationInFrames], [120, -120], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const intensity = interpolate(frame, [0, 8, durationInFrames - 8, durationInFrames], [0.1, 0.7, 0.7, 0.1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+const MotionBlurPhoto: React.FC<{ f: number; duration: number }> = ({ f, duration }) => {
+  const x = interpolate(f, [0, duration], [120, -120], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const intensity = interpolate(f, [0, 8, duration - 8, duration], [0.1, 0.7, 0.7, 0.1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       <AbsoluteFill style={{ transform: `translateX(${x}px)` }}>
@@ -322,9 +429,8 @@ const MotionBlurPhoto: React.FC = () => {
   );
 };
 
-const WhipPanPhoto: React.FC = () => {
-  const frame = useCurrentFrame();
-  const style = useWhipPanEnhanced(frame, 22, "right");
+const WhipPanPhoto: React.FC<{ f: number }> = ({ f }) => {
+  const style = useWhipPanEnhanced(Math.min(f, 22), 22, "right");
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       <AbsoluteFill style={style}>
@@ -335,28 +441,82 @@ const WhipPanPhoto: React.FC = () => {
 };
 
 const EffectDemo: React.FC<{ techId: string; title: string }> = ({ techId, title }) => {
+  const frame = useCurrentFrame();
+  const isFx = frame >= EFFECT_PHASE;
+  const local = isFx ? frame - EFFECT_PHASE : frame;
+
+  let baseline: React.ReactNode;
+  let fx: React.ReactNode;
+  if (techId === "film_grain" || techId === "film_grain_dust") {
+    const dust = techId === "film_grain_dust";
+    baseline = <PhotoScene img={PHOTOS[4]} />;
+    fx = (
+      <>
+        <PhotoScene img={PHOTOS[4]} />
+        {dust && <AbsoluteFill style={{ background: "radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.45) 100%)", pointerEvents: "none" }} />}
+        <FilmGrain opacity={dust ? 0.35 : 0.3} type={dust ? "dust" : "film"} />
+      </>
+    );
+  } else if (techId === "speed_ramp" || techId === "speed_ramp_slow") {
+    const rampType = techId === "speed_ramp" ? ("beat_hit" as const) : ("slow_fast" as const);
+    baseline = <LinearZoomPhoto img={PHOTOS[3]} f={local} duration={EFFECT_PHASE} />;
+    fx = <SpeedRampPhoto rampType={rampType} f={local} duration={EFFECT_PHASE} showBars />;
+  } else if (techId === "motion_blur") {
+    baseline = <SlidePhoto img={PHOTOS[4]} f={local} duration={EFFECT_PHASE} />;
+    fx = <><MotionBlurPhoto f={local} duration={EFFECT_PHASE} /><DirectionArrow dir="left" /></>;
+  } else if (techId === "whip_pan_enhanced") {
+    baseline = <PanPhoto img={PHOTOS[5]} f={local} duration={EFFECT_PHASE} />;
+    fx = <><WhipPanPhoto f={local} /><DirectionArrow dir="right" /></>;
+  } else {
+    baseline = <PhotoScene img={PHOTOS[4]} />;
+    fx = <PhotoScene img={PHOTOS[4]} />;
+  }
+
   return (
     <DesignFrame>
-      {techId === "film_grain" && (<><PhotoScene img={PHOTOS[4]} /><FilmGrain opacity={0.18} type="film" /></>)}
-      {techId === "film_grain_dust" && (<><PhotoScene img={PHOTOS[4]} /><AbsoluteFill style={{ background: "radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.45) 100%)", pointerEvents: "none" }} /><FilmGrain opacity={0.28} type="dust" /></>)}
-      {techId === "speed_ramp" && <SpeedRampPhoto rampType="beat_hit" />}
-      {techId === "speed_ramp_slow" && <SpeedRampPhoto rampType="slow_fast" />}
-      {techId === "motion_blur" && <MotionBlurPhoto />}
-      {techId === "whip_pan_enhanced" && <WhipPanPhoto />}
-      <DemoLabel title={title} sub={`特效 · ${techId}`} />
+      {isFx ? fx : baseline}
+      <PhaseBadge text={isFx ? "特效" : "原片"} color={isFx ? "#0891b2" : "#4b5563"} />
+      <DemoLabel title={title} sub={`特效 · ${techId} · 前半原片 → 后半特效`} />
     </DesignFrame>
   );
 };
 
-// ===== packaging: 风格预设组合（3 场景链 + 字幕 + 颗粒） =====
+// ===== packaging: 风格预设组合（教学版：配方清单 + 转场弹标 + 时间轴） =====
+//
+// 教学设计：
+// - 画面左下固定「配方清单」：这条风格 = 哪些转场 + 哪种字幕 + 多少颗粒
+// - 每次转场时弹出转场名标签，风格差异不再靠悟
+// - 底部时间轴标注「场景 → 转场 → 场景」
 
-const PACKAGING_D = 36;
-const PACKAGING_O = 14;
+const PACKAGING_D = 44;
+const PACKAGING_O = 16;
+
+const TRANSITION_NAMES: Record<string, string> = {
+  whip: "甩镜头", zoom_flash: "缩放闪光", glitch: "故障抖动",
+  fade: "淡入", blur_in: "模糊清晰", circle_reveal: "圆形展开",
+  spin: "360°旋转", zoom_heavy: "重度缩放", freeze_frame: "冻结帧",
+};
+const SUBTITLE_NAMES: Record<string, string> = {
+  neon_sign: "霓虹发光", cinematic: "电影黑条", gradient_bar: "渐变条",
+};
 
 /** 在 Sequence 内读取相对帧驱动字幕动画（转场结束后开始） */
 const SceneSubtitleLive: React.FC<{ text: string; style: string }> = ({ text, style }) => {
   const frame = useCurrentFrame();
   return <SceneSubtitle text={text} frame={Math.max(0, frame - PACKAGING_O)} style={style as never} />;
+};
+
+/** 转场窗口内弹出的转场名标签（仅在转场的前 O 帧显示） */
+const TransitionPopup: React.FC<{ label: string; showFrames: number }> = ({ label, showFrames }) => {
+  const frame = useCurrentFrame();
+  if (frame >= showFrames) return null;
+  return (
+    <div style={{ position: "absolute", bottom: 180, left: 0, right: 0, textAlign: "center", pointerEvents: "none", zIndex: 25 }}>
+      <span style={{ color: "#ff0", fontSize: 26, fontFamily: "'PingFang SC','Microsoft YaHei',monospace", background: "rgba(0,0,0,0.55)", padding: "4px 22px", borderRadius: 6, letterSpacing: 3 }}>
+        {label}
+      </span>
+    </div>
+  );
 };
 
 const PROFILES: Record<string, { transitions: TransitionType[]; subtitle: string; grain: number; hint: string }> = {
@@ -367,6 +527,8 @@ const PROFILES: Record<string, { transitions: TransitionType[]; subtitle: string
 
 const PackagingDemo: React.FC<{ techId: string; title: string }> = ({ techId, title }) => {
   const profile = PROFILES[techId] ?? PROFILES["douyin_travel_fast"];
+  const t1 = profile.transitions[0];
+  const t2 = profile.transitions[1];
   return (
     <DesignFrame>
       {[0, 1, 2].map((i) => {
@@ -389,9 +551,28 @@ const PackagingDemo: React.FC<{ techId: string; title: string }> = ({ techId, ti
               }
               outgoingContent={isFirst ? null : <PhotoScene img={PHOTOS[i - 1]} />}
             />
+            {!isFirst && (
+              <TransitionPopup label={`转场 · ${TRANSITION_NAMES[transition] ?? transition}`} showFrames={PACKAGING_O} />
+            )}
           </Sequence>
         );
       })}
+      {/* 配方清单 */}
+      <div style={{ position: "absolute", left: 48, bottom: 170, zIndex: 25, backgroundColor: "rgba(0,0,0,0.55)", border: "2px solid rgba(255,255,255,0.25)", borderRadius: 10, padding: "12px 20px", pointerEvents: "none" }}>
+        <div style={{ color: "#0ff", fontSize: 20, fontWeight: 700, fontFamily: "'PingFang SC','Microsoft YaHei',sans-serif", letterSpacing: 2, marginBottom: 6 }}>风格配方</div>
+        <div style={{ color: "rgba(255,255,255,0.9)", fontSize: 19, fontFamily: "'PingFang SC','Microsoft YaHei',sans-serif", lineHeight: 1.7 }}>
+          转场：{profile.transitions.map((t) => TRANSITION_NAMES[t] ?? t).join(" / ")}<br />
+          字幕：{SUBTITLE_NAMES[profile.subtitle] ?? profile.subtitle}<br />
+          颗粒：{profile.grain > 0 ? `胶片 ×${profile.grain}` : "无"}
+        </div>
+      </div>
+      <TransitionTimeline segments={[
+        { label: "场景 1", frames: 28, color: "#3b82f6" },
+        { label: TRANSITION_NAMES[t1] ?? t1, frames: PACKAGING_O, color: "#facc15", isTransition: true },
+        { label: "场景 2", frames: 12, color: "#f97316" },
+        { label: TRANSITION_NAMES[t2] ?? t2, frames: PACKAGING_O, color: "#facc15", isTransition: true },
+        { label: "场景 3", frames: 44, color: "#10b981" },
+      ]} />
       <DemoLabel title={title} sub={`包装风格 · ${techId}`} />
     </DesignFrame>
   );
@@ -403,6 +584,13 @@ const MontageDemo: React.FC<{ title: string }> = ({ title }) => {
   const frame = useCurrentFrame();
   const TITLE_DUR = 18;
   const CUT = 9;
+  const timeline = (
+    <TransitionTimeline segments={[
+      { label: "大标题 Hook", frames: TITLE_DUR, color: "#ef4444" },
+      { label: "快切 ×6", frames: 54, color: "#f59e0b" },
+      { label: "定格", frames: 13, color: "#6b7280" },
+    ]} />
+  );
   if (frame < TITLE_DUR) {
     const sp = spring({ fps: 30, frame: Math.min(frame, TITLE_DUR), config: { damping: 12, mass: 0.5, stiffness: 160 } });
     return (
@@ -415,6 +603,7 @@ const MontageDemo: React.FC<{ title: string }> = ({ title }) => {
           </div>
         </AbsoluteFill>
         <DemoLabel title={title} sub="前 3 秒：大标题强冲击" />
+        {timeline}
       </DesignFrame>
     );
   }
@@ -429,11 +618,12 @@ const MontageDemo: React.FC<{ title: string }> = ({ title }) => {
       </AbsoluteFill>
       {local < 2 && idx > 0 && <AbsoluteFill style={{ backgroundColor: "#fff", opacity: interpolate(local, [0, 2], [0.6, 0]), pointerEvents: "none" }} />}
       <DemoLabel title={title} sub="大标题后接快速切换，3 秒内抓住注意力" />
+      {timeline}
     </DesignFrame>
   );
 };
 
-// ===== beat: 音乐卡点 =====
+// ===== beat: 音乐卡点（节拍指示点已具备教学性，保持原设计） =====
 
 const BeatDemo: React.FC<{ title: string }> = ({ title }) => {
   const frame = useCurrentFrame();
@@ -459,7 +649,7 @@ const BeatDemo: React.FC<{ title: string }> = ({ title }) => {
   );
 };
 
-// ===== emotion_arc: 5 段式情绪设计 =====
+// ===== emotion_arc: 5 段式情绪设计（补教学时间轴） =====
 
 const EMOTION_SEGS = [
   { label: "① 开场 Hook", hint: "强冲击抓住注意力", photos: 1, fast: true },
@@ -505,12 +695,19 @@ const EmotionArcDemo: React.FC<{ title: string }> = ({ title }) => {
         <span style={{ color: "#ffd700", fontSize: 40, fontWeight: "bold", fontFamily: "'PingFang SC','Microsoft YaHei',sans-serif", textShadow: "2px 2px 16px rgba(0,0,0,0.9)", letterSpacing: 4 }}>{seg.label}</span>
         <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 24, fontFamily: "'PingFang SC','Microsoft YaHei',sans-serif", textShadow: "2px 2px 10px rgba(0,0,0,0.9)", letterSpacing: 2 }}>{seg.hint}</span>
       </div>
+      <TransitionTimeline segments={[
+        { label: "开场", frames: 30, color: "#ef4444" },
+        { label: "铺垫", frames: 30, color: "#3b82f6" },
+        { label: "高潮", frames: 30, color: "#f59e0b" },
+        { label: "回落", frames: 30, color: "#6366f1" },
+        { label: "收尾", frames: 40, color: "#10b981" },
+      ]} />
       <DemoLabel title={title} sub="开场→铺垫→高潮→回落→收尾" />
     </DesignFrame>
   );
 };
 
-// ===== variety: 转场不做重复（4 种转场连播） =====
+// ===== variety: 转场不做重复（教学版：4 种转场连播 + 弹标 + 时间轴） =====
 
 const VARIETY_TRANSITIONS: { t: TransitionType; name: string }[] = [
   { t: "whip", name: "甩镜头" },
@@ -519,8 +716,8 @@ const VARIETY_TRANSITIONS: { t: TransitionType; name: string }[] = [
   { t: "zoom_flash", name: "缩放闪光" },
 ];
 
-const VARIETY_D = 28;
-const VARIETY_O = 12;
+const VARIETY_D = 40;
+const VARIETY_O = 14;
 
 const VarietyDemo: React.FC<{ title: string }> = ({ title }) => {
   const scenes = VARIETY_TRANSITIONS.length + 1;
@@ -540,16 +737,21 @@ const VarietyDemo: React.FC<{ title: string }> = ({ title }) => {
               currentContent={<PhotoScene img={PHOTOS[i % PHOTOS.length]} />}
               outgoingContent={isFirst ? null : <PhotoScene img={PHOTOS[(i - 1) % PHOTOS.length]} />}
             />
-            {vt && (
-              <div style={{ position: "absolute", bottom: 160, left: 0, right: 0, textAlign: "center", pointerEvents: "none" }}>
-                <span style={{ color: "#ff0", fontSize: 26, fontFamily: "'PingFang SC','Microsoft YaHei',monospace", background: "rgba(0,0,0,0.5)", padding: "4px 20px", borderRadius: 6, letterSpacing: 3 }}>
-                  转场 {i}: {vt.name}
-                </span>
-              </div>
-            )}
+            {vt && <TransitionPopup label={`转场 ${i} · ${vt.name}`} showFrames={VARIETY_O} />}
           </Sequence>
         );
       })}
+      <TransitionTimeline segments={[
+        { label: "场景 1", frames: 26, color: "#3b82f6" },
+        { label: "甩镜头", frames: 14, color: "#facc15", isTransition: true },
+        { label: "场景 2", frames: 12, color: "#f97316" },
+        { label: "故障", frames: 14, color: "#facc15", isTransition: true },
+        { label: "场景 3", frames: 12, color: "#3b82f6" },
+        { label: "旋转", frames: 14, color: "#facc15", isTransition: true },
+        { label: "场景 4", frames: 12, color: "#f97316" },
+        { label: "闪光", frames: 14, color: "#facc15", isTransition: true },
+        { label: "场景 5", frames: 40, color: "#10b981" },
+      ]} />
       <DemoLabel title={title} sub="相邻镜头不重复同一种转场" />
     </DesignFrame>
   );
