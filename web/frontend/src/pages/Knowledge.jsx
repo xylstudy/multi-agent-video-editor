@@ -141,17 +141,20 @@ export default function Knowledge() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {entries.map((e) => (
               <Card key={e.id} hover className="group relative flex flex-col p-4">
-                <button
-                  onClick={() => handleDelete(e.id)}
-                  title="删除"
-                  className="absolute right-3 top-3 rounded-lg p-1 text-[#5a5a7a] opacity-0 transition-all hover:bg-[rgba(248,113,113,0.08)] hover:text-[#f87171] group-hover:opacity-100"
-                >
-                  <Trash2 size={14} />
-                </button>
+                {e.mine && (
+                  <button
+                    onClick={() => handleDelete(e.id)}
+                    title="删除"
+                    className="absolute right-3 top-3 rounded-lg p-1 text-[#5a5a7a] opacity-0 transition-all hover:bg-[rgba(248,113,113,0.08)] hover:text-[#f87171] group-hover:opacity-100"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
                 <div className="mb-2 flex items-center gap-2">
                   <Badge color={TYPE_BADGE[e.type] || 'gray'}>
                     {TYPE_LABEL[e.type] || e.type}
                   </Badge>
+                  <Badge color={e.mine ? 'green' : 'gray'}>{e.mine ? '我的' : '公共'}</Badge>
                 </div>
                 <h3 className="pr-6 text-sm font-semibold text-[#e8e8f0]">{e.title}</h3>
                 <p className="mt-1.5 flex-1 text-xs leading-relaxed text-[#8888a8]">

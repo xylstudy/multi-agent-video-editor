@@ -237,3 +237,15 @@ class GeneRead(SQLModel):
         if v is None:
             return [] if info.field_name == "progress_logs" else 0
         return v
+
+
+class KnowledgeOwnership(SQLModel, table=True):
+    """知识条目归属：把 knowledge.json 里的个人知识关联到用户。
+
+    知识内容仍以引擎 knowledge.json 为单一事实源（07-18 决策 5），
+    本表只记录"哪条知识是谁提炼的"；无归属记录的条目 = 公共种子，全员可见。
+    """
+
+    entry_id: str = Field(primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)

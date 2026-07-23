@@ -12,7 +12,7 @@ from app_config import STORAGE_ROOT
 from auth import get_current_user
 from database import get_session
 from gene_worker import cancel_gene_extraction, start_gene_extraction
-from db_models import Gene, GeneRead, GeneStatus, User
+from db_models import Gene, GeneRead, GeneStatus, KnowledgeOwnership, User
 from media import get_current_user_media, range_file_response
 from vse import SAMPLE_VIRAL_VIDEO
 
@@ -178,6 +178,9 @@ async def extract_knowledge(
             entry.id = f"k_u{current_user.id}_{uuid4().hex[:8]}"
             entry.source_summary = entry.source_summary or f"来自基因「{gene.title}」"
             store.add_entry(entry)
+            # 记录归属：个人提炼的知识仅本人可见、可删
+            session.add(KnowledgeOwnership(entry_id=entry.id, user_id=current_user.id))
+        session.commit()
         return {"added": len(entries)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"知识提炼失败: {e}")
