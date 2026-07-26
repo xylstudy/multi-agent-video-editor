@@ -85,6 +85,7 @@ Video Claw 不是一个通用的视频编辑工具，而是一个 **AI 驱动的
 - **方案生成**：AI 编导根据素材和爆款结构，生成完整分镜方案（30+ 字段/分镜）
 - **视频渲染**：Remotion v4 渲染引擎，支持 30+ 种转场、Ken Burns 运镜、前景分割合成、8 种字幕样式
 - **质量闭环**：10 维度 AI 审核评分，不达标自动迭代优化（最多 3 轮）
+- **Web 平台**（2026-07 新增）：多用户 Web 应用——FastAPI 后端 + React 前端，基因库 / 知识库 / 项目管理 / 任务实时进度 / 作品集一体化（见第三章）
 
 ### 1.5 知识库来源
 
@@ -130,6 +131,12 @@ npm install
 cd ../get_video
 pip install playwright
 python -m playwright install chromium
+
+# 4. Web 应用（可选，推荐使用）
+cd ../web/backend
+pip install -r requirements.txt
+cd ../frontend
+npm install
 ```
 
 ### 2.3 环境变量配置
@@ -223,6 +230,23 @@ cd get_video
 .\download.ps1
 ```
 
+#### 方式六：Web 应用（推荐，多用户 + 实时进度）
+
+```bash
+# Windows 一键启动（自动开前后端两个窗口）
+start_web.bat
+
+# 或手动启动
+cd web/backend && python -m uvicorn main:app --host 127.0.0.1 --port 8000
+cd web/frontend && npm run dev
+```
+
+- 前端界面：http://localhost:5173 ｜ 后端 API 文档：http://127.0.0.1:8000/docs
+- 注册账号后可执行 `python web/backend/seed_demo.py <用户名>` 写入示例基因/项目/成片，页面开箱即有内容
+- 用户级 API Key 在「设置」页配置，任务运行时优先于引擎 `.env`
+
+详见第三章「Web 应用平台」。
+
 ### 2.5 输出产物
 
 ```
@@ -252,11 +276,101 @@ data/runs/{run_id}/
 
 ---
 
-## 三、视频展示与成果
+## 三、Web 应用平台（2026-07 新增）
+
+引擎最初只有命令行脚本：没有用户概念、过程不可见、分析产物跑完就扔。Web 平台把这台"发动机"装进了能开的车里——**FastAPI 后端 + React 前端**，覆盖完整产品闭环：
+
+```
+工作台 → 基因库（拆解爆款）→ 知识库（沉淀经验）→ 项目（迁移生成）→ 作品集（展示成果）
+```
+
+### 3.1 功能页面展示
+
+**工作台** — 项目 / 基因 / 知识 / 成片统计 + 最近任务，一眼掌握全局：
+
+<p align="center">
+  <img src="./assets/web/dashboard.png" alt="工作台" width="720">
+</p>
+
+**基因库** — 上传爆款视频，引擎后台自动拆解其结构基因（Hook 策略 / 段落结构 / 节奏曲线 / 包装风格）：
+
+<p align="center">
+  <img src="./assets/web/genes.png" alt="基因库" width="720">
+</p>
+
+**基因报告** — 分析结果可视化：基因概览标签、前 3 秒 Hook 策略、逐镜头标注、节奏曲线图，可一键提炼知识入库或直接用它创建项目：
+
+<p align="center">
+  <img src="./assets/web/gene-detail.png" alt="基因报告" width="720">
+</p>
+
+**知识库** — 52+ 条剪辑技法知识（转场 / 剪辑技法 / 包装风格 / 特效 / 结构模板 / Hook 技法 / 节奏模式 / 情绪设计），支持类型筛选、搜索、逐条播放演示视频；生成视频时引擎自动参考这些知识：
+
+<p align="center">
+  <img src="./assets/web/knowledge.png" alt="知识库" width="720">
+</p>
+
+**项目详情** — 上传参考视频与照片素材，选择执行步骤（端到端 / 仅素材分析 / 仅视频分析），一键生成 Vlog；创建项目时可直接选用基因库中已分析的爆款作参考：
+
+<p align="center">
+  <img src="./assets/web/project-detail.png" alt="项目详情" width="720">
+</p>
+
+**任务详情** — 步骤时间线（素材分析 → 视频分析 → 渲染输出）+ WebSocket 实时日志终端 + 进度条 + 成片在线预览与下载：
+
+<p align="center">
+  <img src="./assets/web/task-detail.png" alt="任务详情" width="720">
+</p>
+
+**作品集** — 所有项目生成的成片集中画廊，随时播放和下载：
+
+<p align="center">
+  <img src="./assets/web/works.png" alt="作品集" width="720">
+</p>
+
+**设置** — 每用户独立配置智谱 / DeepSeek / Moonshot / 阿里云 API Key，任务运行时优先于引擎 `.env`：
+
+<p align="center">
+  <img src="./assets/web/settings.png" alt="设置" width="720">
+</p>
+
+### 3.2 三层架构
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  前端 React（web/frontend，Vite + Tailwind，端口 5173）  │
+│  11 个页面，深色主题设计系统                              │
+└──────────────────────┬──────────────────────────────────┘
+                       │ HTTP /api + WebSocket（Vite 代理）
+┌──────────────────────▼──────────────────────────────────┐
+│  后端 FastAPI（web/backend，端口 8000）                   │
+│  JWT 认证 → 项目/素材 → 任务队列 → 进度广播               │
+│  genes / knowledge / works / stats 四个产品模块           │
+└──────────────────────┬──────────────────────────────────┘
+                       │ 子进程调用脚本 + 进程内 import
+┌──────────────────────▼──────────────────────────────────┐
+│  引擎 viral-structure-engine/                            │
+│  analyze_video.py / run_material_analysis.py /           │
+│  run_editing_transfer.py / run_pipeline_e2e.py /         │
+│  knowledge/ 知识子系统（knowledge.json 为单一事实源）     │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 3.3 关键设计
+
+- **引擎零侵入**：后端以子进程方式调用引擎脚本（`cwd=viral-structure-engine/`），所有适配都在 Web 层完成，两条 CLI 路线不受影响。
+- **实时进度**：任务队列（asyncio 单 worker）执行中把日志写入 WebSocket 广播；基因提取走独立后台任务，解析子进程输出的 `__GENE_EVENT__` 事件，前端 3 秒轮询 + 进度可视化，支持取消。
+- **知识单一事实源**：知识库不复制到 Web 数据库，每次请求直接读/写引擎的 `knowledge.json`，CLI 与 Web 看到的是同一份知识；用户提炼的知识自动签发 `k_u{user_id}_{uuid8}` 全局唯一 ID，且仅本人可见可删（用户隔离）。
+- **基因复用**：创建项目时指定 `gene_id`，后端自动把基因视频复制为项目参考素材，分析过一次的视频可无限次复用。
+- **多用户**：bcrypt 密码哈希 + JWT（7 天有效期），项目 / 素材 / 任务 / 基因 / API Key 全部按用户隔离。
+
+---
+
+## 四、视频展示与成果
 
 > 项目生成的视频效果概览。完整视频文件存放在 `videos/` 目录（Git LFS）。
 
-### 3.1 编辑迁移路线输出
+### 4.1 编辑迁移路线输出
 
 由 `run_editing_transfer.py` 一键生成，纯规则引擎驱动，无需 LLM API。
 
@@ -266,7 +380,7 @@ data/runs/{run_id}/
 
 **编辑迁移最终输出**（50MB）— 39 张北京照片，librosa 节拍检测 + 预定义转场/运镜/字幕规则，Remotion 渲染。
 
-### 3.2 多智能体流水线输出
+### 4.2 多智能体流水线输出
 
 由 `main.py` / `run_beijing_pipeline.py` 执行，AI Agent 协作完成爆款分析→素材理解→方案生成→渲染→审核全流程。
 
@@ -276,7 +390,7 @@ data/runs/{run_id}/
 
 **多智能体流水线输出**（28MB）— AI 编导根据爆款结构生成的北京旅行 Vlog，含多段情绪弧线和风格化包装。
 
-### 3.3 前景分割 + 字幕合成
+### 4.3 前景分割 + 字幕合成
 
 阿里云 SegmentCommonImage API 前景分割 + Remotion 字幕系统叠加。
 
@@ -286,7 +400,7 @@ data/runs/{run_id}/
 
 **前景分割 + 字幕合成展示**（25MB）— 照片主体抠出叠加在背景上，配合多种字幕样式的综合效果。
 
-### 3.4 剪辑技法综合展示
+### 4.4 剪辑技法综合展示
 
 30+ 种转场效果、Ken Burns 运镜、多字幕样式的技术集锦。
 
@@ -296,7 +410,7 @@ data/runs/{run_id}/
 
 **剪辑技法综合展示**（20MB）— 集中展示 Remotion 渲染引擎支持的转场、运镜、字幕、前景合成等核心能力。
 
-### 3.5 完整视频清单
+### 4.5 完整视频清单
 
 | 分类 | 文件 | 大小 | 来源路线 |
 |------|------|------|---------|
@@ -319,7 +433,7 @@ data/runs/{run_id}/
 
 ---
 
-## 四、项目团队
+## 五、项目团队
 
 | 成员 | 角色 | 职责 |
 |------|------|------|
@@ -329,9 +443,9 @@ data/runs/{run_id}/
 
 ---
 
-## 五、整体 AI 架构
+## 六、整体 AI 架构
 
-### 5.1 总体架构
+### 6.1 总体架构
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -375,7 +489,7 @@ data/runs/{run_id}/
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### 5.2 多 Agent 协作模型
+### 6.2 多 Agent 协作模型
 
 系统采用 **Supervisor-Worker 架构**，所有 Agent 通过 `ViralEngineState` 共享黑板通信，由 LangGraph 状态机构编调度：
 
@@ -406,7 +520,7 @@ init → [Analyst → MaterialManager → Planner → Renderer → Creative → 
 
 Supervisor 的决策采用 **硬编码阶段路由 + LLM 兜底** 混合策略：对于明确的阶段转换（如 `phase=materials → planner`），直接路由不走 LLM；仅在模糊边界调用 LLM 做判断。
 
-### 5.3 LLM 调用链
+### 6.3 LLM 调用链
 
 | 阶段 | 调用次数 | 模型 | 用途 |
 |------|---------|------|------|
@@ -418,7 +532,7 @@ Supervisor 的决策采用 **硬编码阶段路由 + LLM 兜底** 混合策略�
 | Reviewer | 1~3 次 | DeepSeek Chat | 多维度质量评分 |
 | **总计** | **15~30 次/轮** | — | 取决于镜头数和迭代数 |
 
-### 5.4 数据模型体系
+### 6.4 数据模型体系
 
 ```
 ViralEngineState（共享黑板，所有 Agent 共享）
@@ -447,7 +561,7 @@ VideoScheme（视频方案 → 渲染引擎消费）
 └── canvas_width=1080 / canvas_height=1920
 ```
 
-### 5.5 渲染架构
+### 6.5 渲染架构
 
 Remotion 渲染引擎的组件架构：
 
@@ -472,9 +586,9 @@ Remotion 渲染时需要一个本地 HTTP 服务器提供素材（Chrome 禁止 
 
 ---
 
-## 六、工具协议
+## 七、工具协议
 
-### 6.1 Agent 协议（BaseAgent）
+### 7.1 Agent 协议（BaseAgent）
 
 每个 Agent 继承自 `BaseAgent`，使用统一的 **thought → action → observation → done** 决策循环：
 
@@ -489,7 +603,7 @@ Agent 内部循环（最多 15 步）:
 
 所有 Agent 通过共享 `ViralEngineState` 黑板间接通信，**不直接调用**。
 
-### 6.2 LLM 统一接口协议（LLMTools）
+### 7.2 LLM 统一接口协议（LLMTools）
 
 系统通过 `LLMTools` 类统一封装三家 LLM 的 API，提供 3 种调用模式：
 
@@ -507,7 +621,7 @@ Agent 内部循环（最多 15 步）:
 - JSON 输出：通过 `response_format: {"type": "json_object"}` 强制模型输出 JSON
 - 无 API Key 时：返回 mock JSON，流水线直接结束
 
-### 6.3 工具函数协议
+### 7.3 工具函数协议
 
 每个工具模块暴露独立的函数接口：
 
@@ -533,7 +647,7 @@ FFmpegRenderer（回退渲染）
   # 内部：Ken Burns zoompan + overlay + drawtext 字幕 + xfade 转场
 ```
 
-### 6.4 LangGraph 图协议
+### 7.4 LangGraph 图协议
 
 图结构定义在 `graph/builder.py` 中，遵循以下规则：
 
@@ -550,7 +664,7 @@ FFmpegRenderer（回退渲染）
 3. **专家出边**：统一条件边，`is_complete=True → END`，否则回到 `supervisor`
 4. **清理规则**：每个专家节点返回时必须设置 `current_task: {}`，防止 Supervisor 重复路由
 
-### 6.5 Remotion 渲染协议
+### 7.5 Remotion 渲染协议
 
 Python 端与 Remotion 端通过 JSON 文件约定接口：
 
@@ -582,7 +696,7 @@ interface StoryboardFrame {
 }
 ```
 
-### 6.6 数据持久化协议（OutputManager）
+### 7.6 数据持久化协议（OutputManager）
 
 每次运行在 `data/runs/{run_id}/` 下创建目录，按阶段归档：
 
@@ -594,16 +708,16 @@ interface StoryboardFrame {
 
 ---
 
-## 七、安全边际
+## 八、安全边际
 
-### 7.1 API Key 安全
+### 8.1 API Key 安全
 
 - **环境变量加载**：所有 API Key 通过 `.env` 文件加载，使用 `python-dotenv`
 - **不硬编码密钥**：代码中不包含生产密钥；`segment_aliyun.py` 从 `ALIYUN_ACCESS_KEY_ID` / `ALIYUN_ACCESS_KEY_SECRET` 读取
 - **无 Key 降级**：`LLMTools` 在检测不到 API Key 时返回 mock JSON，流水线安全退出而非崩溃
 - **密钥分类**：DeepSeek（文本推理）、Zhipu（视觉理解）、Moonshot（备选）、阿里云（前景分割）四个密钥独立配置
 
-### 7.2 调用安全与容错
+### 8.2 调用安全与容错
 
 | 保护机制 | 实现位置 | 说明 |
 |---------|---------|------|
@@ -615,7 +729,7 @@ interface StoryboardFrame {
 | 超时保护 | `LLM_TIMEOUT=180s` | LLM 调用超时 180 秒，Remotion 渲染超时 1800 秒 |
 | 音频分析降级 | `analyst_node` | 音频分析失败仅打日志，不影响主流程 |
 
-### 7.3 流程安全
+### 8.3 流程安全
 
 ```
 终止条件（防止无限循环）：
@@ -630,21 +744,21 @@ Supervisor 兜底：
   - max_iterations = 3：最多迭代 3 轮，防止无限循环
 ```
 
-### 7.4 文件系统安全
+### 8.4 文件系统安全
 
 - **Windows 兼容**：`_safe_filename()` 清理 Windows 非法字符 `\/:*?"<>|`
 - **FFmpeg Win 适配**：`FFmpegRenderer` 将字体复制到工作目录使用相对路径，避免 Windows 冒号破坏 filter 解析
 - **临时文件清理**：Remotion 渲染后清理 `props_file`、`media_root` 临时目录、FFmpeg 片段文件
 - **磁盘空间**：临时帧图片、分段视频存储在 `data/temp/`，由 `OutputManager` 管理
 
-### 7.5 多线程与资源安全
+### 8.5 多线程与资源安全
 
 - **端口冲突**：Remotion 素材 HTTP 服务器使用 `socket` 自动寻找空闲端口
 - **文件锁**：FFmpeg 回退渲染使用 `id(scheme)` 生成唯一输出文件名，防止并发文件锁冲突
 - **并行控制**：阿里云分割 API 的 `MAX_WORKERS=4`，限制并发连接数
 - **子进程超时**：FFmpeg 子进程 120 秒超时，Remotion 渲染 1800 秒超时
 
-### 7.6 数据边界
+### 8.6 数据边界
 
 ```
 输入边界：
@@ -664,7 +778,7 @@ API 调用边界：
   - 阿里云分割 API 仅处理单张图片的前景/背景分离
 ```
 
-### 7.7 已知限制与风险
+### 8.7 已知限制与风险
 
 | 风险 | 影响 | 缓解措施 |
 |------|------|---------|
@@ -677,4 +791,4 @@ API 调用边界：
 
 ---
 
-*文档版本: v1.0 | 最后更新: 2026-06-10*
+*文档版本: v1.1 | 最后更新: 2026-07-26*
