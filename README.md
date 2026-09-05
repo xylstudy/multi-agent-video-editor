@@ -401,19 +401,11 @@ data/runs/{run_id}/
 
 由 `run_editing_transfer.py` 一键生成，纯规则引擎驱动，无需 LLM API。
 
-<p align="center">
-  <img src="./assets/showcase-editing.svg" alt="编辑迁移路线输出" width="720">
-</p>
-
 **编辑迁移最终输出**（50MB）— 39 张北京照片，librosa 节拍检测 + 预定义转场/运镜/字幕规则，Remotion 渲染。
 
 ### 4.2 多智能体流水线输出
 
 由 `main.py` / `run_beijing_pipeline.py` 执行，AI Agent 协作完成爆款分析→素材理解→方案生成→渲染→审核全流程。
-
-<p align="center">
-  <img src="./assets/showcase-pipeline.svg" alt="多智能体流水线输出" width="720">
-</p>
 
 **多智能体流水线输出**（28MB）— AI 编导根据爆款结构生成的北京旅行 Vlog，含多段情绪弧线和风格化包装。
 
@@ -421,19 +413,11 @@ data/runs/{run_id}/
 
 阿里云 SegmentCommonImage API 前景分割 + Remotion 字幕系统叠加。
 
-<p align="center">
-  <img src="./assets/showcase-segmentation.svg" alt="前景分割+字幕合成展示" width="720">
-</p>
-
 **前景分割 + 字幕合成展示**（25MB）— 照片主体抠出叠加在背景上，配合多种字幕样式的综合效果。
 
 ### 4.4 剪辑技法综合展示
 
 30+ 种转场效果、Ken Burns 运镜、多字幕样式的技术集锦。
-
-<p align="center">
-  <img src="./assets/showcase-techniques.svg" alt="剪辑技法综合展示" width="720">
-</p>
 
 **剪辑技法综合展示**（20MB）— 集中展示 Remotion 渲染引擎支持的转场、运镜、字幕、前景合成等核心能力。
 
