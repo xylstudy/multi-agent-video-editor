@@ -3,6 +3,7 @@ import Layout from './components/Layout.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import GeneDetail from './pages/GeneDetail.jsx'
 import Genes from './pages/Genes.jsx'
+import Insights from './pages/Insights.jsx'
 import Knowledge from './pages/Knowledge.jsx'
 import Login from './pages/Login.jsx'
 import Projects from './pages/Projects.jsx'
@@ -40,6 +41,7 @@ function App() {
         <Route path="genes" element={<Genes />} />
         <Route path="genes/:id" element={<GeneDetail />} />
         <Route path="knowledge" element={<Knowledge />} />
+        <Route path="insights" element={<Insights />} />
         <Route path="works" element={<Works />} />
         <Route path="settings" element={<Settings />} />
       </Route>

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app_config import ALLOWED_ORIGINS
 from database import create_db_and_tables
 from queue_manager import queue
-from routers import auth, api_keys, genes, knowledge, materials, projects, stats, tasks, works
+from routers import auth, api_keys, genes, insights, knowledge, materials, projects, stats, tasks, works
 
 logging.basicConfig(
     level=logging.INFO,
@@ -46,6 +46,7 @@ app.include_router(genes.router)
 app.include_router(knowledge.router)
 app.include_router(works.router)
 app.include_router(stats.router)
+app.include_router(insights.router)
 
 
 @app.get("/api/health")

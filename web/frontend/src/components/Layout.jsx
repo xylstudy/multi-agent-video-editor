@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import {
+  BarChart3,
   BookOpen,
   Clapperboard,
   Dna,
@@ -19,6 +20,7 @@ const NAV_ITEMS = [
   { to: '/projects', label: '项目', icon: FolderOpen },
   { to: '/genes', label: '基因库', icon: Dna },
   { to: '/knowledge', label: '知识库', icon: BookOpen },
+  { to: '/insights', label: '统计洞察', icon: BarChart3 },
   { to: '/works', label: '作品集', icon: PlaySquare },
   { to: '/settings', label: '设置', icon: Settings },
 ]
