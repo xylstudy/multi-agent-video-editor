@@ -25,6 +25,8 @@ class KnowledgeEntry:
     best_when: str = ""
     confidence: float = 0.0
     source_summary: str = ""
+    # 溯源：这条知识是怎么提炼出来的（来源基因、prompt 版本、模型等）
+    derivation: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return {
@@ -38,4 +40,5 @@ class KnowledgeEntry:
             "best_when": self.best_when,
             "confidence": self.confidence,
             "source_summary": self.source_summary,
+            "derivation": self.derivation,
         }

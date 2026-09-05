@@ -147,6 +147,8 @@ class VideoScheme:
     source_structure_ids: list[str] = field(default_factory=list)
     material_ids: list[str] = field(default_factory=list)
     gap_ids: list[str] = field(default_factory=list)
+    # 本方案生成时注入参考的知识/手法 id 列表（供 reviewer 关联与效果统计）
+    knowledge_refs: list[str] = field(default_factory=list)
     color_grade: str = ""
     filter_style: str = ""
 
@@ -210,6 +212,7 @@ class VideoScheme:
             "bgm": self.bgm.to_dict(),
             "script_blocks": self.script_blocks,
             "emotion_arc": self.emotion_arc,
+            "knowledge_refs": self.knowledge_refs,
             "iteration": self.iteration,
             "version": self.version,
             "status": self.status,

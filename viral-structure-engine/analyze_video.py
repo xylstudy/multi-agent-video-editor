@@ -55,6 +55,10 @@ async def analyze_video():
     from tools.audio_tools import AudioTools
     from agents.analyst import AnalystAgent
     from config import settings
+    from models.trace import (
+        ANALYST_PROMPT_VERSION, STRUCTURE_PROMPT_VERSION,
+        make_shot_trace, make_analysis_trace,
+    )
 
     llm = LLMTools(
         api_key=settings.ZHIPU_API_KEY,
@@ -128,6 +132,7 @@ async def analyze_video():
 
     print(f"\n[逐镜头分析] (共 {len(scenes)} 个镜头, 将调用 DeepSeek)...")
     shot_analyses = []
+    shot_traces = []  # 分析轨迹：记录每帧画面的推理上下文
     for i, scene in enumerate(scenes):
         prev_desc = shot_analyses[-1].get("one_sentence_summary", "") if shot_analyses else ""
         print(f"\n   ▶ 分析镜头 {i+1}/{len(scenes)} ({scene['start']:.1f}s-{scene['end']:.1f}s)...")
@@ -157,12 +162,20 @@ async def analyze_video():
             response = await llm.chat_with_images(prompt, [frame_path], response_format="json")
         else:
             response = await llm.chat(prompt, response_format="json")
+        frame_paths = ([str(frames_dir / frame_name)] if frame_name
+                       else ([frame_path] if frame_path else []))
         try:
             result = llm.parse_json(response)
             result["has_face"] = has_face
             result["start_time"] = scene["start"]
             result["end_time"] = scene["end"]
             shot_analyses.append(result)
+            shot_traces.append(make_shot_trace(
+                index=i, start_time=scene["start"], end_time=scene["end"],
+                analysis=result, frame_paths=frame_paths,
+                prev_context_summary=prev_desc,
+                model=getattr(llm, "model", ""),
+            ))
 
             sf = result.get("structure_role", {})
             print(f"      功能: {sf.get('primary_function', '?')} | 情绪: {result.get('emotion', '?')}")
@@ -182,6 +195,12 @@ async def analyze_video():
                 "has_face": has_face,
                 "one_sentence_summary": "分析失败",
             })
+            shot_traces.append(make_shot_trace(
+                index=i, start_time=scene["start"], end_time=scene["end"],
+                analysis={"_error": str(e)}, frame_paths=frame_paths,
+                prev_context_summary=prev_desc,
+                model=getattr(llm, "model", ""),
+            ))
             _emit("shot_failed", index=i, total=len(scenes), message=str(e),
                   start=round(scene["start"], 2), end=round(scene["end"], 2),
                   frame=frame_name)
@@ -205,6 +224,28 @@ async def analyze_video():
           narrative_type=structure.get("narrative_type", "") if isinstance(structure, dict) else "",
           overall_emotion=structure.get("overall_emotion", "") if isinstance(structure, dict) else "",
           overall_summary=structure.get("overall_summary", "") if isinstance(structure, dict) else "")
+
+    print(f"\n💾 保存分析轨迹...")
+    trace = make_analysis_trace(
+        video_path=str(video_path), duration=info["duration"],
+        resolution=[info["width"], info["height"]],
+        scene_count=len(scenes), scene_threshold=0.3,
+        audio_summary={"transcript_chars": len(transcript), "transcribed": bool(transcript)},
+        shots=shot_traces,
+        structure_input_summary=shot_text,
+        structure_analysis=structure if isinstance(structure, dict) else {},
+        versions={
+            "model": getattr(llm, "model", ""),
+            "prompt_version": f"{ANALYST_PROMPT_VERSION}+{STRUCTURE_PROMPT_VERSION}",
+            "llm_client": "LLMTools",
+        },
+    )
+    trace_path = Path(args.output).parent / "analysis_trace.json"
+    trace_path.parent.mkdir(parents=True, exist_ok=True)
+    trace_path.write_text(
+        json.dumps(trace.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    print(f"   分析轨迹已保存至: {trace_path.resolve()}")
 
     print(f"\n[组装 VideoStructure 对象]...")
     video_structure = analyst.build_video_structure(

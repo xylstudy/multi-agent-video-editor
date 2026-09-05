@@ -71,6 +71,7 @@ class KnowledgeStore:
                         best_when=item.get("best_when", ""),
                         confidence=item.get("confidence", 0.0),
                         source_summary=item.get("source_summary", ""),
+                        derivation=item.get("derivation", {}),
                     )
                     self._entries[entry.id] = entry
                     self.index.add_entry(entry.id, entry.tags, entry.content)

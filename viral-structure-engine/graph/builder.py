@@ -17,6 +17,10 @@ from agents.reviewer import ReviewerAgent
 from agents.renderer import RendererAgent
 from models.material import MaterialInventory, MaterialItem, MaterialType
 from models.scheme import VideoScheme
+from models.trace import (
+    ANALYST_PROMPT_VERSION, STRUCTURE_PROMPT_VERSION,
+    make_shot_trace, make_analysis_trace,
+)
 from config.llm_client import LLMTools
 from config.output_manager import OutputManager
 from config import settings
@@ -48,6 +52,21 @@ def _create_vision_llm() -> LLMTools:
         base_url=settings.ZHIPU_BASE_URL,
         model="glm-4.6v",
     )
+
+
+def _collect_knowledge_refs() -> list[str]:
+    """收集注入 Planner 的手法注册表 id 列表（前缀区分来源，供 reviewer 关联与效果统计）。"""
+    try:
+        from knowledge.techniques_loader import load_registry
+        reg = load_registry()
+        refs = [f"transition:{k}" for k in reg.get("transitions", {})]
+        refs += [f"effect:{k}" for k in reg.get("effects", {})]
+        refs += [f"fg_reveal:{k}" for k in reg.get("foreground_reveal_effects", {})]
+        refs += [f"subtitle:{k}" for k in reg.get("subtitle_styles", {})]
+        refs += [f"style_profile:{k}" for k in reg.get("style_profiles", {})]
+        return refs
+    except Exception:
+        return []
 
 
 async def supervisor_node(state: ViralEngineState) -> dict:
@@ -156,6 +175,7 @@ async def analyst_node(state: ViralEngineState) -> dict:
 
         # ===== 逐镜头 LLM 分析阶段 =====
         shot_analyses = []
+        shot_traces = []  # 分析轨迹：记录每镜头的推理上下文与原始返回
         prev_desc = ""
         total_shots = len(scenes)
         for i, scene in enumerate(scenes):
@@ -174,12 +194,26 @@ async def analyst_node(state: ViralEngineState) -> dict:
             except Exception as e:
                 logger.warning(f"  镜头 {i+1} 分析失败: {e}，跳过")
                 errors.append(f"shot_{i}_analysis: {e}")
+                shot_traces.append(make_shot_trace(
+                    index=i, start_time=scene["start"], end_time=scene["end"],
+                    analysis={"_error": str(e)}, frame_paths=frames_map.get(i, []),
+                    motion_intensity=motion, color_stats=color,
+                    prev_context_summary=prev_desc,
+                    model=getattr(llm, "model", ""),
+                ))
                 continue
             analysis["start_time"] = scene["start"]
             analysis["end_time"] = scene["end"]
             analysis["motion_intensity"] = motion
             analysis["color_stats"] = color
             shot_analyses.append(analysis)
+            shot_traces.append(make_shot_trace(
+                index=i, start_time=scene["start"], end_time=scene["end"],
+                analysis=analysis, frame_paths=frames_map.get(i, []),
+                motion_intensity=motion, color_stats=color,
+                prev_context_summary=prev_desc,
+                model=getattr(llm, "model", ""),
+            ))
             prev_desc = analysis.get("one_sentence_summary", "")
             role = analysis.get("structure_role", {})
             logger.info(f"  [分析师]   → {role.get('primary_function', '?')}: {analysis.get('one_sentence_summary', '')[:50]}")
@@ -197,6 +231,28 @@ async def analyst_node(state: ViralEngineState) -> dict:
             audio_data=audio_data,
         )
         out.save_json("analyst", "structure_analysis.json", structure)
+
+        # ===== 分析轨迹落盘：记录推理过程，供知识溯源与故障排查 =====
+        trace = make_analysis_trace(
+            video_path=str(video_path), duration=info["duration"],
+            resolution=[info["width"], info["height"]],
+            scene_count=len(scenes), scene_threshold=settings.SCENE_CHANGE_THRESHOLD,
+            audio_summary={
+                "transcript_chars": len(transcript),
+                "bpm": audio_data.get("bpm", 0),
+                "beat_count": audio_data.get("beat_count", 0),
+                "recommended_ken_burns_speed": audio_data.get("recommended_ken_burns_speed", ""),
+            },
+            shots=shot_traces,
+            structure_input_summary=shot_text,
+            structure_analysis=structure,
+            versions={
+                "model": getattr(llm, "model", ""),
+                "prompt_version": f"{ANALYST_PROMPT_VERSION}+{STRUCTURE_PROMPT_VERSION}",
+                "llm_client": "LLMTools",
+            },
+        )
+        out.save_json("analyst", "analysis_trace.json", trace)
 
         video_structure = analyst.build_video_structure(
             video_path, info["duration"], info["width"], info["height"],
@@ -363,11 +419,43 @@ async def planner_node(state: ViralEngineState) -> dict:
             scheme_data = await planner._iterate_scheme(scheme_json, review_json, inv_json)
 
         scheme = planner.build_scheme(scheme_data, target_topic, iteration)
+        scheme.knowledge_refs = _collect_knowledge_refs()
         out.save_json("planner", f"scheme_v{iteration}.json", scheme)
         logger.info(f"  [编导] [OK] 方案生成完成: {len(scheme.storyboard)} 个分镜, 目标时长 {scheme.target_duration}s")
         log_entry = {"stage": "planner", "iteration": iteration, "frames": len(scheme.storyboard)}
         logs.append(log_entry)
         out.append_log("planner", log_entry)
+
+        # ===== 方案决策轨迹：记录编导做方案时参考了什么 =====
+        try:
+            from knowledge.techniques_loader import get_summary
+            techniques_snapshot = get_summary()
+        except Exception:
+            techniques_snapshot = ""
+        inventory_summary = {}
+        inventory = state.get("material_inventory")
+        if inventory:
+            items = getattr(inventory, "items", getattr(inventory, "materials", []))
+            type_counts: dict[str, int] = {}
+            face_count = 0
+            for m in items:
+                t = str(getattr(m, "type", "unknown"))
+                type_counts[t] = type_counts.get(t, 0) + 1
+                if getattr(m, "has_face", False):
+                    face_count += 1
+            inventory_summary = {"total": len(items), "by_type": type_counts, "face_count": face_count}
+        planning_trace = {
+            "iteration": iteration,
+            "target_topic": target_topic,
+            "skeleton": skeleton if iteration == 0 else "(迭代轮：基于审核反馈修改)",
+            "review_feedback": review_result if iteration > 0 else {},
+            "techniques_injected": techniques_snapshot,
+            "knowledge_refs": scheme.knowledge_refs,
+            "inventory_summary": inventory_summary,
+            "audio_data": audio_data_str if iteration == 0 else "",
+            "scheme_frame_count": len(scheme.storyboard),
+        }
+        out.save_json("planner", "planning_trace.json", planning_trace)
 
         return {
             "scheme": scheme,
@@ -731,6 +819,8 @@ async def reviewer_node(state: ViralEngineState) -> dict:
             material_list_desc=material_list_desc,
             transition_summary=transition_summary,
         )
+        # 关联本方案参考的知识/手法，供后续统计「知识 → 审核分数」效果
+        review["knowledge_refs_applied"] = list(getattr(scheme, "knowledge_refs", []))
 
         if hasattr(scheme, "review_notes"):
             scheme.review_notes.append(json.dumps(review, ensure_ascii=False))
