@@ -11,6 +11,7 @@ import { BeijingVlogSegmented } from "./BeijingVlogSegmented";
 import { VlogTechniquesShowcase } from "./VlogTechniquesShowcase";
 import { BeijingVlogVariety, BEIJING_VARIETY_DURATION } from "./BeijingVlogVariety";
 import { TechniqueDemo, getDemoDuration, type TechniqueDemoProps } from "./TechniqueDemo";
+import { CinematicDemo, CINEMATIC_DEMO_DURATION } from "./CinematicDemo";
 
 const fps = 30;
 
@@ -125,6 +126,15 @@ export const Root: React.FC = () => {
           durationInFrames: getDemoDuration((props as unknown as TechniqueDemoProps).kind),
           props,
         })}
+      />
+      {/* 进阶特效示范：粒子 / 真实运动模糊 / 卡点爆发 */}
+      <Composition
+        id="CinematicDemo"
+        component={CinematicDemo}
+        durationInFrames={CINEMATIC_DEMO_DURATION}
+        fps={fps}
+        width={1080}
+        height={1920}
       />
     </>
   );

@@ -48,3 +48,11 @@ web/backend/app.db
 # 引擎运行产物
 viral-structure-engine/data/runs/
 viral-structure-engine/data/temp/
+viral-structure-engine/data/output/
+
+# 采样/帧分析缓存
+get_video/frames_analysis/
+
+# 本地工具/临时文件
+.workbuddy/
+vc_proj.json
