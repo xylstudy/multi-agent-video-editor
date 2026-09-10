@@ -23,7 +23,6 @@ import {
   InfoBar,
   ProgressBar,
   SectionHeader,
-  StatusPill,
 } from '../components/ui.jsx'
 
 const PURPOSE_COLORS = {
@@ -270,19 +269,20 @@ export default function GeneDetail() {
   const [gene, setGene] = useState(null)
   const [extracting, setExtracting] = useState(false)
   const [extractMsg, setExtractMsg] = useState(null)
+  const geneStatus = gene?.status
 
   useEffect(() => {
     getGene(id).then((res) => setGene(res.data)).catch(() => navigate('/genes'))
-  }, [id])
+  }, [id, navigate])
 
   // 分析中轮询
   useEffect(() => {
-    if (!gene || gene.status === 'done' || gene.status === 'failed') return
+    if (!geneStatus || geneStatus === 'done' || geneStatus === 'failed') return
     const timer = setInterval(() => {
       getGene(id).then((res) => setGene(res.data)).catch(() => {})
     }, 3000)
     return () => clearInterval(timer)
-  }, [gene?.status, id])
+  }, [geneStatus, id])
 
   const handleExtract = async () => {
     setExtracting(true)

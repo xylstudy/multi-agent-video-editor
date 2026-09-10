@@ -1,0 +1,11 @@
+name: video-claw
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - ffmpeg>=7
+  - nodejs>=22.12
+  - pip:
+      - -c requirements-lock.txt
+      - -r requirements-dev.txt

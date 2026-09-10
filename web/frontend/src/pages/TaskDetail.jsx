@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Download, Trash2 } from 'lucide-react'
 import { deleteTask, downloadTaskResult, getTask, mediaUrl } from '../api.js'
@@ -42,7 +42,7 @@ export default function TaskDetail() {
   const [wsStatus, setWsStatus] = useState('connecting')
   const wsRef = useRef(null)
 
-  const fetchTask = async () => {
+  const fetchTask = useCallback(async () => {
     try {
       const res = await getTask(id)
       setTask(res.data)
@@ -50,7 +50,7 @@ export default function TaskDetail() {
     } catch {
       navigate('/')
     }
-  }
+  }, [id, navigate])
 
   useEffect(() => {
     fetchTask()
@@ -79,7 +79,7 @@ export default function TaskDetail() {
       clearInterval(ping)
       ws.close()
     }
-  }, [id])
+  }, [fetchTask, id])
 
   const handleDownload = async () => {
     try {

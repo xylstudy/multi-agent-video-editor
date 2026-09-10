@@ -39,6 +39,7 @@ export default function Projects() {
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState('')
   const [searchParams] = useSearchParams()
+  const preselectedGeneId = searchParams.get('gene')
 
   const fetchProjects = async () => {
     try {
@@ -55,13 +56,12 @@ export default function Projects() {
       const done = res.data.filter((g) => g.status === 'done')
       setGenes(done)
       // 从基因详情页带过来的预选
-      const preselect = searchParams.get('gene')
-      if (preselect && done.some((g) => String(g.id) === preselect)) {
-        setGeneId(preselect)
+      if (preselectedGeneId && done.some((g) => String(g.id) === preselectedGeneId)) {
+        setGeneId(preselectedGeneId)
         setShowCreate(true)
       }
     })
-  }, [])
+  }, [preselectedGeneId])
 
   const handleCreate = async (e) => {
     e.preventDefault()

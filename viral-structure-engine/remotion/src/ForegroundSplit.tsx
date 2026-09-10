@@ -49,7 +49,7 @@ const SUBTITLE_STYLES: SubtitleStyle[] = [
 
 // ===== Subtitle Components =====
 
-const SubtitleTypewriter: React.FC<{ text: string; frame: number }> = ({ text, frame, children }) => {
+const SubtitleTypewriter: React.FC<{ text: string; frame: number }> = ({ text, frame }) => {
   const progress = interpolate(frame, [0, 30], [0, text.length], {
     extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.ease),
   });

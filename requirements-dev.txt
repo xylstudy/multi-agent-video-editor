@@ -1,0 +1,4 @@
+# Unified Python environment for the engine, Web API, tests, and downloader.
+-e ./viral-structure-engine[audio,test]
+-r ./web/backend/requirements.txt
+-r ./get_video/requirements.txt

@@ -55,7 +55,7 @@ const comp_fg_overlay_animation: React.FC<{
   const subtitleY = interpolate(frame, [20, 40], [200, 0], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.back),
+    easing: Easing.out(Easing.back()),
   });
   const subtitleOpacity = interpolate(frame, [20, 40], [0, 1]);
 

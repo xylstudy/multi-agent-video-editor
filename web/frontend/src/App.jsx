@@ -12,7 +12,7 @@ import Register from './pages/Register.jsx'
 import Settings from './pages/Settings.jsx'
 import TaskDetail from './pages/TaskDetail.jsx'
 import Works from './pages/Works.jsx'
-import { useAuth } from './context/AuthContext.jsx'
+import { useAuth } from './context/auth-context.js'
 
 function RequireAuth({ children }) {
   const { user, loading } = useAuth()

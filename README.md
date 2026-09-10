@@ -108,38 +108,57 @@ Video Claw 不是一个通用的视频编辑工具，而是一个 **AI 驱动的
 ### 2.1 系统依赖
 
 ```
-- Python >= 3.11
-- Node.js >= 18 (npm)
+- Python >= 3.11（项目基准版本 3.12）
+- Node.js 20.19+ 或 22.12+（项目基准版本 22/24）
 - FFmpeg (需在 PATH 中)
 - Git
-- 操作系统: Windows 11 (项目主要在 Windows 上开发)
+- 操作系统: Windows 11（主要开发环境；CI 同时在 Linux 验证）
 ```
 
 ### 2.2 安装步骤
 
+#### Windows 一键安装（推荐）
+
+项目根目录执行：
+
+```powershell
+# 默认创建项目本地 .venv；缺少 Python 3.12、FFmpeg 或 Node 时通过 winget 安装，
+# 然后安装前端/Remotion 依赖和 Playwright Chromium
+.\setup_windows.ps1
+
+# 不使用抖音下载器时可跳过 Chromium（其余依赖仍会安装）
+.\setup_windows.ps1 -SkipBrowser
+
+# 偏好 Conda 时可改用 environment.yml
+.\setup_windows.ps1 -Mode conda
+```
+
+系统已经安装其他 Python 3.11+ 时，也可以显式指定：
+
+```powershell
+.\setup_windows.ps1 -Mode venv -PythonExecutable "C:\path\to\python.exe"
+```
+
+#### 手动安装
+
 ```bash
-# 1. Python 依赖（项目核心）
-cd viral-structure-engine
-pip install -e .
+# 统一安装引擎、Web 后端、测试与下载器 Python 依赖
+python -m pip install -c requirements-lock.txt -r requirements-dev.txt
 
-# 可选：音频分析模块（编辑迁移路线需要）
-pip install librosa openai-whisper
+# Node 依赖使用锁文件安装
+npm ci --prefix web/frontend
+npm ci --prefix viral-structure-engine/remotion
 
-# 2. Remotion 渲染引擎
-cd remotion
-npm install
-
-# 3. 抖音视频下载器（可选）
-cd ../get_video
-pip install playwright
+# 抖音下载器需要浏览器（可选）
 python -m playwright install chromium
 
-# 4. Web 应用（可选，推荐使用）
-cd ../web/backend
-pip install -r requirements.txt
-cd ../frontend
-npm install
+# 启动前体检
+python scripts/preflight.py --full
 ```
+
+Python 基准版本记录在 `.python-version`，Conda 环境定义在 `environment.yml`；
+`requirements-dev.txt` 是各 Python 子项目依赖的统一入口，`requirements-lock.txt`
+锁定已验证的 Python 3.12 依赖版本。
 
 ### 2.3 环境变量配置
 
@@ -235,8 +254,11 @@ cd get_video
 #### 方式六：Web 应用（推荐，多用户 + 实时进度）
 
 ```bash
-# Windows 一键启动（自动开前后端两个窗口）
+# Windows 一键启动（自动定位项目路径与 video-claw/.venv Python，启动前先做环境体检）
 start_web.bat
+
+# 只检查环境，不启动服务
+start_web.bat --check
 
 # 或手动启动
 cd web/backend && python -m uvicorn main:app --host 127.0.0.1 --port 8000
@@ -509,13 +531,13 @@ data/runs/{run_id}/
 | Agent | 角色 | 驱动模型 | 职责 |
 |-------|------|---------|------|
 | **Supervisor** | 项目经理 | DeepSeek Chat | 读取黑板状态，决定下一步叫谁 |
-| **Analyst** | 视频分析师 | GLM-4.6V + OpenCV + Whisper | 逐镜头分析爆款 Vlog，提取结构 |
+| **Analyst** | 视频分析师 | GLM-4.6V + OpenCV + Whisper | 逐镜头分析爆款 Vlog，提取结构并生成 StructureGene（结构基因） |
 | **MaterialManager** | 素材管家 | GLM-4.6V + OpenCV | 照片内容理解、质量评估、人脸检测 |
-| **Planner** | 编导策划师 | DeepSeek Chat | 提取爆款骨架、生成分镜方案 |
+| **Planner** | 编导策划师 | DeepSeek Chat | 消费 Gene + 素材 + 按需 Skill，做结构迁移生成分镜方案 |
 | **Creative** | 创意补全师 | DeepSeek Chat | 制定素材缺口填充策略 |
 | **Renderer** | 渲染策略师 | DeepSeek Chat + esbuild | 分析方案、生成动态 React 组件 |
 | **Assembler** | 视频合成师 | Remotion CLI / FFmpeg | 渲染最终视频 |
-| **Reviewer** | 质量审核师 | DeepSeek Chat | 10 维度评分，判断是否迭代 |
+| **Reviewer** | 质量审核师 | DeepSeek Chat | 双维度评分（Fidelity 结构保真 + Quality 剪辑质量），判断是否迭代 |
 
 #### 调度流程
 
@@ -550,15 +572,32 @@ ViralEngineState（共享黑板，所有 Agent 共享）
 ├── sample_videos: string[]          # 输入：爆款视频路径
 ├── user_materials: dict[]           # 输入：用户素材
 ├── target_topic: string             # 输入：目标主题
-├── source_structures: VideoStructure[]  # Analyst 输出
+├── source_structures: VideoStructure[]  # Analyst 输出（每结构含 .gene）
+├── source_genes: StructureGene[]        # Analyst 输出（Reference Gene，Planner 核心输入）
 ├── material_inventory: MaterialInventory  # MaterialManager 输出
 ├── scheme: VideoScheme              # Planner 输出
+├── knowledge_refs: string[]         # 注入的知识/手法 id
+├── skill_refs: string[]             # 本次按需加载的 Editing Skill reference 名
 ├── generated_materials: list        # Creative 输出
 ├── rendered_video_path: string      # Assembler 输出
-├── review_result: dict              # Reviewer 输出
+├── review_result: dict              # Reviewer 输出（含 fidelity/quality/feedback_type）
 ├── current_task: dict               # Supervisor 输出（路由）
 ├── phase: string                    # 流程控制
 └── iteration: int / is_complete: bool / errors / logs
+
+VideoStructure（原片结构分析结果）
+├── shots / script_blocks / rhythm_curve / packaging / bgm / vlog_meta
+└── gene: StructureGene               # 结构功能基因（迁移核心约束）
+
+StructureGene（结构基因 — 表达功能，不复制内容）
+├── shot_genes: ShotGene[]
+│   ├── function（hook/establishing/climax/closing/...）
+│   ├── semantic_role / rhythm_role / emotion_role / relation_to_previous
+│   ├── visual_requirement（功能性画面要求，而非物体）
+│   ├── duration_ratio / importance（critical/high/medium/low）
+│   └── hard_constraints / soft_preferences
+├── structure_type / rhythm_pattern / climax_position_ratio / emotion_arc
+└── hard_constraints / soft_preferences / migration_notes
 
 VideoScheme（视频方案 → 渲染引擎消费）
 ├── storyboard: StoryboardFrame[]    # 35 个分镜
@@ -567,7 +606,11 @@ VideoScheme（视频方案 → 渲染引擎消费）
 │   ├── subtitle_text / subtitle_config (8 种样式参数)
 │   ├── transition_in (30+ 种转场)
 │   ├── composite_mode (overlay / reveal / pip)
-│   └── render_component (auto / ken_burns / text_card / custom:*)
+│   ├── render_component (auto / ken_burns / text_card / custom:*)
+│   ├── structure_function / gene_shot_index   # 溯源：本镜承担的 Gene 功能 + 对应下标
+│   ├── skill_refs                             # 溯源：本镜用到的 Skill reference
+│   └── adaptation                              # 溯源：{preserved, reason, original_function}
+├── gene_refs / skill_refs_used / adaptation_log  # 方案级溯源
 ├── packaging / bgm / audio_config
 └── canvas_width=1080 / canvas_height=1920
 ```
@@ -594,6 +637,85 @@ VideoSchemeComposition
 ```
 
 Remotion 渲染时需要一个本地 HTTP 服务器提供素材（Chrome 禁止 `file://`），使用 `http.server` 在随机端口启动。
+
+### 6.6 Reference-guided 结构迁移（Gene × Skill）
+
+本次架构升级把系统从「复制爆款内容」升级为「迁移爆款结构」：核心原则是
+**Gene 决定「迁移什么」，Skill 决定「怎么迁移好」**。
+
+#### 6.6.1 核心概念与边界
+
+| | Reference Gene（结构基因） | Editing Skill（剪辑技能） |
+|---|---|---|
+| 作用域 | 当前参考视频**专属** | 跨任务**长期复用** |
+| 决定什么 | 迁移**什么结构**（镜头功能 / 节奏 / 情绪骨架） | **怎么剪好**（具体手法 / 替代策略） |
+| 约束性质 | 硬约束为主（`hard_constraints` / `importance=critical`） | 软策略为主 |
+| 可否被覆盖 | 仅用户显式要求可覆盖 | 可被 Gene 硬约束覆盖 |
+
+**决策优先级（贯穿系统，Planner 与 Reviewer 均遵守）**：
+
+```
+用户显式要求  >  Reference Gene 硬约束  >  Editing Skill 策略  >  模型自由发挥
+```
+
+Gene 表达的是「结构功能」而非原始内容：例如不记录「航拍 A 地标」，而是记录
+`function=establishing`（场景建立）、`visual_requirement=宽景/地标/环境交代`、
+`rhythm_role=breather`、`relation_to_previous=continue`。迁移时按功能找替代素材，
+实现 **Structure Transfer（结构迁移），不是 Content Copy（内容复制）**。
+
+#### 6.6.2 数据流
+
+```
+参考视频 → Analyst（GLM-4.6V 逐镜头 + 全局结构分析）
+        → build_gene()（纯函数，把分析映射为 StructureGene）
+        → VideoStructure.gene（挂在原片结构上，一并持久化）
+        → Planner（消费 Gene + 素材清单 + 用户意图 + 按需 Skill）
+        → VideoScheme（统一中间表示，逐镜带溯源字段）
+        → Reviewer（双维度评估：Fidelity + Quality）
+        → 回 Planner 迭代（≤3 轮）
+        → Renderer / Assembler
+```
+
+#### 6.6.3 渐进式披露（按需加载 Skill）
+
+Skill 不是一次性全量注入，而是按规划阶段 / 镜头功能**确定性路由 + LLM 语义兜底**：
+
+- 目录结构：`skills/video-editing/SKILL.md`（定位 / 使用时机 / 路由规则 / 优先级）
+  + `references/*.md`（7 个文件承载真实知识：适用条件 / 不适用条件 / 推荐策略 / 例子）。
+- `skills/router.py::SkillRouter`：
+  - `route_for_stage(stage)` —— 规划 Opening Hook 只加载 `hook.md`；
+  - `route_for_shot(function)` —— 镜头功能 → reference；
+  - `route_for_gene(gene)` —— 汇总整条 Gene 需要的 reference（恒含 `structure-adaptation`；
+    存在 `establishing` 时强制 `material-matching`）；
+  - `route_by_llm(context, llm)` —— 仅确定性规则覆盖不到时的语义兜底。
+- 未引入 RAG / 向量库 / 复杂检索。
+
+#### 6.6.4 Planner 如何融合 Gene / 素材 / Skill
+
+Planner 的 prompt 结构（`prompts/planner_prompts.py`）：
+
+1. `gene_json` 作为**核心约束**单独成段（硬约束 / critical 镜头功能优先保持）；
+2. `skill_context` 按需注入（只注入本次加载的 reference，带 `===== Skill 参考：xxx.md =====` 标题）；
+3. 素材清单 + 音频特征 + 系统能力手册；
+4. 决策优先级块 + Structure Transfer 指引。
+
+产出 `VideoScheme`，每个分镜带溯源字段：
+
+- `structure_function`（本镜承担的 Gene 功能）、`gene_shot_index`（对应 Gene 镜头下标）；
+- `skill_refs`（本镜用到的 Skill reference 名）、`adaptation`（`{preserved, reason, original_function}`）；
+- 顶层 `gene_refs` / `skill_refs_used` / `adaptation_log`（整方案级溯源）。
+
+#### 6.6.5 Reviewer 双维度评估
+
+Reviewer 同时评价两组指标（`prompts/reviewer_prompts.py`）：
+
+- **A 组 Gene / Structure Fidelity**（迁移得「像不像」Reference）：Hook 结构、镜头/时长关系、
+  节奏曲线、情绪弧线、高潮/Ending 位置、核心镜头功能是否保持；
+- **B 组 Adaptation / Editing Quality**（在当前素材上「剪得好不好」）：素材匹配、转场、节奏自然度、
+  情绪连贯、字幕包装、素材覆盖。
+
+输出 `feedback_type ∈ {fidelity, quality, mixed}`：fidelity 问题回 Planner 恢复 Gene 结构，
+quality 问题在不破坏 Gene 的前提下优化剪辑。
 
 ---
 

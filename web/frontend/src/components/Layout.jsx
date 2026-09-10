@@ -13,7 +13,7 @@ import {
   Settings,
   X,
 } from 'lucide-react'
-import { useAuth } from '../context/AuthContext.jsx'
+import { useAuth } from '../context/auth-context.js'
 
 const NAV_ITEMS = [
   { to: '/', label: '工作台', icon: LayoutDashboard, end: true },

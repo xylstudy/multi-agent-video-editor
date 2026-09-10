@@ -11,7 +11,6 @@ import {
   InfoBar,
   ProgressBar,
   SectionHeader,
-  StatusPill,
   TextInput,
 } from '../components/ui.jsx'
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   ChevronRight,
@@ -89,7 +89,7 @@ export default function ProjectDetail() {
   const [creating, setCreating] = useState(false)
   const [taskType, setTaskType] = useState('end_to_end')
 
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     try {
       const [pRes, mRes, tRes] = await Promise.all([
         getProject(id),
@@ -102,11 +102,11 @@ export default function ProjectDetail() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id])
 
   useEffect(() => {
     fetchAll()
-  }, [id])
+  }, [fetchAll])
 
   const handleUpload = async (e, type) => {
     const file = e.target.files[0]

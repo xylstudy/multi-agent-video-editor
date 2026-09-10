@@ -56,9 +56,9 @@ const ColorGradedKenBurns: React.FC<ColorGradedKenBurnsProps> = ({
   const progress = interpolate(frame, [0, duration * fps - 1], [0, 1], {
     extrapolateRight: 'clamp',
   });
-  const r = interpolate(colorGrading.startColor[0], colorGrading.endColor[0], progress);
-  const g = interpolate(colorGrading.startColor[1], colorGrading.endColor[1], progress);
-  const b = interpolate(colorGrading.startColor[2], colorGrading.endColor[2], progress);
+  const r = interpolate(progress, [0, 1], [colorGrading.startColor[0], colorGrading.endColor[0]]);
+  const g = interpolate(progress, [0, 1], [colorGrading.startColor[1], colorGrading.endColor[1]]);
+  const b = interpolate(progress, [0, 1], [colorGrading.startColor[2], colorGrading.endColor[2]]);
 
   // 字幕淡入动画
   const subtitleOpacity = spring({

@@ -25,7 +25,7 @@ function mapStepKey(key) {
  * taskType 决定展示哪些步骤（end_to_end 为全链路）。
  * 返回 [{ ...def, state: 'pending' | 'running' | 'done' | 'failed' }]
  */
-export function deriveSteps(logs = [], taskStatus = 'pending', taskType = 'end_to_end') {
+function deriveSteps(logs = [], taskStatus = 'pending', taskType = 'end_to_end') {
   const defs = TYPE_STEPS[taskType] || STEP_DEFS
   const seenKeys = logs.map((l) => mapStepKey(l.step)).filter(Boolean)
   const lastKey = seenKeys.length ? seenKeys[seenKeys.length - 1] : null

@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install Python dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -c requirements-lock.txt -r requirements-dev.txt
+      - name: Engine tests
+        working-directory: viral-structure-engine
+        run: python -m pytest -q
+      - name: Downloader tests
+        working-directory: get_video
+        run: python -m pytest -q
+      - name: Backend import smoke test
+        working-directory: web/backend
+        run: python -c "import main; assert main.app.title == 'Video Claw Web API'"
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: |
+            web/frontend/package-lock.json
+            viral-structure-engine/remotion/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: web/frontend
+        run: npm ci
+      - name: Lint frontend
+        working-directory: web/frontend
+        run: npm run lint
+      - name: Build frontend
+        working-directory: web/frontend
+        run: npm run build
+      - name: Install Remotion dependencies
+        working-directory: viral-structure-engine/remotion
+        run: npm ci
+      - name: Type-check Remotion
+        working-directory: viral-structure-engine/remotion
+        run: npx tsc --noEmit

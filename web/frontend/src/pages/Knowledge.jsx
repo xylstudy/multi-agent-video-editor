@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { BookOpen, PlayCircle, Search, Trash2 } from 'lucide-react'
 import { deleteKnowledge, listKnowledge, mediaUrl } from '../api.js'
 import { Badge, Card, EmptyState, SectionHeader, TextInput } from '../components/ui.jsx'
@@ -63,7 +63,7 @@ export default function Knowledge() {
   const [type, setType] = useState('')
   const [q, setQ] = useState('')
 
-  const fetchEntries = async () => {
+  const fetchEntries = useCallback(async () => {
     setLoading(true)
     try {
       const res = await listKnowledge({ ...(type ? { type } : {}), ...(q ? { q } : {}) })
@@ -71,17 +71,13 @@ export default function Knowledge() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [q, type])
 
+  // 类型切换立即刷新；搜索输入做 350ms 防抖。
   useEffect(() => {
-    fetchEntries()
-  }, [type])
-
-  // 搜索防抖
-  useEffect(() => {
-    const timer = setTimeout(fetchEntries, 350)
+    const timer = setTimeout(fetchEntries, q ? 350 : 0)
     return () => clearTimeout(timer)
-  }, [q])
+  }, [fetchEntries, q])
 
   const handleDelete = async (id) => {
     if (!confirm('确定删除该知识条目？')) return

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Clapperboard } from 'lucide-react'
 import { login } from '../api.js'
-import { useAuth } from '../context/AuthContext.jsx'
+import { useAuth } from '../context/auth-context.js'
 import { Button, Field, InfoBar, TextInput } from '../components/ui.jsx'
 
 export default function Login() {

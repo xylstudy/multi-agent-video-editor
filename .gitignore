@@ -8,6 +8,7 @@ build/
 # Environment
 .env
 .env.local
+.venv/
 
 # Large media files (generated / temp)
 viral-structure-engine/data/temp/**/*.mp4
