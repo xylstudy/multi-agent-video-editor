@@ -9,6 +9,7 @@ from models.video_structure import (
     VideoStructure, ShotInfo, ShotType, TransitionType,
     RhythmPoint, PackagingStyle, SubtitleStyle, BGMInfo, VlogMeta,
 )
+from models.gene import build_gene as build_gene_from_analyses
 from tools.video_tools import VideoTools
 from tools.face_tools import FaceTools
 from tools.audio_tools import AudioTools
@@ -137,6 +138,21 @@ class AnalystAgent(BaseAgent):
     async def _done(self, summary: str) -> dict:
         return {"status": "done", "summary": summary}
 
+    def build_gene(self, video_path: str, duration: float,
+                   shot_analyses: list[dict], structure_analysis: dict) -> "StructureGene":
+        """把逐镜头分析 + 结构分析映射为 StructureGene（结构功能基因）。
+
+        纯映射，不调用 LLM；迁移的核心输入，先于 Planner 生成。
+        """
+        from models.gene import StructureGene
+        return build_gene_from_analyses(
+            shot_analyses=shot_analyses,
+            structure_analysis=structure_analysis,
+            source_id=str(Path(video_path).stem),
+            source_path=str(video_path),
+            duration=duration,
+        )
+
     def build_video_structure(self, video_path: str, duration: float, width: int, height: int,
                                shot_analyses: list[dict], structure_analysis: dict,
                                transcript: str = "") -> VideoStructure:
@@ -222,5 +238,8 @@ class AnalystAgent(BaseAgent):
         audio_analysis = sa.get("audio_analysis", {})
         if audio_analysis:
             structure.audio_analysis = audio_analysis
+
+        # 提取结构基因（结构功能迁移的核心输入）
+        structure.gene = self.build_gene(video_path, duration, shot_analyses, structure_analysis)
 
         return structure

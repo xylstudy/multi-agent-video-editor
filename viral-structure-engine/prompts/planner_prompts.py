@@ -105,6 +105,20 @@ def build_skeleton_extract_prompt(
 }}"""
 
 
+def _format_skill_context(skill_context) -> str:
+    """把 SkillRouter.collect() 的结果（[{name, content}]）或已拼接字符串，格式化为 prompt 片段。"""
+    if not skill_context:
+        return ""
+    if isinstance(skill_context, str):
+        return skill_context
+    blocks = []
+    for ref in skill_context:
+        name = ref.get("name", "") if isinstance(ref, dict) else getattr(ref, "name", "")
+        content = ref.get("content", "") if isinstance(ref, dict) else getattr(ref, "content", "")
+        blocks.append(f"===== Skill 参考：{name}.md =====\n{content}")
+    return "\n\n".join(blocks)
+
+
 def build_scheme_generate_prompt(
     skeleton_json: str,
     inventory_json: str,
@@ -112,16 +126,23 @@ def build_scheme_generate_prompt(
     target_info: str,
     preferences: str,
     material_type_hint: str = "",
-    techniques_summary: str = "",
     audio_data: str = "",                    # Analyst 的音频分析结果
+    gene_json: str = "",                     # Reference Gene（本次要迁移的结构，硬约束为主）
+    skill_context=None,                      # 按需加载的 Editing Skill（[{name, content}] 或字符串）
 ) -> str:
     material_note = ""
     if material_type_hint:
         material_note = f"\n【素材类型说明】\n{material_type_hint}\n请合理混合使用视频素材（type: video）和图片素材（type: image）。视频片段可直接使用，图片需做 Ken Burns 运镜。高潮段落优先用视频素材。"
 
-    techniques_section = ""
-    if techniques_summary:
-        techniques_section = f"\n【系统可用剪辑手法参考】\n{techniques_summary}\n"
+    gene_section = ""
+    if gene_json:
+        gene_section = f"""
+【参考视频结构基因（Reference Gene — 本次迁移的核心约束）】
+{gene_json}
+"""
+    skill_section = _format_skill_context(skill_context)
+    if skill_section:
+        skill_section = f"\n【按需加载的剪辑 Skill（决定「怎么剪好」，不替代 Gene）】\n{skill_section}\n"
 
     audio_section = ""
     if audio_data:
@@ -331,8 +352,9 @@ freeze_frame     | 冻结帧+RGB   | 瞬间定格，节奏马停                
 总结：请充分利用以上全部系统能力，为每个分镜精心选择转场、字幕配置、渲染组件和合成模式，使整个视频每个镜头都富有变化和设计感。
 """
 
-    return f"""你是一位Vlog编导，正在根据“结构骨架”和手头素材，为一条新Vlog生成完整的剪辑方案。{techniques_section}
+    return f"""你是一位Vlog编导，正在把参考视频的**结构基因（Gene）**迁移到用户素材上，生成完整剪辑方案。
 
+{gene_section}
 【结构骨架】
 {skeleton_json}
 
@@ -340,11 +362,24 @@ freeze_frame     | 冻结帧+RGB   | 瞬间定格，节奏马停                
 {inventory_json}
 {material_note}
 {audio_section}
-{capabilities_section}
+{skill_section}
 【新Vlog信息】
 主题：{target_topic}
 详情：{target_info}
 创作偏好：{preferences}
+
+【决策优先级（务必遵守）】
+1. 用户显式要求（创作偏好中的明确指示）
+2. Reference Gene 的硬约束（hard_constraints / importance=critical 的镜头功能）
+3. Editing Skill 的剪辑策略（帮助你"怎么剪好"，但不覆盖 Gene）
+4. 模型自由发挥（仅在前三者都未约束的细节上）
+
+【核心原则：Structure Transfer，不是 Content Copy】
+- 迁移的是"镜头功能 / 节奏 / 情绪 / 结构关系"，不是复制原片的物体。
+- Gene 某镜头要求 establishing（场景建立）但没有航拍素材时，不要因找不到"航拍"而失败：
+  结合 material-matching / structure-adaptation Skill，用"宽景 / 地标 / 环境交代"等**相同功能**的素材替代。
+- 每个分镜在 storyboard 中写清 structure_function（本镜承担的 Gene 功能）、gene_shot_index（对应 Gene 镜头下标）、
+  skill_refs（用到的 Skill reference 名）、adaptation（若做了功能替代/结构适配，写 preserved / reason / original_function）。
 
 【关键设计要求】
 
@@ -413,6 +448,11 @@ freeze_frame     | 冻结帧+RGB   | 瞬间定格，节奏马停                
   "title": "Vlog标题",
   "target_duration": 秒数,
   "structure_type": "结构类型",
+  "gene_refs": ["参考 Gene 的 source_id"],
+  "skill_refs_used": ["本次实际用到的 Skill reference 名"],
+  "adaptation_log": [
+    {{"gene_shot_index": 0, "original_function": "establishing", "adapted_to": "宽景地标照", "reason": "无航拍素材，功能级替代"}}
+  ],
   "canvas_width": 1080,
   "canvas_height": 1920,
   "render_hints": {{
@@ -460,7 +500,15 @@ freeze_frame     | 冻结帧+RGB   | 瞬间定格，节奏马停                
       "layers": [],
       "canvas_width": 1080,
       "canvas_height": 1920,
-      "ffmpeg_segment": {{}}
+      "ffmpeg_segment": {{}},
+      "structure_function": "本镜头承担的 Gene 功能（hook/establishing/daily_moment/climax/persona/info/closing/transition）",
+      "gene_shot_index": -1,
+      "skill_refs": ["用到的 Skill reference 名，如 material-matching"],
+      "adaptation": {{
+        "preserved": true,
+        "reason": "是否/为何做了功能级替代或结构适配",
+        "original_function": "原 Gene 功能（若适配了则填写）"
+      }}
     }}
   ],
   "packaging": {{
@@ -478,9 +526,16 @@ def build_scheme_iterate_prompt(
     original_scheme_json: str,
     review_result_json: str,
     inventory_json: str,
+    gene_json: str = "",
+    skill_context=None,
 ) -> str:
-    return f"""你是一位Vlog编导，正在根据审核反馈迭代优化Vlog方案。参考以下系统能力做优化。
+    gene_section = f"\n【参考视频结构基因（迭代中仍必须保持的硬约束）】\n{gene_json}\n" if gene_json else ""
+    skill_section = _format_skill_context(skill_context)
+    if skill_section:
+        skill_section = f"\n【按需加载的剪辑 Skill】\n{skill_section}\n"
 
+    return f"""你是一位Vlog编导，正在根据审核反馈迭代优化Vlog方案。参考以下系统能力做优化。
+{gene_section}
 【当前方案】
 {original_scheme_json}
 
@@ -489,12 +544,17 @@ def build_scheme_iterate_prompt(
 
 【可用素材】
 {inventory_json}
-
+{skill_section}
 【系统能力参考】
 此系统支持 23 种转场、14 种渲染组件、4 种前景合成模式、灵活的字幕配置（见前一轮完整清单）。
 请充分利用这些能力，在迭代中增加多样性。
 
-请根据审核反馈优化方案。保持结构骨架不变，但必须检查并修正以下方面：
+【决策优先级】用户显式要求 > Reference Gene > Editing Skill > 模型自由发挥。
+审核反馈会区分两类问题：
+- fidelity（迁移得不像 Reference）：结构/节奏/情绪/高潮位置/镜头功能未保持 → 优先恢复 Gene 结构。
+- quality（像 Reference 但剪得不好）：素材匹配/转场/情绪连贯/字幕包装问题 → 在不破坏 Gene 结构的前提下优化。
+
+请根据审核反馈优化方案。保持结构骨架（Gene 硬约束）不变，但必须检查并修正以下方面：
 1. **素材覆盖率**：检查哪些素材还未被使用，创造性地安排进合适的镜头里。必须覆盖所有素材
 2. **字幕配置多样化**：相邻分镜不得使用完全相同的字号、位置和颜色，至少使用 3 种不同的字号和 2 种垂直位置
 3. **转场多样化**：至少使用 4 种不同类型的转场，cut 比例不得超过 60%
@@ -502,6 +562,7 @@ def build_scheme_iterate_prompt(
 5. **前景/背景合成**：至少有 2-3 个分镜使用 fg_overlay / fg_reveal / pip 合成
 6. 节奏微调（镜头时长、顺序）
 7. 包装优化（字幕、转场、调色）
+8. 每个分镜补全 structure_function / gene_shot_index / skill_refs / adaptation 溯源字段
 
 输出格式不变，结构不变，只修改优化部分。
 """

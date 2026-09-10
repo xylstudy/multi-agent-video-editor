@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
 
+from models.gene import StructureGene
+
 
 class ShotType(str, Enum):
     HOOK = "hook"
@@ -283,6 +285,10 @@ class VideoStructure:
     raw_analysis: str = ""
     key_techniques: list[str] = field(default_factory=list)
 
+    # ===== 结构基因（Reference-guided 迁移的核心输入） =====
+    # 与 VideoStructure（记录原片内容）互补：gene 只表达"结构功能"。
+    gene: Optional[StructureGene] = None
+
     @property
     def _shot_count(self) -> int:
         return len(self.shots)
@@ -320,4 +326,5 @@ class VideoStructure:
             "key_techniques": self.key_techniques,
             "audio_analysis": self.audio_analysis,
             "raw_analysis": self.raw_analysis,
+            "gene": self.gene.to_dict() if self.gene else {},
         }

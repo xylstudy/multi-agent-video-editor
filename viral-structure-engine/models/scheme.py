@@ -73,6 +73,12 @@ class StoryboardFrame:
     # ===== FFmpeg 粗剪控制 =====
     ffmpeg_segment: dict = field(default_factory=dict)  # {trim_start, trim_end, speed, reverse, ...}
 
+    # ===== 结构迁移可溯源（Reference Gene → Material → Skill → Adaptation） =====
+    structure_function: str = ""     # 本镜头承担的 Gene 结构功能（hook/establishing/...）
+    gene_shot_index: int = -1        # 对应参考 Gene 的 shot_gene index（-1 为自由发挥）
+    skill_refs: list[str] = field(default_factory=list)   # 本镜头用到的 Skill reference 名
+    adaptation: dict = field(default_factory=dict)        # {preserved, reason, original_function}
+
     def __post_init__(self):
         if not self.material_id and self.source_material_id:
             self.material_id = self.source_material_id
@@ -124,6 +130,10 @@ class StoryboardFrame:
             "canvas_width": self.canvas_width,
             "canvas_height": self.canvas_height,
             "ffmpeg_segment": self.ffmpeg_segment,
+            "structure_function": self.structure_function,
+            "gene_shot_index": self.gene_shot_index,
+            "skill_refs": self.skill_refs,
+            "adaptation": self.adaptation,
         }
 
 
@@ -149,6 +159,10 @@ class VideoScheme:
     gap_ids: list[str] = field(default_factory=list)
     # 本方案生成时注入参考的知识/手法 id 列表（供 reviewer 关联与效果统计）
     knowledge_refs: list[str] = field(default_factory=list)
+    # ===== 结构迁移可溯源 =====
+    gene_refs: list[str] = field(default_factory=list)         # 参考 Gene 的 source_id 列表
+    skill_refs_used: list[str] = field(default_factory=list)   # 本次实际用到的 Skill reference 名
+    adaptation_log: list[dict] = field(default_factory=list)   # 结构适配决策记录
     color_grade: str = ""
     filter_style: str = ""
 
@@ -213,6 +227,9 @@ class VideoScheme:
             "script_blocks": self.script_blocks,
             "emotion_arc": self.emotion_arc,
             "knowledge_refs": self.knowledge_refs,
+            "gene_refs": self.gene_refs,
+            "skill_refs_used": self.skill_refs_used,
+            "adaptation_log": self.adaptation_log,
             "iteration": self.iteration,
             "version": self.version,
             "status": self.status,

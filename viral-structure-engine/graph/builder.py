@@ -69,6 +69,41 @@ def _collect_knowledge_refs() -> list[str]:
         return []
 
 
+def _collect_gene_and_skills(state: ViralEngineState) -> tuple[str, list[str], list]:
+    """从 state 中取出 Reference Gene，并按需路由加载 Editing Skill。
+
+    返回 (gene_json, skill_refs, skill_context)：
+      - gene_json:   Reference Gene 序列化文本（Planner 的核心结构约束）
+      - skill_refs:  本次按需加载的 Skill reference 名（渐进式披露）
+      - skill_context: [{name, content}]，直接注入 Planner prompt
+    """
+    from skills.router import SkillRouter
+
+    genes = []
+    for vs in state.get("source_structures", []):
+        g = getattr(vs, "gene", None)
+        if g is not None:
+            genes.append(g)
+    if not genes:
+        genes = [g for g in state.get("source_genes", []) if g]
+
+    gene_json = "\n\n".join(
+        json.dumps(g.to_dict() if hasattr(g, "to_dict") else g, ensure_ascii=False)
+        for g in genes
+    ) if genes else ""
+
+    router = SkillRouter()
+    skill_refs: list[str] = []
+    for g in genes:
+        plan = router.route_for_gene(g)
+        for ref in plan.references:
+            if ref not in skill_refs:
+                skill_refs.append(ref)
+
+    skill_context = [r.to_dict() for r in router.collect(skill_refs)] if skill_refs else []
+    return gene_json, skill_refs, skill_context
+
+
 async def supervisor_node(state: ViralEngineState) -> dict:
     """Supervisor 节点：判断下一步该叫谁"""
     llm = _create_llm()
@@ -107,6 +142,7 @@ async def analyst_node(state: ViralEngineState) -> dict:
 
     sample_videos = state.get("sample_videos", [])
     structures = list(state.get("source_structures", []))
+    genes = list(state.get("source_genes", []))
     errors = list(state.get("errors", []))
     logs = list(state.get("logs", []))
 
@@ -263,6 +299,15 @@ async def analyst_node(state: ViralEngineState) -> dict:
             video_structure.audio_analysis = audio_data
         structures.append(video_structure)
         out.save_json("analyst", "video_structure.json", video_structure)
+
+        # ===== 结构基因（Reference Gene）—— Planner 的核心输入 =====
+        if video_structure.gene is not None:
+            genes.append(video_structure.gene)
+            out.save_json("analyst", "gene.json", video_structure.gene)
+            logger.info(f"  [分析师] [Gene] 已提取结构基因: "
+                        f"{len(video_structure.gene.shot_genes)} 个镜头功能, "
+                        f"硬约束 {len(video_structure.gene.hard_constraints)} 条")
+
         logger.info(f"  [分析师] [OK] 分析完成: {len(shot_analyses)} 个镜头, "
                      f"结构类型: {structure.get('structure_type', {}).get('category', '?')}")
         log_entry = {"stage": "analyst", "video": video_path, "shots": len(shot_analyses)}
@@ -275,6 +320,7 @@ async def analyst_node(state: ViralEngineState) -> dict:
 
     return {
         "source_structures": structures,
+        "source_genes": genes,
         "phase": "analyst" if video_index + 1 < len(sample_videos) else "materials",
         "errors": errors,
         "logs": logs,
@@ -367,10 +413,14 @@ async def planner_node(state: ViralEngineState) -> dict:
 
     structures = state.get("source_structures", [])
 
+    # ===== Reference Gene + 按需加载的 Editing Skill（渐进式披露） =====
+    gene_json, skill_refs, skill_context = _collect_gene_and_skills(state)
+
     logger.info(f"")
     logger.info(f"  ===========================================")
     logger.info(f"    编导策划：{'迭代优化方案' if iteration > 0 else '生成迁移方案'} (第{iteration+1}轮)")
     logger.info(f"  ===========================================")
+    logger.info(f"  [编导] Reference Gene: {len(state.get('source_genes', []))} 条 | 按需加载 Skill: {skill_refs or '无'}")
 
     try:
         if iteration == 0:
@@ -405,6 +455,8 @@ async def planner_node(state: ViralEngineState) -> dict:
                 target_topic, json.dumps(target_info, ensure_ascii=False),
                 json.dumps(preferences, ensure_ascii=False),
                 audio_data=audio_data_str,
+                gene_json=gene_json,
+                skill_context=skill_context,
             )
         else:
             scheme = state.get("scheme")
@@ -416,10 +468,15 @@ async def planner_node(state: ViralEngineState) -> dict:
                 ensure_ascii=False,
             )
             logger.info(f"  [编导] 根据审核结果迭代优化...")
-            scheme_data = await planner._iterate_scheme(scheme_json, review_json, inv_json)
+            scheme_data = await planner._iterate_scheme(
+                scheme_json, review_json, inv_json,
+                gene_json=gene_json, skill_context=skill_context,
+            )
 
         scheme = planner.build_scheme(scheme_data, target_topic, iteration)
         scheme.knowledge_refs = _collect_knowledge_refs()
+        if skill_refs and not scheme.skill_refs_used:
+            scheme.skill_refs_used = list(skill_refs)
         out.save_json("planner", f"scheme_v{iteration}.json", scheme)
         logger.info(f"  [编导] [OK] 方案生成完成: {len(scheme.storyboard)} 个分镜, 目标时长 {scheme.target_duration}s")
         log_entry = {"stage": "planner", "iteration": iteration, "frames": len(scheme.storyboard)}
@@ -427,11 +484,6 @@ async def planner_node(state: ViralEngineState) -> dict:
         out.append_log("planner", log_entry)
 
         # ===== 方案决策轨迹：记录编导做方案时参考了什么 =====
-        try:
-            from knowledge.techniques_loader import get_summary
-            techniques_snapshot = get_summary()
-        except Exception:
-            techniques_snapshot = ""
         inventory_summary = {}
         inventory = state.get("material_inventory")
         if inventory:
@@ -449,16 +501,19 @@ async def planner_node(state: ViralEngineState) -> dict:
             "target_topic": target_topic,
             "skeleton": skeleton if iteration == 0 else "(迭代轮：基于审核反馈修改)",
             "review_feedback": review_result if iteration > 0 else {},
-            "techniques_injected": techniques_snapshot,
+            "gene": (gene_json[:3000] + "...") if len(gene_json) > 3000 else gene_json,
+            "skill_refs": skill_refs,
             "knowledge_refs": scheme.knowledge_refs,
             "inventory_summary": inventory_summary,
             "audio_data": audio_data_str if iteration == 0 else "",
             "scheme_frame_count": len(scheme.storyboard),
+            "adaptation_log": getattr(scheme, "adaptation_log", []),
         }
         out.save_json("planner", "planning_trace.json", planning_trace)
 
         return {
             "scheme": scheme,
+            "skill_refs": skill_refs,
             "phase": "renderer" if iteration == 0 else "review",
             "errors": errors,
             "logs": logs,
@@ -769,10 +824,11 @@ async def reviewer_node(state: ViralEngineState) -> dict:
 
     logger.info(f"")
     logger.info(f"  ===========================================")
-    logger.info(f"    方案审核：10 维度评分（含字幕/素材覆盖率/镜头切换）")
+    logger.info(f"    方案审核：结构保真 (Fidelity) + 适配质量 (Quality) 双维度")
     logger.info(f"  ===========================================")
 
     try:
+        gene_json, _, _ = _collect_gene_and_skills(state)
         structure_summaries = "\n\n".join(
             json.dumps(vs.to_dict() if hasattr(vs, "to_dict") else str(vs), ensure_ascii=False)
             for vs in structures
@@ -818,9 +874,11 @@ async def reviewer_node(state: ViralEngineState) -> dict:
             structure_summaries, scheme_json, coverage,
             material_list_desc=material_list_desc,
             transition_summary=transition_summary,
+            gene_json=gene_json,
         )
         # 关联本方案参考的知识/手法，供后续统计「知识 → 审核分数」效果
         review["knowledge_refs_applied"] = list(getattr(scheme, "knowledge_refs", []))
+        review["skill_refs_applied"] = list(getattr(scheme, "skill_refs_used", []))
 
         if hasattr(scheme, "review_notes"):
             scheme.review_notes.append(json.dumps(review, ensure_ascii=False))
@@ -830,10 +888,18 @@ async def reviewer_node(state: ViralEngineState) -> dict:
         max_iter = state.get("max_iterations", 3)
 
         score = review.get("total_score", 0)
-        hook_score = review.get("scores", {}).get("hook_appeal", {}).get("score", 10)
+        # hook 分：优先读新 fidelity 维度，回退旧扁平 scores
+        hook_score = (
+            review.get("fidelity", {}).get("dimensions", {}).get("hook_preserved", {}).get("score")
+            or review.get("scores", {}).get("hook_appeal", {}).get("score", 10)
+        )
         scores_detail = review.get("scores", {})
         score_line = " | ".join(f"{k}: {v.get('score', '?')}" for k, v in scores_detail.items())
+        fidelity_overall = review.get("fidelity", {}).get("overall", "?")
+        quality_overall = review.get("quality", {}).get("overall", "?")
+        feedback_type = review.get("feedback_type", "?")
         logger.info(f"  [审核] [OK] 评分: {score}/100")
+        logger.info(f"  [审核]   Fidelity={fidelity_overall}/10 Quality={quality_overall}/10 | feedback_type={feedback_type}")
         logger.info(f"  [审核]   维度: {score_line}")
 
         is_complete = passed or iteration >= max_iter or hook_score < 4
@@ -933,9 +999,11 @@ def create_initial_state(
         "narrative_type_hint": (user_preferences or {}).get("narrative_type", ""),
         "persona_config": (user_preferences or {}).get("persona_config", {}),
         "source_structures": [],
+        "source_genes": [],
         "material_inventory": None,
         "scheme": None,
         "knowledge_refs": [],
+        "skill_refs": [],
         "gap_report": {},
         "generated_materials": [],
         "rendered_video_path": "",

@@ -4,23 +4,32 @@ def build_review_prompt(
     material_coverage_desc: str,
     material_list_desc: str = "",
     transition_summary: str = "",
+    gene_json: str = "",
 ) -> str:
-    return f"""你是一位严苛但公正的Vlog内容审核专家。你审核过上万条Vlog，对什么样的Vlog完播率高、互动率高有极其敏锐的判断力。
+    """Reference-guided 审核：同时评价两类指标。
 
-你的审核标准基于真实数据经验：
-- Vlog的生死在前3秒，hook不行后面全白搭
-- Vlog需要"呼吸感"——不能全程快切也不能全程慢
-- Vlog的情绪一致性比内容丰富度更重要
-- Vlog最怕"假"和"刻意"
-- 每个用户素材都必须被用到，一张图都不能少——宁可一镜多图也不要漏素材
-- 镜头切换要有变化和节奏感，不能千篇一律
-- Vlog必须有字幕，这是完播率的基础设施
+    1) Gene / Structure Fidelity —— 迁移得"像不像" Reference（结构是否保持）
+    2) Adaptation / Editing Quality —— 在当前素材上"剪得好不好"（适配是否合理）
+
+    两类问题反馈性质不同：fidelity 问题要回 Planner 恢复 Gene 结构；
+    quality 问题要在不破坏 Gene 的前提下优化剪辑。
+    """
+    gene_section = f"""
+━━━━━━━━━━━━━━━━━━━━━━━━
+零、参考视频结构基因（Gene —— 结构保真的唯一基准）
+━━━━━━━━━━━━━━━━━━━━━━━━
+{gene_json}
+""" if gene_json else ""
+
+    return f"""你是一位严苛但公正的 Vlog 结构迁移审核专家。你审核的不是"视频好不好看"，而是：
+
+  迁移得"像不像" Reference（Gene 结构保真），以及"像了之后在当前素材上剪得好不好"（适配质量）。
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
-一、原始爆款的结构模式
+一、原始爆款的结构模式（含基因）
 ━━━━━━━━━━━━━━━━━━━━━━━━
 {source_structure_summary}
-
+{gene_section}
 ━━━━━━━━━━━━━━━━━━━━━━━━
 二、新Vlog方案
 ━━━━━━━━━━━━━━━━━━━━━━━━
@@ -41,43 +50,52 @@ def build_review_prompt(
 ━━━━━━━━━━━━━━━━━━━━━━━━
 {transition_summary}
 
-请从以下10个维度逐项评估。每个维度给出0-10分和一句话理由。
+请从两组维度评估。
 
-维度1：结构保真度（权重1.0）
-  方案是否忠实迁移了爆款Vlog的叙事结构和节奏模式。
+=== A 组：Gene / Structure Fidelity（迁移得像不像 Reference）===
 
-维度2：Hook吸引力（权重1.5）★★★
-  前3秒是否抓人？开头有没有悬念/冲突/视觉冲击？
+维度 A1：Hook 结构保持（weight 1.5）★★★
+  前 3 秒是否保持 Reference 的 hook 结构（悬念/冲击/金句）？开场的结构功能是否被迁移。
 
-维度3：内容适配度（权重1.0）
-  爆款结构是否合理适配到了新主题和素材上，不生硬。
+维度 A2：镜头数量 / 时长关系（weight 1.0）
+  镜头数与时长比例是否合理继承了 Reference 的节奏骨架。
 
-维度4：节奏合理性（权重1.0）
-  "呼吸感"——快慢交替是否自然？不能一直快切也不能一直慢。同时评估镜头切换的多样性：是否混用了cut/fade/dissolve/zoom等不同类型，还是全程一种切换方式？
+维度 A3：节奏曲线接近度（weight 1.0）
+  快慢交替、高潮位置、节奏模式是否接近 Reference 的 rhythm_pattern / climax_position_ratio。
 
-维度5：情绪连贯性（权重1.2）★★
-  整条Vlog的情绪曲线是否流畅？有没有情绪断裂或刻意煽情。
+维度 A4：情绪弧线保持（weight 1.2）★★
+  情绪起点→递进→高潮→回落→余韵是否沿 Reference 的情绪弧走。
 
-维度6：缺口补全质量（权重1.0）
-  AI生成的填充素材是否自然融入，不违和。
+维度 A5：高潮 / Ending 关键结构位置（weight 1.2）★★
+  高潮与收尾的关键结构位置是否与 Reference 一致。
 
-维度7：包装与视觉一致性（权重0.8）
-  字体、色调、动效风格是否统一。同时评估镜头切换的创意性和适配度——切换方式是否与画面内容和情绪匹配（如情绪高潮用dissolve比cut更合适）。
+维度 A6：核心镜头功能迁移（weight 1.2）★★
+  establishing / climax / closing 等核心镜头功能是否被迁移，而非被丢弃或替换成无关内容。
 
-维度8：完整性与可执行性（权重0.5）
-  方案是否完整，每个分镜是否具备可渲染的细节。
+=== B 组：Adaptation / Editing Quality（在当前素材上剪得好不好）===
 
-维度9：字幕质量（权重0.8）★★ 新增
-  每个分镜是否有字幕（subtitle_text）或旁白（voiceover_text）？
-  字幕是否与画面内容匹配？纯音乐段可以无字幕，但叙事段必须有。
-  文字卡片是否简洁易读，位置合理不遮挡关键画面？
+维度 B1：素材匹配合理性（weight 1.2）★★★
+  用户素材是否按"功能/情绪"合理匹配到各镜头；是否出现为了模仿原片而强行使用不合适素材。
 
-维度10：素材覆盖率（权重1.2）★★★ 新增
-  至关重要！检查每个分镜使用的素材（material_id / source_material_id）是否覆盖了用户素材清单中的所有素材。
-  - 如果分镜数 < 素材数：必须有分镜在一镜中使用了多张图片（拼贴/蒙太奇/画中画），不允许任何素材被遗漏
-  - 如果某个素材从未出现在任何分镜中 → 严重扣分
-  - 如果使用了素材清单之外的重复素材而没有用到所有清单内素材 → 严重扣分
-  - 高质量方案应让每个素材物尽其用
+维度 B2：转场是否符合场景（weight 0.8）
+  转场是否与画面内容、情绪、节奏匹配（高潮用冲击转场、收尾用柔和转场）。
+
+维度 B3：节奏自然度（weight 1.0）
+  快慢是否自然，有无"呼吸感"，是否全程快切或全程慢。
+
+维度 B4：情绪连贯性（weight 1.0）
+  情绪是否连贯，有无情绪断裂或刻意煽情。
+
+维度 B5：字幕 / 包装合理性（weight 0.8）
+  字幕是否有且差异化、位置不遮挡关键画面、调色/包装风格统一。
+
+维度 B6：素材覆盖率（weight 1.2）★★★
+  每个用户素材是否都被用到（一镜多图/拼贴/画中画也算）；有无漏素材或重复用清单外素材。
+
+────────────────────────
+
+每个维度给出 0-10 分 + 一句话理由。fidelity 与 quality 分别汇总为两个 overall 分（0-10），
+并给出 feedback_type（本次最需要改哪一类）。
 
 {{
   "scores": {{
@@ -92,13 +110,39 @@ def build_review_prompt(
     "subtitle_quality": {{"score": 0, "weight": 0.8, "reason": "一句话理由"}},
     "material_coverage": {{"score": 0, "weight": 1.2, "reason": "一句话理由"}}
   }},
+  "fidelity": {{
+    "overall": 0,
+    "issues": ["结构保真相关问题1", "问题2"],
+    "dimensions": {{
+      "hook_preserved": {{"score": 0, "reason": "一句话理由"}},
+      "shot_rhythm_ratio": {{"score": 0, "reason": "一句话理由"}},
+      "rhythm_curve": {{"score": 0, "reason": "一句话理由"}},
+      "emotion_arc": {{"score": 0, "reason": "一句话理由"}},
+      "climax_ending": {{"score": 0, "reason": "一句话理由"}},
+      "core_functions": {{"score": 0, "reason": "一句话理由"}}
+    }}
+  }},
+  "quality": {{
+    "overall": 0,
+    "issues": ["适配质量相关问题1", "问题2"],
+    "dimensions": {{
+      "material_matching": {{"score": 0, "reason": "一句话理由"}},
+      "transition_fit": {{"score": 0, "reason": "一句话理由"}},
+      "rhythm_naturalness": {{"score": 0, "reason": "一句话理由"}},
+      "emotion_coherence": {{"score": 0, "reason": "一句话理由"}},
+      "subtitle_packaging": {{"score": 0, "reason": "一句话理由"}},
+      "material_coverage": {{"score": 0, "reason": "一句话理由"}}
+    }}
+  }},
   "total_score": 0,
   "pass": false,
   "force_iterate": false,
+  "feedback_type": "fidelity/quality/mixed",
   "top_3_issues": ["问题1", "问题2", "问题3"],
   "top_3_highlights": ["亮点1", "亮点2", "亮点3"],
   "suggestions": [
     {{
+      "category": "fidelity/quality",
       "target_dimension": "维度名称",
       "current_problem": "当前问题",
       "suggested_change": "建议修改",
@@ -107,5 +151,10 @@ def build_review_prompt(
   ],
   "one_line_verdict": "一句话总评"
 }}
+
+判定口径：
+- 若主要问题是"结构没迁移过来"（hook 丢了/高潮位置错了/核心功能被换掉）→ feedback_type="fidelity"。
+- 若结构基本像 Reference，但素材匹配/转场/情绪连贯/字幕包装剪得不好 → feedback_type="quality"。
+- 两者都有 → "mixed"。
 
 重要：只输出 JSON，不要包含任何解释文字，不要使用 markdown 代码块，直接输出纯 JSON。"""

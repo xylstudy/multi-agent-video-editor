@@ -69,18 +69,16 @@ class PlannerAgent(BaseAgent):
     async def _generate_scheme(self, skeleton_json: str, inventory_json: str,
                                 target_topic: str, target_info: str, preferences: str,
                                 material_type_hint: str = "",
-                                audio_data: str = "") -> dict:
-        # 加载剪辑手法摘要注入 LLM，让编导能做出有依据的转场/特效选择
-        try:
-            from knowledge.techniques_loader import get_summary
-            techniques_summary = get_summary()
-        except Exception:
-            techniques_summary = ""
+                                audio_data: str = "",
+                                gene_json: str = "",
+                                skill_context=None) -> dict:
+        # 渐进式披露：不再把全部剪辑手法摘要注入，改为按需加载 Skill reference。
         prompt = build_scheme_generate_prompt(skeleton_json, inventory_json,
                                                target_topic, target_info, preferences,
                                                material_type_hint,
-                                               techniques_summary=techniques_summary,
-                                               audio_data=audio_data)
+                                               audio_data=audio_data,
+                                               gene_json=gene_json,
+                                               skill_context=skill_context)
         for attempt in range(3):
             try:
                 response = await self.llm.chat(prompt, response_format="json", max_tokens=16384)
@@ -91,8 +89,10 @@ class PlannerAgent(BaseAgent):
                     raise
         raise RuntimeError("方案生成失败")
 
-    async def _iterate_scheme(self, scheme_json: str, review_json: str, inventory_json: str) -> dict:
-        prompt = build_scheme_iterate_prompt(scheme_json, review_json, inventory_json)
+    async def _iterate_scheme(self, scheme_json: str, review_json: str, inventory_json: str,
+                              gene_json: str = "", skill_context=None) -> dict:
+        prompt = build_scheme_iterate_prompt(scheme_json, review_json, inventory_json,
+                                             gene_json=gene_json, skill_context=skill_context)
         for attempt in range(3):
             try:
                 response = await self.llm.chat(prompt, response_format="json", max_tokens=16384)
@@ -162,6 +162,11 @@ class PlannerAgent(BaseAgent):
                 canvas_width=fd.get("canvas_width", 1080),
                 canvas_height=fd.get("canvas_height", 1920),
                 ffmpeg_segment=fd.get("ffmpeg_segment", {}),
+                # 结构迁移可溯源
+                structure_function=fd.get("structure_function", ""),
+                gene_shot_index=fd.get("gene_shot_index", -1),
+                skill_refs=fd.get("skill_refs", []),
+                adaptation=fd.get("adaptation", {}),
             ))
 
         return VideoScheme(
@@ -176,6 +181,10 @@ class PlannerAgent(BaseAgent):
             canvas_width=scheme_data.get("canvas_width", 1080),
             canvas_height=scheme_data.get("canvas_height", 1920),
             render_hints=scheme_data.get("render_hints", {}),
+            # 结构迁移可溯源
+            gene_refs=scheme_data.get("gene_refs", []),
+            skill_refs_used=scheme_data.get("skill_refs_used", []),
+            adaptation_log=scheme_data.get("adaptation_log", []),
             # 音频配置
             audio_source_id=scheme_data.get("audio_source_id", ""),
             audio_config=scheme_data.get("audio_config", {}),

@@ -19,9 +19,11 @@ class ViralEngineState(TypedDict):
 
     # ===== 共享工作区（Agent 按需读写） =====
     source_structures: list
+    source_genes: list        # Analyst 输出的 StructureGene（Reference Gene，Planner 核心输入）
     material_inventory: Any
     scheme: Any
     knowledge_refs: list
+    skill_refs: list          # 本次实际用到的 Editing Skill reference 名
     gap_report: dict
     generated_materials: list
     rendered_video_path: str
