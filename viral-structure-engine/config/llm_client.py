@@ -4,12 +4,17 @@ import json
 import logging
 from pathlib import Path
 from typing import Optional
+from urllib.parse import urlparse
 
 import httpx
 
 from config import settings
 
 logger = logging.getLogger(__name__)
+
+
+class LLMEmptyResponseError(RuntimeError):
+    """The provider returned a successful response without final content."""
 
 
 class LLMTools:
@@ -20,9 +25,16 @@ class LLMTools:
         model: str = "kimi-2.6",
     ):
         self.api_key = api_key or settings.MOONSHOT_API_KEY
-        self.base_url = base_url or settings.MOONSHOT_BASE_URL
+        self.base_url = (base_url or settings.MOONSHOT_BASE_URL).rstrip("/")
         self.model = model
-        self.chat_url = f"{self.base_url}/chat/completions"
+        self.chat_url = (
+            self.base_url
+            if self.base_url.endswith("/chat/completions")
+            else f"{self.base_url}/chat/completions"
+        )
+
+    def _can_call_without_key(self) -> bool:
+        return urlparse(self.chat_url).hostname in {"localhost", "127.0.0.1", "::1"}
 
     async def chat(
         self,
@@ -32,7 +44,7 @@ class LLMTools:
         temperature: float = 0.7,
         max_tokens: int = 4096,
     ) -> str:
-        if not self.api_key:
+        if not self.api_key and not self._can_call_without_key():
             logger.warning("No API key configured, returning mock response")
             return self._mock_response(prompt)
 
@@ -63,7 +75,7 @@ class LLMTools:
         max_tokens: int = 4096,
     ) -> str:
         """发送视频+音频到多模态模型（如 Qwen3-OMNI-Flash），模型可同时看画面和听声音"""
-        if not self.api_key:
+        if not self.api_key and not self._can_call_without_key():
             logger.warning("No API key configured, returning mock response")
             return self._mock_response(prompt)
 
@@ -109,7 +121,7 @@ class LLMTools:
         temperature: float = 0.7,
         max_tokens: int = 4096,
     ) -> str:
-        if not self.api_key:
+        if not self.api_key and not self._can_call_without_key():
             logger.warning("No API key configured, returning mock response")
             return self._mock_response(prompt)
 
@@ -149,21 +161,43 @@ class LLMTools:
         for attempt in range(10):
             try:
                 async with httpx.AsyncClient(timeout=settings.LLM_TIMEOUT) as client:
-                    resp = await client.post(
-                        self.chat_url,
-                        headers={
-                            "Authorization": f"Bearer {self.api_key}",
-                            "Content-Type": "application/json",
-                        },
-                        json=body,
-                    )
+                    headers = {"Content-Type": "application/json"}
+                    if self.api_key:
+                        headers["Authorization"] = f"Bearer {self.api_key}"
+                    resp = await client.post(self.chat_url, headers=headers, json=body)
                     if resp.status_code == 400 and "response_format" in body:
                         logger.warning("response_format not supported, retrying without it")
                         del body["response_format"]
                         continue
                     resp.raise_for_status()
                     data = resp.json()
-                    return data["choices"][0]["message"]["content"]
+                    choice = data["choices"][0]
+                    message = choice.get("message") or {}
+                    content = message.get("content") or ""
+                    if content.strip():
+                        return content
+
+                    finish_reason = choice.get("finish_reason", "unknown")
+                    usage = data.get("usage") or {}
+                    completion_details = usage.get("completion_tokens_details") or {}
+                    reasoning_tokens = completion_details.get("reasoning_tokens", 0)
+                    current_limit = int(body.get("max_tokens") or 4096)
+                    if finish_reason == "length" and current_limit < 16384:
+                        next_limit = min(16384, current_limit * 2)
+                        logger.warning(
+                            "LLM 正文因长度上限为空，max_tokens %s -> %s 后重试",
+                            current_limit,
+                            next_limit,
+                        )
+                        body["max_tokens"] = next_limit
+                        continue
+                    raise LLMEmptyResponseError(
+                        "模型返回空正文"
+                        f" (finish_reason={finish_reason}, "
+                        f"reasoning_tokens={reasoning_tokens}, max_tokens={current_limit})"
+                    )
+            except LLMEmptyResponseError:
+                raise
             except httpx.HTTPStatusError as e:
                 if e.response.status_code == 429:
                     wait = min(30, (attempt + 1) * 5)

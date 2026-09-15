@@ -3,6 +3,8 @@ import React from 'react';
 
 interface SlowLifeMontageProps {
   source_material_ids?: string[];
+  imagePath?: string;
+  imageUrls?: string[];
   animation?: string;
   color_grade?: string;
   ambient_sound?: boolean;
@@ -12,6 +14,8 @@ interface SlowLifeMontageProps {
 
 const SlowLifeMontage: React.FC<SlowLifeMontageProps> = ({
   source_material_ids = [],
+  imagePath = '',
+  imageUrls = [],
   animation = 'zoom_in_slow',
   color_grade = 'warm',
   ambient_sound = true,
@@ -21,8 +25,7 @@ const SlowLifeMontage: React.FC<SlowLifeMontageProps> = ({
   const frame = useCurrentFrame();
   const { durationInFrames, fps } = useVideoConfig();
 
-  // 图片素材路径（示例中为beijing_8）
-  const imageSrc = 'beijing_8.jpg'; // 实际项目中应从source_material_ids获取
+  const imageSrc = imageUrls[0] || imagePath;
 
   // 缩放动画：缓慢推进
   const zoomScale = interpolate(frame, [0, durationInFrames], [1, 1.08], {
@@ -165,7 +168,7 @@ const SlowLifeMontage: React.FC<SlowLifeMontageProps> = ({
   return (
     <AbsoluteFill style={containerStyle}>
       {/* 背景图片 */}
-      <Img src={imageSrc} style={imageStyle} />
+      {imageSrc && <Img src={imageSrc} style={imageStyle} />}
 
       {/* 暖色调叠加层 */}
       <div style={warmOverlayStyle} />

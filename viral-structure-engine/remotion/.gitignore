@@ -3,3 +3,6 @@ dist/
 out/
 *.mp4
 input_props_*.json
+.render-tmp/
+.remotion-tmp/
+.test-tmp/

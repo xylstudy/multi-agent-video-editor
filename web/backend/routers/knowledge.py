@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlmodel import Session, select
@@ -13,6 +14,7 @@ from media import get_current_user_media, range_file_response
 router = APIRouter(prefix="/api/knowledge", tags=["knowledge"])
 
 DEMO_DIR = STORAGE_ROOT / "knowledge_demos"
+KnowledgeScope = Literal["mine", "system", "all"]
 
 
 def _demo_path(entry_id: str) -> Path:
@@ -39,20 +41,42 @@ def _is_visible(entry_id: str, ownership: dict[str, int], user_id: int) -> bool:
     return owner is None or owner == user_id
 
 
+def _entry_source(entry_id: str, ownership: dict[str, int], user_id: int) -> str | None:
+    """返回当前用户视角下的知识来源；他人的个人知识返回 None。"""
+    owner = ownership.get(entry_id)
+    if owner is None:
+        return "system"
+    if owner == user_id:
+        return "user"
+    return None
+
+
+def _matches_scope(source: str | None, scope: KnowledgeScope) -> bool:
+    if source is None:
+        return False
+    return scope == "all" or source == ("user" if scope == "mine" else "system")
+
+
 @router.get("")
 def list_knowledge(
     type: str | None = None,
     q: str | None = None,
+    scope: KnowledgeScope = "mine",
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
     store = _load_store()
     ownership = _ownership_map(session)
-    entries = [
-        {**e.to_dict(), "mine": ownership.get(e.id) == current_user.id}
-        for e in store.get_all_entries()
-        if _is_visible(e.id, ownership, current_user.id)
-    ]
+    entries = []
+    for entry in store.get_all_entries():
+        source = _entry_source(entry.id, ownership, current_user.id)
+        if not _matches_scope(source, scope):
+            continue
+        entries.append({
+            **entry.to_dict(),
+            "source": source,
+            "mine": source == "user",
+        })
 
     if type:
         entries = [e for e in entries if e["type"] == type]
@@ -65,6 +89,11 @@ def list_knowledge(
             or keyword in e["content"].lower()
             or any(keyword in str(t).lower() for t in e["tags"])
         ]
+    # Newly extracted knowledge is more useful at the top of the personal view.
+    entries.sort(
+        key=lambda item: (item.get("derivation") or {}).get("extracted_at", ""),
+        reverse=True,
+    )
     # 标记每个条目是否有演示视频
     for e in entries:
         e["has_demo"] = _demo_path(e["id"]).exists()
@@ -73,6 +102,7 @@ def list_knowledge(
 
 @router.get("/stats")
 def knowledge_stats(
+    scope: KnowledgeScope = "mine",
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
@@ -81,7 +111,8 @@ def knowledge_stats(
     counts: dict[str, int] = {}
     total = 0
     for e in store.get_all_entries():
-        if not _is_visible(e.id, ownership, current_user.id):
+        source = _entry_source(e.id, ownership, current_user.id)
+        if not _matches_scope(source, scope):
             continue
         total += 1
         key = e.type.value
@@ -94,8 +125,14 @@ def get_knowledge_demo(
     entry_id: str,
     request: Request,
     current_user: User = Depends(get_current_user_media),
+    session: Session = Depends(get_session),
 ):
     """知识条目的技法演示视频（支持 Range 拖动播放）。"""
+    store = _load_store()
+    if not store.get_entry(entry_id) or not _is_visible(
+        entry_id, _ownership_map(session), current_user.id
+    ):
+        raise HTTPException(status_code=404, detail="知识条目不存在")
     path = _demo_path(entry_id)
     if not path.exists():
         raise HTTPException(status_code=404, detail="该知识暂无演示视频")

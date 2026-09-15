@@ -1,9 +1,7 @@
 import json
 import shutil
-from datetime import datetime
 from pathlib import Path
 from typing import Optional
-from uuid import uuid4
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
 from fastapi.responses import FileResponse
@@ -13,7 +11,8 @@ from app_config import STORAGE_ROOT
 from auth import get_current_user
 from database import get_session
 from gene_worker import cancel_gene_extraction, start_gene_extraction
-from db_models import Gene, GeneRead, GeneStatus, KnowledgeOwnership, User
+from db_models import Gene, GeneRead, GeneStatus, User
+from knowledge_sync import extract_gene_knowledge as extract_gene_knowledge_service
 from media import get_current_user_media, range_file_response
 from vse import SAMPLE_VIRAL_VIDEO
 
@@ -158,46 +157,9 @@ async def extract_knowledge(
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
-    """从基因报告中提炼知识，写入全局知识库。"""
-    gene = _get_owned_gene(gene_id, current_user.id, session)
-    if gene.status != GeneStatus.DONE or not gene.report_path:
-        raise HTTPException(status_code=400, detail="基因提取尚未完成")
-    if not Path(gene.report_path).exists():
-        raise HTTPException(status_code=404, detail="报告文件不存在")
-
-    report_text = Path(gene.report_path).read_text(encoding="utf-8")
-    # 提炼轨迹写到基因目录，与分析报告、关键帧放在一起
-    trace_path = Path(gene.report_path).parent / "knowledge_extract_trace.json"
-
+    """从基因报告中幂等提炼知识；已提炼过时直接返回已有结果。"""
+    _get_owned_gene(gene_id, current_user.id, session)
     try:
-        from agents.knowledge_agent import KnowledgeAgent
-        from knowledge.store import KnowledgeStore
-        from models.trace import KNOWLEDGE_EXTRACT_PROMPT_VERSION
-
-        agent = KnowledgeAgent()
-        store = KnowledgeStore()
-        entries = await agent.extract_knowledge(
-            report_text, "vlog", gene.duration or 0.0, trace_path=trace_path,
-        )
-        extracted_at = datetime.now().isoformat()
-        model = getattr(agent.llm, "model", "")
-        for entry in entries:
-            # 引擎默认 id 规则（k_序号）会与已有条目冲突，统一换成全局唯一 id
-            entry.id = f"k_u{current_user.id}_{uuid4().hex[:8]}"
-            entry.source_summary = entry.source_summary or f"来自基因「{gene.title}」"
-            # 溯源：这条知识来自哪个基因、用的哪个 prompt/模型
-            entry.derivation = {
-                "source_gene_id": gene.id,
-                "source_gene_title": gene.title,
-                "source_video": gene.source_filename,
-                "extracted_at": extracted_at,
-                "prompt_version": KNOWLEDGE_EXTRACT_PROMPT_VERSION,
-                "model": model,
-            }
-            store.add_entry(entry)
-            # 记录归属：个人提炼的知识仅本人可见、可删
-            session.add(KnowledgeOwnership(entry_id=entry.id, user_id=current_user.id))
-        session.commit()
-        return {"added": len(entries), "trace_path": str(trace_path)}
+        return await extract_gene_knowledge_service(gene_id, current_user.id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"知识提炼失败: {e}")

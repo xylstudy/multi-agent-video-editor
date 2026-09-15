@@ -29,26 +29,30 @@ def create_project(
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
+    gene = None
+    if project_in.gene_id is not None:
+        gene = session.get(Gene, project_in.gene_id)
+        if not gene or gene.user_id != current_user.id:
+            raise HTTPException(status_code=404, detail="所选基因不存在")
+        if gene.status != GeneStatus.DONE:
+            raise HTTPException(status_code=400, detail="所选基因尚未完成提取")
+        if not Path(gene.video_path).is_file():
+            raise HTTPException(status_code=404, detail="基因视频文件不存在")
+
     project = Project(
         name=project_in.name,
         topic=project_in.topic,
         pipeline_mode=project_in.pipeline_mode,
         user_id=current_user.id,
+        gene_id=gene.id if gene else None,
     )
     session.add(project)
     session.commit()
     session.refresh(project)
 
     # 从基因库选择参考视频：复制基因视频为项目素材
-    if project_in.gene_id:
-        gene = session.get(Gene, project_in.gene_id)
-        if not gene or gene.user_id != current_user.id:
-            raise HTTPException(status_code=404, detail="所选基因不存在")
-        if gene.status != GeneStatus.DONE:
-            raise HTTPException(status_code=400, detail="所选基因尚未完成提取")
+    if gene:
         src = Path(gene.video_path)
-        if not src.exists():
-            raise HTTPException(status_code=404, detail="基因视频文件不存在")
         material_dir = get_project_dir(current_user.id, project.id) / "video"
         material_dir.mkdir(parents=True, exist_ok=True)
         dest = material_dir / src.name

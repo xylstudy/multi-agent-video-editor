@@ -1,9 +1,11 @@
-import { Check, Clapperboard, Images, Loader2, Sparkles, X } from 'lucide-react'
+import { Check, Clapperboard, Film, Images, ListChecks, Loader2, Sparkles, X } from 'lucide-react'
 
 const STEP_DEFS = [
   { key: 'material_analysis', label: '素材分析', icon: Images },
   { key: 'video_analysis', label: '视频分析', icon: Clapperboard },
-  { key: 'render', label: '渲染输出', icon: Sparkles, match: ['editing_transfer', 'pipeline'] },
+  { key: 'scheme_generation', label: '生成分镜', icon: Sparkles, match: ['editing_transfer', 'pipeline'] },
+  { key: 'storyboard', label: '分镜确认', icon: ListChecks },
+  { key: 'render', label: '渲染输出', icon: Film },
 ]
 
 // 不同任务类型对应不同的步骤序列
@@ -35,6 +37,9 @@ function deriveSteps(logs = [], taskStatus = 'pending', taskType = 'end_to_end')
     let state = 'pending'
     if (taskStatus === 'success') {
       state = 'done'
+    } else if (taskStatus === 'awaiting_confirmation') {
+      if (def.key === 'storyboard') state = 'running'
+      else if (i < defs.findIndex((item) => item.key === 'storyboard')) state = 'done'
     } else if (lastIndex >= 0) {
       if (i < lastIndex) state = 'done'
       else if (i === lastIndex) {

@@ -45,6 +45,9 @@ export type TransitionType =
   | "freeze_frame"
   | "flip_3d"
   | "radial_wipe"
+  | "zoom_through"
+  | "liquid_warp"
+  | "chromatic_aberration"
   | "none";
 
 /** 单个分镜的渲染层 */

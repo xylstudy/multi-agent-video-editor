@@ -53,6 +53,9 @@ def load_scheme_v2(run_dir: Path):
         "zoom_in": TransitionType.ZOOM_IN, "zoom_out": TransitionType.ZOOM_OUT,
         "flash_white": TransitionType.FLASH_WHITE, "slide": TransitionType.SLIDE,
         "whip": TransitionType.WHIP,
+        "zoom_through": TransitionType.ZOOM_THROUGH,
+        "liquid_warp": TransitionType.LIQUID_WARP,
+        "chromatic_aberration": TransitionType.CHROMATIC_ABERRATION,
     }
 
     frames = []

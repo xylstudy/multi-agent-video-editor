@@ -86,18 +86,18 @@ class DictWrapper:
 def create_llm():
     """使用 DeepSeek（Moonshot key 仅支持 kimi-for-coding 专用模型，无法用于 API）"""
     return LLMTools(
-        api_key=settings.DEEPSEEK_API_KEY,
-        base_url=settings.DEEPSEEK_BASE_URL,
-        model="deepseek-chat",
+        api_key=settings.TEXT_API_KEY,
+        base_url=settings.TEXT_BASE_URL,
+        model=settings.TEXT_MODEL_ID,
     )
 
 
 def create_vision_llm():
     """使用 Zhipu GLM-4.6V 进行视觉理解"""
     return LLMTools(
-        api_key=settings.ZHIPU_API_KEY,
-        base_url=settings.ZHIPU_BASE_URL,
-        model="glm-4.6v",
+        api_key=settings.VISION_API_KEY,
+        base_url=settings.VISION_BASE_URL,
+        model=settings.VISION_MODEL_ID,
     )
 
 

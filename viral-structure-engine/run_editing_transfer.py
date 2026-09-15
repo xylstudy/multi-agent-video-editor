@@ -41,27 +41,87 @@ def parse_args():
         default="editing_transfer",
         help="本次运行 ID（默认: editing_transfer）",
     )
+    parser.add_argument("--materials", required=True, help="任务素材库存 JSON")
+    parser.add_argument("--topic", default="我的短视频", help="目标视频主题")
+    parser.add_argument("--shot-analyses", default="", help="可选的镜头分析 JSON")
+    parser.add_argument("--structure-analysis", default="", help="可选的结构分析 JSON")
+    parser.add_argument("--output", default="", help="最终视频精确输出路径")
+    parser.add_argument("--scheme-output", default="", help="最终方案 JSON 输出路径")
+    parser.add_argument("--prepare-only", action="store_true", help="只生成分镜草案，不渲染")
     return parser.parse_args()
 
 
 # ============================================================
 # 1. 从爆款视频提取剪辑模式（镜头级节奏序列）
 # ============================================================
-def extract_editing_pattern(bpm=None, beat_times=None):
+def build_rule_based_acts(scenes, bpm=None, beat_times=None):
+    """Build a model-free structure from scene changes and audio rhythm."""
+    usable_scenes = [scene for scene in scenes if scene.get("duration", 0) > 0]
+    if not usable_scenes:
+        usable_scenes = [{"start": 0.0, "end": 3.0, "duration": 3.0}]
+    total_duration = max(scene.get("end", 0) for scene in usable_scenes)
+    beat_interval = 60.0 / bpm if bpm and bpm > 0 else 0.5
+    definitions = [
+        (0.10, "开场吸引", "期待", "快速"),
+        (0.35, "建立主题", "轻快", "舒展"),
+        (0.80, "内容展开", "兴奋", "递进"),
+        (1.01, "高潮与收束", "满足", "先快后缓"),
+    ]
+    groups = [[] for _ in definitions]
+    for scene in usable_scenes:
+        midpoint = (scene.get("start", 0) + scene.get("end", 0)) / 2
+        ratio = midpoint / total_duration if total_duration else 0
+        group_index = next(
+            index for index, definition in enumerate(definitions) if ratio < definition[0]
+        )
+        groups[group_index].append(scene)
+
+    acts = []
+    for group_index, group in enumerate(groups):
+        if not group:
+            continue
+        _, purpose, emotion, rhythm = definitions[group_index]
+        durations = [max(0.1, scene.get("duration", 0)) for scene in group]
+        acts.append({
+            "index": len(acts),
+            "purpose": purpose,
+            "emotion": emotion,
+            "rhythm": rhythm,
+            "shot_count": len(group),
+            "duration": round(sum(durations), 1),
+            "shot_beats": [max(1, round(duration / beat_interval)) for duration in durations],
+        })
+    return acts, round(sum(act["duration"] for act in acts), 1)
+
+
+def extract_editing_pattern(
+    viral_video_path: str,
+    bpm=None,
+    beat_times=None,
+    shot_analyses_path: str = "",
+    structure_analysis_path: str = "",
+):
     """加载爆款视频的镜头级分析，提取每镜头的拍数节奏序列
 
     返回:
       acts: 每段结构 + shot_beats（每镜头的拍数列表）
       total_duration: 爆款视频总时长
     """
-    shot_analyses = json.loads(
-        (PROJECT_ROOT / "data/runs/video_analysis_demo/analyst/shot_analyses.json").read_text(encoding="utf-8")
-    )
-    structure = json.loads(
-        (PROJECT_ROOT / "data/runs/video_analysis_demo/analyst/structure_analysis.json").read_text(encoding="utf-8")
-    )
+    shot_path = Path(shot_analyses_path) if shot_analyses_path else None
+    structure_path = Path(structure_analysis_path) if structure_analysis_path else None
+    if not shot_path or not structure_path or not shot_path.is_file() or not structure_path.is_file():
+        logger.info("未提供可复用分析报告，使用场景切分与节拍生成剪辑结构")
+        scenes = VideoTools().detect_scene_changes(viral_video_path, threshold=25.0)
+        return build_rule_based_acts(scenes, bpm, beat_times)
+
+    shot_analyses = json.loads(shot_path.read_text(encoding="utf-8"))
+    structure = json.loads(structure_path.read_text(encoding="utf-8"))
 
     beats_raw = structure.get("script_structure", [])
+    if not beats_raw:
+        logger.info("分析报告未包含可用段落，回退到本地场景切分")
+        scenes = VideoTools().detect_scene_changes(viral_video_path, threshold=25.0)
+        return build_rule_based_acts(scenes, bpm, beat_times)
     beat_interval = 60.0 / bpm if bpm and bpm > 0 else 0.5
 
     # 逐镜头起止时间索引
@@ -113,11 +173,9 @@ def extract_editing_pattern(bpm=None, beat_times=None):
 # ============================================================
 # 2. 加载用户照片素材
 # ============================================================
-def load_photo_materials():
+def load_photo_materials(inventory_path: str):
     """从素材库存加载用户照片"""
-    inventory = json.loads(
-        (PROJECT_ROOT / "data/runs/material_analysis/material/inventory.json").read_text(encoding="utf-8")
-    )
+    inventory = json.loads(Path(inventory_path).read_text(encoding="utf-8"))
     items = inventory.get("items", inventory.get("materials", []))
     logger.info(f"用户照片: {len(items)} 张")
 
@@ -131,7 +189,7 @@ def load_photo_materials():
 # 3. 按爆款视频的镜头级节奏序列分配照片（精确节拍对齐）
 # ============================================================
 def build_photo_scheme(acts, photos, beat_times, bpm,
-                       transition_pool_override=None):
+                       transition_pool_override=None, topic="我的短视频"):
     """按爆款视频的 shot_beats 节奏序列分配照片，每镜精确对齐到 beat_times
 
     参数:
@@ -300,7 +358,7 @@ def build_photo_scheme(acts, photos, beat_times, bpm,
                 "duration": duration,
                 "material_id": pid,
                 "visual_content": desc[:60],
-                "subtitle_text": desc[:60] if desc.strip() else "北京旅行",
+                "subtitle_text": desc[:60] if desc.strip() else topic,
                 "subtitle_config": base_cfg,
                 "emotion": act["emotion"],
                 "transition": transition,
@@ -515,6 +573,7 @@ def main():
 
     viral_video = args.viral_video
     run_id = args.run_id
+    topic = args.topic.strip() or "我的短视频"
 
     out = OutputManager(run_id=run_id)
     logger.info(f"输出目录: {out.run_dir}")
@@ -522,7 +581,7 @@ def main():
     # ---- 1. 加载用户照片 ----
     logger.info("=" * 60)
     logger.info("1. 加载用户照片素材")
-    photos = load_photo_materials()
+    photos = load_photo_materials(args.materials)
     out.save_json("editing", "photos_summary.json",
                   [{"id": p["id"], "desc": p.get("description", "")[:40]} for p in photos])
 
@@ -546,13 +605,19 @@ def main():
     # ---- 4. 提取剪辑模式（含镜头级节奏序列） ----
     logger.info("=" * 60)
     logger.info("4. 提取爆款视频剪辑模式（镜头级）")
-    acts, total_duration = extract_editing_pattern(bpm, beat_times)
+    acts, total_duration = extract_editing_pattern(
+        viral_video,
+        bpm,
+        beat_times,
+        args.shot_analyses,
+        args.structure_analysis,
+    )
     out.save_json("editing", "acts.json", acts)
 
     # ---- 5. 按爆款节奏生成照片方案 ----
     logger.info("=" * 60)
     logger.info("5. 按爆款节奏序列生成方案")
-    storyboard = build_photo_scheme(acts, photos, beat_times, bpm)
+    storyboard = build_photo_scheme(acts, photos, beat_times, bpm, topic=topic)
 
     # 延长最后一镜至总时长
     actual_duration = sum(s["duration"] for s in storyboard)
@@ -570,9 +635,9 @@ def main():
             "index": 0,
             "shot_type": "title_card",
             "duration": opening_dur,
-            "material_id": first_p.get("id", "beijing_00"),
+            "material_id": first_p.get("id", "photo_00"),
             "visual_content": "",
-            "subtitle_text": "北京之旅",
+            "subtitle_text": topic,
             "subtitle_config": {
                 "animation": "scale_up", "fontSize": 64,
                 "verticalAlign": "center", "color": "#FFD700",
@@ -590,7 +655,7 @@ def main():
             "index": 0,
             "shot_type": "ending_card",
             "duration": ending_dur,
-            "material_id": last_p.get("id", f"beijing_{len(photos)-1:02d}"),
+            "material_id": last_p.get("id", f"photo_{len(photos)-1:02d}"),
             "visual_content": "",
             "subtitle_text": "谢谢观看\n下次见",
             "subtitle_config": {
@@ -628,8 +693,8 @@ def main():
     logger.info("6. 构建渲染方案")
     scheme = {
         "id": run_id,
-        "title": "北京旅行Vlog",
-        "target_topic": "北京旅行Vlog",
+        "title": topic,
+        "target_topic": topic,
         "target_duration": round(actual_duration, 1),
         "structure_type": "情绪递进型",
         "storyboard": storyboard,
@@ -657,7 +722,17 @@ def main():
         },
     }
     out.save_json("editing", "scheme.json", scheme)
+    if args.scheme_output:
+        scheme_output = Path(args.scheme_output).resolve()
+        scheme_output.parent.mkdir(parents=True, exist_ok=True)
+        scheme_output.write_text(
+            json.dumps(scheme, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
     logger.info(f"方案: {len(storyboard)} 个分镜, {actual_duration:.1f}s, 迁移评分={scores['overall']:.3f}")
+
+    if args.prepare_only:
+        logger.info("分镜草案已生成，等待用户确认")
+        return
 
     # ---- 6. 构建素材映射 ----
     logger.info("=" * 60)
@@ -671,7 +746,9 @@ def main():
 
     from tools.remotion_renderer import render_with_remotion
 
-    output = str((out.run_dir / "final_video.mp4").resolve())
+    output_path = Path(args.output).resolve() if args.output else (out.run_dir / "final_video.mp4").resolve()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output = str(output_path)
     # 把音频也作为素材传入，确保 Remotion 能拿到 BGM
     materials_for_render = photos + [{"id": "_viral_audio", "path": audio_path}] if audio_path else photos
     result_path = render_with_remotion(scheme, materials_for_render, output, timeout=600)

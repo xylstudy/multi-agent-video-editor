@@ -289,7 +289,12 @@ export default function GeneDetail() {
     setExtractMsg(null)
     try {
       const res = await extractGeneKnowledge(id)
-      setExtractMsg({ type: 'success', text: `已提炼 ${res.data.added} 条知识，沉淀到知识库` })
+      setExtractMsg({
+        type: 'success',
+        text: res.data.skipped
+          ? `该基因已有 ${res.data.existing} 条知识，${res.data.demos_available || 0} 个视频示例可用`
+          : `已提炼 ${res.data.added} 条知识，生成 ${res.data.demos_available || 0} 个视频示例`,
+      })
     } catch (err) {
       setExtractMsg({ type: 'error', text: err.response?.data?.detail || '提炼失败' })
     } finally {

@@ -58,7 +58,12 @@ class PlannerAgent(BaseAgent):
         prompt = build_skeleton_extract_prompt(structure_summary, target_topic, target_info, structure_analysis)
         for attempt in range(3):
             try:
-                response = await self.llm.chat(prompt, response_format="json")
+                response = await self.llm.chat(
+                    prompt,
+                    response_format="json",
+                    temperature=0.2,
+                    max_tokens=16384,
+                )
                 return self.llm.parse_json(response)
             except (json.JSONDecodeError, ValueError) as e:
                 logger.warning(f"骨架解析失败 (尝试 {attempt+1}/3): {e}")
@@ -132,6 +137,9 @@ class PlannerAgent(BaseAgent):
             "light_leak": TransitionType.LIGHT_LEAK,
             "freeze_frame": TransitionType.FREEZE_FRAME,
             "flip_3d": TransitionType.FLIP_3D, "radial_wipe": TransitionType.RADIAL_WIPE,
+            "zoom_through": TransitionType.ZOOM_THROUGH,
+            "liquid_warp": TransitionType.LIQUID_WARP,
+            "chromatic_aberration": TransitionType.CHROMATIC_ABERRATION,
             "none": TransitionType.NONE,
         }
 

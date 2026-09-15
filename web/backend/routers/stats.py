@@ -3,14 +3,14 @@ from sqlmodel import Session, func, select
 
 from auth import get_current_user
 from database import get_session
-from db_models import Gene, KnowledgeOwnership, Project, Task, User
+from db_models import Gene, KnowledgeOwnership, Project, Task, TaskStatus, TaskType, User
 from vse import VSE_KNOWLEDGE_DB
 
 router = APIRouter(prefix="/api/stats", tags=["stats"])
 
 
-def _knowledge_count(session: Session, user_id: int) -> int:
-    """当前用户可见的知识条数：公共种子（无归属记录）+ 本人提炼的。"""
+def _personal_knowledge_count(session: Session, user_id: int) -> int:
+    """只统计当前用户提炼的个人知识，不把系统种子计入账号数据。"""
     import json
 
     if not VSE_KNOWLEDGE_DB.exists():
@@ -20,10 +20,7 @@ def _knowledge_count(session: Session, user_id: int) -> int:
     except Exception:
         return 0
     ownership = {o.entry_id: o.user_id for o in session.exec(select(KnowledgeOwnership)).all()}
-    return sum(
-        1 for e in entries
-        if ownership.get(e.get("id", "")) in (None, user_id)
-    )
+    return sum(1 for e in entries if ownership.get(e.get("id", "")) == user_id)
 
 
 @router.get("")
@@ -65,14 +62,14 @@ def get_stats(
         works_count = session.exec(
             select(func.count(Task.id))
             .where(Task.project_id.in_(project_ids))
-            .where(Task.status == "success")
-            .where(Task.type == "end_to_end")
+            .where(Task.status == TaskStatus.SUCCESS)
+            .where(Task.type == TaskType.END_TO_END)
         ).one()
 
     return {
         "projects": len(projects),
         "genes": gene_count,
-        "knowledge": _knowledge_count(session, current_user.id),
+        "knowledge": _personal_knowledge_count(session, current_user.id),
         "works": works_count,
         "recent_tasks": recent_tasks,
     }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Download, Trash2 } from 'lucide-react'
-import { deleteTask, downloadTaskResult, getTask, mediaUrl } from '../api.js'
+import { deleteTask, downloadTaskResult, getStoryboard, getTask, mediaUrl } from '../api.js'
 import {
   Button,
   Card,
@@ -12,6 +12,7 @@ import {
 } from '../components/ui.jsx'
 import StepTimeline from '../components/StepTimeline.jsx'
 import LogTerminal from '../components/LogTerminal.jsx'
+import StoryboardEditor from '../components/StoryboardEditor.jsx'
 
 const TASK_TYPE_LABELS = {
   end_to_end: '端到端生成',
@@ -39,6 +40,8 @@ export default function TaskDetail() {
   const navigate = useNavigate()
   const [task, setTask] = useState(null)
   const [logs, setLogs] = useState([])
+  const [draft, setDraft] = useState(null)
+  const [draftError, setDraftError] = useState('')
   const [wsStatus, setWsStatus] = useState('connecting')
   const wsRef = useRef(null)
 
@@ -80,6 +83,20 @@ export default function TaskDetail() {
       ws.close()
     }
   }, [fetchTask, id])
+
+  useEffect(() => {
+    if (task?.status !== 'awaiting_confirmation') {
+      setDraft(null)
+      setDraftError('')
+      return
+    }
+    getStoryboard(id)
+      .then((response) => {
+        setDraft(response.data)
+        setDraftError('')
+      })
+      .catch((error) => setDraftError(error.response?.data?.detail || '分镜草案加载失败'))
+  }, [id, task?.status, task?.draft_revision])
 
   const handleDownload = async () => {
     try {
@@ -151,6 +168,28 @@ export default function TaskDetail() {
         <div className="mb-6">
           <InfoBar type="error">{task.error_message}</InfoBar>
         </div>
+      )}
+
+      {task.status === 'awaiting_confirmation' && draftError && (
+        <div className="mb-6">
+          <InfoBar type="error">{draftError}</InfoBar>
+        </div>
+      )}
+
+      {task.status === 'awaiting_confirmation' && draft && (
+        <StoryboardEditor
+          taskId={task.id}
+          draft={draft}
+          onDraftChange={(nextDraft) => {
+            setDraft(nextDraft)
+            setTask((current) => ({ ...current, draft_revision: nextDraft.revision }))
+          }}
+          onConfirmed={(nextTask) => {
+            setTask(nextTask)
+            setLogs(nextTask.logs || [])
+            setDraft(null)
+          }}
+        />
       )}
 
       {/* 视频预览（仅端到端任务） */}

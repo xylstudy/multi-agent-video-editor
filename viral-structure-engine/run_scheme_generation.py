@@ -21,9 +21,9 @@ async def main():
 
     # DeepSeek：文本处理
     llm = LLMTools(
-        api_key=settings.DEEPSEEK_API_KEY,
-        base_url=settings.DEEPSEEK_BASE_URL,
-        model="deepseek-chat",
+        api_key=settings.TEXT_API_KEY,
+        base_url=settings.TEXT_BASE_URL,
+        model=settings.TEXT_MODEL_ID,
     )
     planner = PlannerAgent(llm)
 

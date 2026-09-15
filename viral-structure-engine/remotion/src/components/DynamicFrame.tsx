@@ -79,7 +79,20 @@ export const DynamicFrame: React.FC<DynamicFrameProps> = ({
 
   if (customComponent) {
     const imagePath = getMaterialPath(frame, materialMap) ?? "";
+    const foregroundPath = getFgMaterialPath(frame, materialMap) ?? "";
+    const backgroundPath = getBgMaterialPath(frame, materialMap) ?? imagePath;
     const config = frame.custom_render_config ?? {};
+    const configuredMaterialIds = [
+      ...(Array.isArray(config.source_material_ids) ? config.source_material_ids : []),
+      ...(Array.isArray(config.material_ids) ? config.material_ids : []),
+      ...(frame.layers ?? []).map((layer) => layer.material_id),
+    ].filter((item): item is string => typeof item === "string");
+    const configuredPaths = configuredMaterialIds
+      .map((id) => materialMap[id])
+      .filter((item): item is string => typeof item === "string" && item.length > 0);
+    const imageUrls = Array.from(
+      new Set([imagePath, foregroundPath, backgroundPath, ...configuredPaths].filter(Boolean)),
+    );
 
     // 构建传给组件的 props
     const baseProps: Record<string, unknown> = {
@@ -87,7 +100,14 @@ export const DynamicFrame: React.FC<DynamicFrameProps> = ({
       materialMap,
       durationInFrames,
       imagePath,
-      imageUrls: imagePath ? [imagePath] : [], // 自定义组件多使用 imageUrls[]
+      imageUrls,
+      images: imageUrls,
+      src: imagePath,
+      sourceMaterialId: imagePath,
+      backgroundSourceId: backgroundPath,
+      foregroundSourceId: foregroundPath || imagePath,
+      subtitleText: frame.subtitle_text ?? "",
+      subtitle: frame.subtitle_text ?? "",
       text: frame.text_card_content || frame.visual_description || "",
     };
 
@@ -303,5 +323,11 @@ function getMaterialPath(frame: StoryboardFrame, materialMap: MaterialMap): stri
 /** 获取前景素材路径（优先 fg_source_id） */
 function getFgMaterialPath(frame: StoryboardFrame, materialMap: MaterialMap): string | undefined {
   const mid = frame.fg_source_id;
+  return mid ? materialMap[mid] : undefined;
+}
+
+/** 获取显式背景素材；没有指定时由调用方回退到主素材。 */
+function getBgMaterialPath(frame: StoryboardFrame, materialMap: MaterialMap): string | undefined {
+  const mid = frame.bg_source_id;
   return mid ? materialMap[mid] : undefined;
 }

@@ -3,6 +3,7 @@ import argparse
 import asyncio
 import json
 import logging
+import re
 import sys
 from pathlib import Path
 
@@ -25,26 +26,32 @@ def parse_args():
     parser.add_argument(
         "--struct",
         type=str,
-        default=str(PROJECT_ROOT / "data" / "runs" / "video_analysis_demo" / "analyst" / "video_structure.json"),
-        help="视频结构分析结果路径（默认: data/runs/video_analysis_demo/analyst/video_structure.json）",
+        required=True,
+        help="视频结构分析结果路径",
     )
     parser.add_argument(
         "--struct-analysis",
         type=str,
-        default=str(PROJECT_ROOT / "data" / "runs" / "video_analysis_demo" / "analyst" / "structure_analysis.json"),
-        help="结构分析详细结果路径（默认: data/runs/video_analysis_demo/analyst/structure_analysis.json）",
+        required=True,
+        help="结构分析详细结果路径",
     )
     parser.add_argument(
         "--photo-dir",
         type=str,
-        default=str(PROJECT_ROOT / "data" / "北京"),
-        help="用户照片素材目录（默认: data/北京）",
+        default="",
+        help="用户照片素材目录；未传 --inventory 时使用",
+    )
+    parser.add_argument(
+        "--inventory",
+        type=str,
+        default="",
+        help="已分析的素材库存 JSON",
     )
     parser.add_argument(
         "--topic",
         type=str,
-        default="北京旅行Vlog",
-        help="目标视频主题（默认: 北京旅行Vlog）",
+        default="我的短视频",
+        help="目标视频主题",
     )
     parser.add_argument(
         "--run-id",
@@ -52,7 +59,68 @@ def parse_args():
         default="pipeline_e2e_techniques",
         help="本次运行 ID（默认: pipeline_e2e_techniques）",
     )
+    parser.add_argument(
+        "--knowledge-context",
+        type=str,
+        default="",
+        help="当前用户个人知识 JSON；由 Web 后端按用户过滤后传入",
+    )
+    parser.add_argument("--output", type=str, default="", help="最终视频精确输出路径")
+    parser.add_argument("--scheme-output", type=str, default="", help="最终方案 JSON 输出路径")
+    parser.add_argument("--prepare-only", action="store_true", help="只生成分镜草案，不渲染")
     return parser.parse_args()
+
+
+def infer_target_duration(topic: str, reference_duration: float = 0) -> float:
+    """Prefer an explicit duration in the topic, then the reference duration."""
+    match = re.search(r"(\d+(?:\.\d+)?)\s*(?:秒|s(?:ec(?:ond)?s?)?\b)", topic, re.IGNORECASE)
+    if match:
+        return max(1.0, min(600.0, float(match.group(1))))
+    if reference_duration > 0:
+        return max(1.0, min(600.0, float(reference_duration)))
+    return 45.0
+
+
+def normalize_storyboard_duration(scheme_data: dict, target_duration: float) -> dict:
+    """Scale model-proposed shot durations to an exact, deterministic total."""
+    frames = scheme_data.get("storyboard", [])
+    if not frames or target_duration <= 0:
+        return scheme_data
+
+    durations = [max(0.2, float(frame.get("duration", 3.0))) for frame in frames]
+    total = sum(durations)
+    if total <= 0:
+        return scheme_data
+
+    scaled = [max(0.2, round(value * target_duration / total, 3)) for value in durations]
+    scaled[-1] = round(scaled[-1] + target_duration - sum(scaled), 3)
+    if scaled[-1] < 0.2:
+        deficit = round(0.2 - scaled[-1], 3)
+        scaled[-1] = 0.2
+        for index in range(len(scaled) - 2, -1, -1):
+            available = max(0.0, scaled[index] - 0.2)
+            taken = min(available, deficit)
+            scaled[index] = round(scaled[index] - taken, 3)
+            deficit = round(deficit - taken, 3)
+            if deficit <= 0:
+                break
+
+    for frame, duration in zip(frames, scaled):
+        frame["duration"] = duration
+    scheme_data["target_duration"] = round(sum(scaled), 3)
+    return scheme_data
+
+
+def build_preferences(topic: str, target_duration: float = 45.0) -> dict:
+    subject = topic.strip() or "短视频"
+    shot_count = "6-10个分镜" if target_duration <= 20 else "12-16个分镜"
+    return {
+        "style": f"贴合“{subject}”的创意短视频风格",
+        "shot_count_target": shot_count,
+        "total_duration_guide": f"严格控制为 {target_duration:g} 秒",
+        "material_usage": "优先使用内容匹配且质量较高的不同素材，避免无意义重复",
+        "note": "根据参考视频的结构、节奏与情绪曲线安排运镜和转场。",
+    }
 
 
 async def main():
@@ -67,6 +135,7 @@ async def main():
     logger.info("1. 加载视频结构分析")
     struct_path = Path(args.struct)
     struct = json.loads(struct_path.read_text(encoding="utf-8"))
+    target_duration = infer_target_duration(args.topic, float(struct.get("duration", 0) or 0))
     logger.info(f"   视频: {struct.get('source_video', '?')}")
     logger.info(f"   时长: {struct.get('duration', 0):.1f}s, 镜头: {len(struct.get('shots', []))}")
 
@@ -76,15 +145,22 @@ async def main():
     # ===== 2. 加载素材 =====
     logger.info("=" * 60)
     logger.info("2. 加载用户素材")
-    photo_dir = Path(args.photo_dir)
-    photo_paths = sorted([p for p in photo_dir.glob("*") if p.suffix.lower() in (".jpg", ".jpeg", ".png")])
-    inventory = {
-        "items": [
-            {"id": f"mat_{i:03d}", "path": str(p.resolve()), "type": "image", "description": p.stem[:40]}
-            for i, p in enumerate(photo_paths)
-        ]
-    }
-    # 也设置 materials 字段兼容不同代码
+    if args.inventory:
+        inventory = json.loads(Path(args.inventory).read_text(encoding="utf-8"))
+        inventory.setdefault("items", inventory.get("materials", []))
+    elif args.photo_dir:
+        photo_dir = Path(args.photo_dir)
+        photo_paths = sorted([
+            p for p in photo_dir.glob("*") if p.suffix.lower() in (".jpg", ".jpeg", ".png")
+        ])
+        inventory = {
+            "items": [
+                {"id": f"mat_{i:03d}", "path": str(p.resolve()), "type": "image", "description": p.stem[:40]}
+                for i, p in enumerate(photo_paths)
+            ]
+        }
+    else:
+        raise ValueError("必须传入 --inventory 或 --photo-dir")
     inventory["materials"] = inventory["items"]
     logger.info(f"   共 {len(inventory['items'])} 张照片")
 
@@ -98,7 +174,11 @@ async def main():
     for line in techniques.split("\n")[:6]:
         logger.info(f"   {line}")
 
-    llm = LLMTools(api_key=settings.DEEPSEEK_API_KEY, base_url=settings.DEEPSEEK_BASE_URL, model="deepseek-chat")
+    llm = LLMTools(
+        api_key=settings.TEXT_API_KEY,
+        base_url=settings.TEXT_BASE_URL,
+        model=settings.TEXT_MODEL_ID,
+    )
     planner = PlannerAgent(llm)
 
     structure_summary = json.dumps(struct, ensure_ascii=False)
@@ -109,13 +189,30 @@ async def main():
     logger.info(f"   骨架: {skeleton.get('structure_type', '?')}")
 
     inv_json = json.dumps(inventory, ensure_ascii=False)
-    preferences = json.dumps({
-        "style": "旅行Vlog创意风格",
-        "shot_count_target": "12-16个分镜",
-        "total_duration_guide": "35-50秒",
-        "material_usage": "尽量使用不同照片，充分展示北京多样性（天坛、故宫、街景、夜景等）",
-        "note": "使用分割前景图片做前景展示效果。高潮段用震撼全景。",
-    })
+    preferences_data = build_preferences(args.topic, target_duration)
+    if args.knowledge_context:
+        context_path = Path(args.knowledge_context)
+        if context_path.exists():
+            try:
+                personal_entries = json.loads(context_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                logger.warning("个人知识上下文读取失败: %s", exc)
+                personal_entries = []
+            if personal_entries:
+                # 控制 prompt 体积；优先采用最近写入文件尾部的个人知识。
+                preferences_data["personal_knowledge"] = [
+                    {
+                        "id": entry.get("id", ""),
+                        "type": entry.get("type", ""),
+                        "title": entry.get("title", ""),
+                        "content": entry.get("content", ""),
+                        "tags": entry.get("tags", []),
+                        "best_when": entry.get("best_when", ""),
+                    }
+                    for entry in personal_entries[-20:]
+                ]
+                logger.info("   注入当前用户个人知识 %d 条", len(preferences_data["personal_knowledge"]))
+    preferences = json.dumps(preferences_data, ensure_ascii=False)
 
     # manually inject techniques into the generate call
     scheme_data = await planner._generate_scheme(
@@ -123,6 +220,7 @@ async def main():
         args.topic, "", preferences,
         material_type_hint="全部为静态照片素材，需要做 Ken Burns 运镜。建议每镜用不同照片。",
     )
+    normalize_storyboard_duration(scheme_data, target_duration)
     out.save_json("planner", "scheme_raw.json", scheme_data)
 
     scheme = planner.build_scheme(scheme_data, args.topic, iteration=0)
@@ -158,9 +256,22 @@ async def main():
         d = decisions_map.get(frame.get("index", -1), {})
         frame["render_component"] = d.get("render_component", "auto")
 
+    if args.scheme_output:
+        scheme_output = Path(args.scheme_output).resolve()
+        scheme_output.parent.mkdir(parents=True, exist_ok=True)
+        scheme_output.write_text(
+            json.dumps(scheme_dict, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+
+    if args.prepare_only:
+        logger.info("分镜草案已生成，等待用户确认")
+        return
+
     from tools.remotion_renderer import render_with_remotion
 
-    output = str((out.run_dir / "final_video.mp4").resolve())
+    output_path = Path(args.output).resolve() if args.output else (out.run_dir / "final_video.mp4").resolve()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output = str(output_path)
     result_path = render_with_remotion(scheme_dict, inventory["items"], output, timeout=600)
 
     if result_path:

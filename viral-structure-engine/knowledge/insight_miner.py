@@ -8,6 +8,7 @@
 """
 import json
 import logging
+from hashlib import sha256
 from dataclasses import dataclass, field
 from pathlib import Path
 from statistics import mean, median
@@ -218,19 +219,39 @@ def discover_analyses(roots: list[Path]) -> list[VideoAnalysisData]:
     """扫描多个根目录，收集所有可读的分析报告（自动去重）。"""
     found: list[VideoAnalysisData] = []
     seen: set[str] = set()
+    seen_content: set[str] = set()
+
+    def append_unique(data: VideoAnalysisData | None) -> None:
+        if data is None:
+            return
+        fingerprint_payload = {
+            "video": Path(data.video_path).name.lower() if data.video_path else "",
+            "duration": data.duration,
+            "shots": [shot.to_dict() for shot in data.shots],
+            "hook_method": data.hook_method,
+            "structure_type": data.structure_type,
+            "overall_emotion": data.overall_emotion,
+            "transitions_used": data.transitions_used,
+        }
+        fingerprint = sha256(
+            json.dumps(fingerprint_payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
+        ).hexdigest()
+        if fingerprint in seen_content:
+            return
+        seen_content.add(fingerprint)
+        found.append(data)
 
     for root in roots:
         if not root.exists():
             continue
-        # 新格式：analysis_result.json
-        for p in sorted(root.rglob("analysis_result.json")):
-            key = str(p.resolve())
-            if key in seen:
-                continue
-            seen.add(key)
-            data = normalize_new_format(p)
-            if data:
-                found.append(data)
+        # 新格式：CLI 使用 analysis_result.json，Web 基因提取使用 report.json。
+        for filename in ("analysis_result.json", "report.json"):
+            for p in sorted(root.rglob(filename)):
+                key = str(p.resolve())
+                if key in seen:
+                    continue
+                seen.add(key)
+                append_unique(normalize_new_format(p))
         # 旧格式：analyst/shot_analyses.json + structure_analysis.json
         for p in sorted(root.rglob("shot_analyses.json")):
             analyst_dir = p.parent
@@ -238,9 +259,7 @@ def discover_analyses(roots: list[Path]) -> list[VideoAnalysisData]:
             if key in seen:
                 continue
             seen.add(key)
-            data = normalize_legacy_format(analyst_dir)
-            if data:
-                found.append(data)
+            append_unique(normalize_legacy_format(analyst_dir))
 
     logger.info(f"发现 {len(found)} 份分析报告")
     return found

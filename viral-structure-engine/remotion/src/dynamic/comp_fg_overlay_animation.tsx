@@ -9,9 +9,9 @@ const comp_fg_overlay_animation: React.FC<{
   foregroundEffect?: string;
   foregroundDuration?: number;
 }> = ({
-  backgroundSourceId = 'beijing_c0a47dc3',
-  foregroundSourceId = 'beijing_0280b0f2',
-  subtitleText = '这一刻，属于北京',
+  backgroundSourceId = '',
+  foregroundSourceId = '',
+  subtitleText = '',
   subtitleColor = '#ffd700',
   foregroundEffect = 'glow_fade_in',
   foregroundDuration = 4,
@@ -59,9 +59,9 @@ const comp_fg_overlay_animation: React.FC<{
   });
   const subtitleOpacity = interpolate(frame, [20, 40], [0, 1]);
 
-  // 背景图片路径（根据实际资源路径调整）
-  const bgSrc = `/${backgroundSourceId}.png`;
-  const fgSrc = `/${foregroundSourceId}.png`;
+  // DynamicFrame 已把素材 ID 解析为当前任务 HTTP 服务的完整 URL。
+  const bgSrc = backgroundSourceId;
+  const fgSrc = foregroundSourceId || backgroundSourceId;
 
   return (
     <AbsoluteFill style={{
@@ -73,14 +73,16 @@ const comp_fg_overlay_animation: React.FC<{
       <AbsoluteFill style={{
         transform: `scale(${bgScale})`,
       }}>
-        <Img
-          src={bgSrc}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-          }}
-        />
+        {bgSrc && (
+          <Img
+            src={bgSrc}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
+        )}
       </AbsoluteFill>
 
       {/* 前景层（抠图人物） */}
@@ -97,16 +99,18 @@ const comp_fg_overlay_animation: React.FC<{
         `,
         transition: 'transform 0.1s ease-out',
       }}>
-        <Img
-          src={fgSrc}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            // 假设前景图片已经是抠好的PNG，用mix-blend-mode可以增强效果
-            // 如果是在绿幕上，可以加chroma key，这里假设已经抠好
-          }}
-        />
+        {fgSrc && (
+          <Img
+            src={fgSrc}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              // 假设前景图片已经是抠好的PNG，用mix-blend-mode可以增强效果
+              // 如果是在绿幕上，可以加chroma key，这里假设已经抠好
+            }}
+          />
+        )}
       </AbsoluteFill>
 
       {/* 金色字幕层 */}

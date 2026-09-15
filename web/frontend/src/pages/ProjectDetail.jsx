@@ -36,8 +36,8 @@ const MODE_META = {
 const TASK_TYPE_OPTIONS = [
   {
     value: 'end_to_end',
-    label: '端到端：素材分析 → 视频分析 → 渲染',
-    hint: '完整流程，直接产出成片',
+    label: '完整生成：分析 → 分镜确认 → 渲染',
+    hint: '先生成可编辑分镜，确认后再产出成片',
   },
   { value: 'material_analysis', label: '仅素材分析', hint: '只分析照片素材，用于调试' },
   { value: 'analyze_video', label: '仅视频结构分析', hint: '只分析参考视频结构，用于调试' },
@@ -132,8 +132,16 @@ export default function ProjectDetail() {
   const handleCreateTask = async () => {
     const hasVideo = materials.some((m) => m.type === 'video')
     const hasImage = materials.some((m) => m.type === 'image')
-    if (!hasVideo || !hasImage) {
-      alert('需要至少一个参考视频和一张照片')
+    if (taskType === 'analyze_video' && !hasVideo) {
+      alert('视频结构分析需要至少一个参考视频')
+      return
+    }
+    if (taskType === 'material_analysis' && !hasImage) {
+      alert('素材分析需要至少一张照片')
+      return
+    }
+    if (taskType === 'end_to_end' && (!hasVideo || !hasImage)) {
+      alert('完整生成需要至少一个参考视频和一张照片')
       return
     }
     setCreating(true)
@@ -240,7 +248,7 @@ export default function ProjectDetail() {
             size="lg"
             className="w-full"
           >
-            {taskType === 'end_to_end' ? '一键生成 Vlog' : '运行该步骤'}
+            {taskType === 'end_to_end' ? '生成分镜草案' : '运行该步骤'}
           </Button>
 
           <h3 className="mb-2 mt-6 text-[11px] font-semibold uppercase tracking-wider text-[#5a5a7a]">

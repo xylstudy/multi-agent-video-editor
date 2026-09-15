@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { AbsoluteFill, Sequence, interpolate, useVideoConfig, Easing } from "remotion";
+import { AbsoluteFill, Sequence, interpolate, useCurrentFrame, useVideoConfig, Easing } from "remotion";
 import type { RenderInput, StoryboardFrame } from "./types/schema";
 import { FrameLayer } from "./components/FrameLayer";
 import { DualTransitionLayer, getRequiredOverlap } from "./components/DualTransitions";
@@ -23,6 +23,7 @@ export const VideoSchemeComposition: React.FC<RenderInput> = ({
   material_map,
 }) => {
   const { fps } = useVideoConfig();
+  const currentFrame = useCurrentFrame();
   const storyboard = scheme.storyboard ?? [];
 
   const premountFrames = Math.round(PREMOUNT_SECONDS * fps);
@@ -121,7 +122,7 @@ export const VideoSchemeComposition: React.FC<RenderInput> = ({
       <AbsoluteFill
         style={{
           opacity: interpolate(
-            fadeOutStart,
+            currentFrame,
             [fadeOutStart, totalDuration],
             [0, 1],
             {

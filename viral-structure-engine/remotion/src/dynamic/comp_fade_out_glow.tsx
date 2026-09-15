@@ -20,10 +20,12 @@ const FadeOutGlow: React.FC<FadeOutGlowProps> = ({
   fadeDuration = 2.0,
 }) => {
   const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
+  const { durationInFrames, fps } = useVideoConfig();
 
   // 计算淡入淡出效果
-  const fadeOutStartFrame = Math.max(0, durationInFrames - Math.floor(fadeDuration * 30));
+  const fadeFrames = Math.max(1, Math.min(durationInFrames, fadeDuration * fps));
+  const fadeOutStartFrame = Math.max(0, durationInFrames - fadeFrames);
+  const glowPeakFrame = fadeOutStartFrame + fadeFrames * 0.6;
   
   // 透明度：前段保持1，后段渐变为0
   const opacity = interpolate(
@@ -40,7 +42,7 @@ const FadeOutGlow: React.FC<FadeOutGlowProps> = ({
   // 辉光强度：从0开始，在淡出过程中达到峰值，然后随透明度降低
   const glowIntensityProgress = interpolate(
     frame,
-    [fadeOutStartFrame, fadeOutStartFrame + Math.floor(fadeDuration * 30 * 0.6), durationInFrames],
+    [fadeOutStartFrame, glowPeakFrame, durationInFrames],
     [0, glowIntensity * 1.2, 0],
     {
       extrapolateLeft: 'clamp',
@@ -62,16 +64,19 @@ const FadeOutGlow: React.FC<FadeOutGlowProps> = ({
   );
 
   // 字幕淡入
-  const subtitleOpacity = interpolate(
-    frame,
-    [fadeOutStartFrame - 30, fadeOutStartFrame],
-    [0, 1],
-    {
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-      easing: Easing.out(Easing.ease),
-    }
-  );
+  const subtitleStartFrame = Math.max(0, fadeOutStartFrame - fps);
+  const subtitleOpacity = fadeOutStartFrame > subtitleStartFrame
+    ? interpolate(
+        frame,
+        [subtitleStartFrame, fadeOutStartFrame],
+        [0, 1],
+        {
+          extrapolateLeft: 'clamp',
+          extrapolateRight: 'clamp',
+          easing: Easing.out(Easing.ease),
+        }
+      )
+    : 1;
 
   return (
     <AbsoluteFill style={{
@@ -109,7 +114,7 @@ const FadeOutGlow: React.FC<FadeOutGlowProps> = ({
       }} />
 
       {/* 字幕层 */}
-      <Sequence from={Math.max(0, fadeOutStartFrame - 30)}>
+      <Sequence from={subtitleStartFrame}>
         <AbsoluteFill style={{
           justifyContent: 'flex-end',
           alignItems: 'center',

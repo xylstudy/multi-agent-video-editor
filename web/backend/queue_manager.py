@@ -94,15 +94,20 @@ class TaskQueue:
                 return
 
             task.status = TaskStatus.RUNNING
-            task.progress = 0
-            task.logs = []
+            task.error_message = None
+            if task.workflow_stage == "render":
+                task.progress = max(task.progress, 70)
+                task.logs = list(task.logs or [])
+            else:
+                task.progress = 0
+                task.logs = []
             task.updated_at = datetime.utcnow()
             session.add(task)
             session.commit()
 
             await ws_manager.broadcast(
                 str(task.id),
-                {"type": "status", "data": {"status": "running", "progress": 0}},
+                {"type": "status", "data": {"status": "running", "progress": task.progress}},
             )
 
         def emit_progress(step: str, message: str, percent: int):
@@ -132,15 +137,31 @@ class TaskQueue:
             )
             with Session(engine) as session:
                 task = session.get(Task, item.task_id)
-                task.status = TaskStatus.SUCCESS
-                task.progress = 100
-                task.result_path = result_path
+                if task.type.value == "end_to_end" and task.workflow_stage == "prepare":
+                    task.status = TaskStatus.AWAITING_CONFIRMATION
+                    task.progress = 70
+                    task.scheme_path = result_path
+                    status_payload = {
+                        "status": TaskStatus.AWAITING_CONFIRMATION.value,
+                        "progress": 70,
+                        "scheme_path": result_path,
+                    }
+                else:
+                    task.status = TaskStatus.SUCCESS
+                    task.progress = 100
+                    task.result_path = result_path
+                    status_payload = {
+                        "status": TaskStatus.SUCCESS.value,
+                        "progress": 100,
+                        "result_path": result_path,
+                    }
+                task.error_message = None
                 task.updated_at = datetime.utcnow()
                 session.add(task)
                 session.commit()
             await ws_manager.broadcast(
                 str(item.task_id),
-                {"type": "status", "data": {"status": "success", "progress": 100, "result_path": result_path}},
+                {"type": "status", "data": status_payload},
             )
         except Exception as e:
             logger.exception(f"Pipeline failed for task {item.task_id}: {e}")

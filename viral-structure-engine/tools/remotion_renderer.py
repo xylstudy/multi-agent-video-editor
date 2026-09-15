@@ -22,6 +22,7 @@ import threading
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from config import settings
 
@@ -147,13 +148,23 @@ def render_with_remotion(
     materials = _normalize_materials(material_items)
 
     media_root = None
+    run_temp_root = None
+    process_temp_root = None
     httpd = None
     httpd_thread = None
     props_file = None
 
     try:
-        # 1) 创建临时目录并复制素材
-        media_root = Path(__import__("tempfile").mkdtemp(prefix="vse_media_"))
+        # 1) 在项目盘创建隔离临时目录，避免 Windows 系统盘空间不足。
+        temp_parent = REMOTION_DIR / ".render-tmp"
+        temp_parent.mkdir(parents=True, exist_ok=True)
+        # tempfile.mkdtemp() can inherit restrictive ACLs in some Windows shells;
+        # explicit project-local directories remain writable by the render process.
+        run_temp_root = temp_parent / f"vse_remotion_{uuid4().hex}"
+        process_temp_root = temp_parent / f"remotion_process_{uuid4().hex}"
+        run_temp_root.mkdir()
+        process_temp_root.mkdir()
+        media_root = run_temp_root
         material_map: dict[str, str] = {}
         for m in materials:
             src = Path(m["path"])
@@ -196,12 +207,17 @@ def render_with_remotion(
         ]
 
         logger.info(f"Remotion 渲染命令: {' '.join(cmd)}")
+        render_env = os.environ.copy()
+        # 仅影响本次子进程；Remotion/esbuild/Chromium 的临时文件不会写入 C 盘。
+        render_env["TEMP"] = str(process_temp_root)
+        render_env["TMP"] = str(process_temp_root)
         result = subprocess.run(
             cmd,
             cwd=str(REMOTION_DIR),
             capture_output=True,
             text=False,
             timeout=timeout,
+            env=render_env,
         )
 
         if result.returncode == 0:
@@ -234,5 +250,7 @@ def render_with_remotion(
             props_file.unlink(missing_ok=True)
         if httpd is not None:
             httpd.shutdown()
-        if media_root is not None:
-            shutil.rmtree(media_root, ignore_errors=True)
+        if run_temp_root is not None:
+            shutil.rmtree(run_temp_root, ignore_errors=True)
+        if process_temp_root is not None:
+            shutil.rmtree(process_temp_root, ignore_errors=True)

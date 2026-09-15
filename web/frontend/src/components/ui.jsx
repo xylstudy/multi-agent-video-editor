@@ -86,6 +86,7 @@ export function Badge({ color = 'gray', className = '', children }) {
 const statusMeta = {
   pending:   { label: '排队中', dot: 'bg-[#5a5a7a]',       text: 'text-[#8888a8]', bg: 'bg-[rgba(255,255,255,0.06)]' },
   running:   { label: '运行中', dot: 'bg-[#7c5cfc]',       text: 'text-[#b49aff]', bg: 'bg-[rgba(124,92,252,0.12)]' },
+  awaiting_confirmation: { label: '等待确认', dot: 'bg-[#fbbf24]', text: 'text-[#fcd34d]', bg: 'bg-[rgba(251,191,36,0.12)]' },
   success:   { label: '成功',   dot: 'bg-[#34d399]',       text: 'text-[#6ee7b7]', bg: 'bg-[rgba(52,211,153,0.12)]' },
   failed:    { label: '失败',   dot: 'bg-[#f87171]',       text: 'text-[#fca5a5]', bg: 'bg-[rgba(248,113,113,0.12)]' },
   cancelled: { label: '已取消', dot: 'bg-[#5a5a7a]',       text: 'text-[#8888a8]', bg: 'bg-[rgba(255,255,255,0.06)]' },

@@ -24,6 +24,7 @@ class TaskType(str, enum.Enum):
 class TaskStatus(str, enum.Enum):
     PENDING = "pending"
     RUNNING = "running"
+    AWAITING_CONFIRMATION = "awaiting_confirmation"
     SUCCESS = "success"
     FAILED = "failed"
     CANCELLED = "cancelled"
@@ -34,6 +35,20 @@ class Provider(str, enum.Enum):
     ZHIPU = "zhipu"
     MOONSHOT = "moonshot"
     ALIYUN = "aliyun"
+
+
+class ApiFormat(str, enum.Enum):
+    OPENAI_CHAT_COMPLETIONS = "openai_chat_completions"
+
+
+class EndpointMode(str, enum.Enum):
+    BASE_URL = "base_url"
+    FULL_URL = "full_url"
+
+
+class ModelPurpose(str, enum.Enum):
+    VISION = "vision"
+    TEXT = "text"
 
 
 class UserBase(SQLModel):
@@ -48,6 +63,7 @@ class User(UserBase, table=True):
 
     projects: list["Project"] = Relationship(back_populates="user")
     api_keys: list["ApiKey"] = Relationship(back_populates="user")
+    model_configs: list["ModelConfiguration"] = Relationship(back_populates="user")
 
 
 class UserCreate(UserBase):
@@ -82,6 +98,92 @@ class ApiKeyRead(SQLModel):
     created_at: datetime
 
 
+class ModelConfiguration(SQLModel, table=True):
+    """A user-owned OpenAI-compatible model endpoint.
+
+    API keys are intentionally omitted from all read schemas and encrypted
+    before persistence. They are decrypted only for the local worker process.
+    """
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    provider: str = Field(default="custom", index=True)
+    display_name: str
+    model_id: str
+    endpoint_url: str
+    endpoint_mode: EndpointMode = Field(default=EndpointMode.BASE_URL)
+    api_format: ApiFormat = Field(default=ApiFormat.OPENAI_CHAT_COMPLETIONS)
+    api_key: str = ""
+    supports_vision: bool = Field(default=False)
+    enabled: bool = Field(default=True)
+    is_default_vision: bool = Field(default=False)
+    is_default_text: bool = Field(default=False)
+    last_test_status: Optional[str] = Field(default=None)
+    last_test_message: Optional[str] = Field(default=None)
+    last_tested_at: Optional[datetime] = Field(default=None)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    user: User = Relationship(back_populates="model_configs")
+
+
+class ModelConfigurationCreate(SQLModel):
+    provider: str = "custom"
+    display_name: str
+    model_id: str
+    endpoint_url: str
+    endpoint_mode: EndpointMode = EndpointMode.BASE_URL
+    api_format: ApiFormat = ApiFormat.OPENAI_CHAT_COMPLETIONS
+    api_key: str = ""
+    supports_vision: bool = False
+    enabled: bool = True
+    use_for_vision: bool = False
+    use_for_text: bool = False
+
+
+class ModelConfigurationUpdate(SQLModel):
+    provider: Optional[str] = None
+    display_name: Optional[str] = None
+    model_id: Optional[str] = None
+    endpoint_url: Optional[str] = None
+    endpoint_mode: Optional[EndpointMode] = None
+    api_format: Optional[ApiFormat] = None
+    api_key: Optional[str] = None
+    supports_vision: Optional[bool] = None
+    enabled: Optional[bool] = None
+
+
+class ModelConfigurationRead(SQLModel):
+    id: int
+    provider: str
+    display_name: str
+    model_id: str
+    endpoint_url: str
+    endpoint_mode: EndpointMode
+    api_format: ApiFormat
+    has_api_key: bool
+    masked_api_key: str
+    supports_vision: bool
+    enabled: bool
+    is_default_vision: bool
+    is_default_text: bool
+    last_test_status: Optional[str]
+    last_test_message: Optional[str]
+    last_tested_at: Optional[datetime]
+    created_at: datetime
+    updated_at: datetime
+
+
+class ModelConnectionTest(SQLModel):
+    provider: str = "custom"
+    model_id: str
+    endpoint_url: str
+    endpoint_mode: EndpointMode = EndpointMode.BASE_URL
+    api_format: ApiFormat = ApiFormat.OPENAI_CHAT_COMPLETIONS
+    api_key: Optional[str] = None
+    model_config_id: Optional[int] = None
+
+
 class ProjectBase(SQLModel):
     name: str
     topic: str = Field(default="")
@@ -91,6 +193,7 @@ class ProjectBase(SQLModel):
 class Project(ProjectBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id", index=True)
+    gene_id: Optional[int] = Field(default=None, foreign_key="gene.id", index=True)
     status: str = Field(default="idle")  # idle / running / etc.
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -106,6 +209,7 @@ class ProjectCreate(ProjectBase):
 class ProjectRead(ProjectBase):
     id: int
     user_id: int
+    gene_id: Optional[int] = None
     status: str
     created_at: datetime
 
@@ -152,6 +256,9 @@ class Task(SQLModel, table=True):
     status: TaskStatus = Field(default=TaskStatus.PENDING)
     progress: int = Field(default=0)
     logs: list = Field(default_factory=list, sa_column=Column(JSON))
+    workflow_stage: str = Field(default="prepare")  # prepare / render
+    scheme_path: Optional[str] = Field(default=None)
+    draft_revision: int = Field(default=0)
     result_path: Optional[str] = Field(default=None)
     error_message: Optional[str] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -171,6 +278,9 @@ class TaskRead(SQLModel):
     status: TaskStatus
     progress: int
     logs: list
+    workflow_stage: str
+    scheme_path: Optional[str]
+    draft_revision: int
     result_path: Optional[str]
     error_message: Optional[str]
     created_at: datetime

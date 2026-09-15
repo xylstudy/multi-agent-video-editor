@@ -19,9 +19,9 @@ async def main():
     logger.info(f"输出目录: {out.run_dir}")
 
     llm = LLMTools(
-        api_key=settings.DEEPSEEK_API_KEY,
-        base_url=settings.DEEPSEEK_BASE_URL,
-        model="deepseek-chat",
+        api_key=settings.TEXT_API_KEY,
+        base_url=settings.TEXT_BASE_URL,
+        model=settings.TEXT_MODEL_ID,
     )
     renderer = RendererAgent(llm)
 

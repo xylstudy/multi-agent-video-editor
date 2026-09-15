@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 from typing import Any, Optional
 
+from config.motion_catalog import build_motion_catalog_prompt
+
 from agents.base import BaseAgent, AgentRole, AgentResult, AgentStep
 
 logger = logging.getLogger(__name__)
@@ -81,6 +83,8 @@ class RendererAgent(BaseAgent):
         except Exception:
             pass
 
+        motion_catalog = build_motion_catalog_prompt()
+
         prompt = f"""你是一个Vlog渲染策略分析专家。
 
 请分析以下方案中每个分镜的渲染需求，并判断用什么方式渲染。
@@ -93,6 +97,8 @@ class RendererAgent(BaseAgent):
 
 【系统可用剪辑手法】
 {techniques_hint}
+
+{motion_catalog}
 
 对每个分镜，判断：
 1. render_component: 用什么渲染（"auto"让系统自动推断 / "text_card" / "ken_burns" / "custom:xxx" 需要自定义组件）

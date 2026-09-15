@@ -102,7 +102,7 @@ export default function Projects() {
     <div>
       <SectionHeader
         title="我的项目"
-        description="每个项目对应一条要生成的 Vlog：上传参考视频和照片，即可复刻爆款结构"
+        description="选择已提取的视频基因或上传参考视频，再用自己的素材迁移结构与节奏"
         actions={
           <Button icon={Plus} onClick={() => setShowCreate((v) => !v)}>
             新建项目
@@ -121,7 +121,7 @@ export default function Projects() {
               <TextInput
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="例如：北京旅行 Vlog"
+                placeholder="例如：周末探店短片"
                 required
               />
             </Field>
@@ -129,17 +129,17 @@ export default function Projects() {
               <TextInput
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                placeholder="例如：北京旅行"
+                placeholder="例如：咖啡探店"
               />
             </Field>
             <Field
               label="流水线模式"
-              hint={mode === 'editing_transfer' ? '复刻爆款剪辑节奏，速度快' : '多智能体协作生成，效果更好'}
+              hint={mode === 'editing_transfer' ? '本地节拍迁移，不调用模型 API' : '模型分析素材并生成完整方案'}
               className="min-w-[220px]"
             >
               <SelectInput value={mode} onChange={(e) => setMode(e.target.value)}>
-                <option value="editing_transfer">编辑迁移</option>
-                <option value="agent_pipeline">多智能体流水线</option>
+                <option value="editing_transfer">轻量编辑迁移（无需 API）</option>
+                <option value="agent_pipeline">智能生成流水线（需要 API）</option>
               </SelectInput>
             </Field>
             <Field

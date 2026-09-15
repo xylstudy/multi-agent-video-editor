@@ -76,6 +76,23 @@ def test_normalize_new_format_bad_timing_falls_back(tmp_path):
     assert data.shots[1].duration == 3.0
 
 
+def test_discover_web_gene_report_and_deduplicate_copies(tmp_path):
+    original = _write_new_report(
+        tmp_path,
+        "gene-a",
+        [_shot(0, "hook", 0, 1), _shot(1, "closing_moment", 1, 3)],
+    )
+    web_gene_dir = tmp_path / "gene-b"
+    web_gene_dir.mkdir()
+    (web_gene_dir / "report.json").write_text(
+        original.read_text(encoding="utf-8"), encoding="utf-8"
+    )
+
+    videos = discover_analyses([tmp_path])
+
+    assert len(videos) == 1
+
+
 def test_normalize_legacy_format(tmp_path):
     analyst = tmp_path / "analyst"
     analyst.mkdir()

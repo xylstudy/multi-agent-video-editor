@@ -1,5 +1,7 @@
 import json
 
+from config.motion_catalog import build_motion_catalog_prompt
+
 
 def build_skeleton_extract_prompt(
     structure_summary: str,
@@ -352,6 +354,8 @@ freeze_frame     | 冻结帧+RGB   | 瞬间定格，节奏马停                
 总结：请充分利用以上全部系统能力，为每个分镜精心选择转场、字幕配置、渲染组件和合成模式，使整个视频每个镜头都富有变化和设计感。
 """
 
+    advanced_motion_section = build_motion_catalog_prompt()
+
     return f"""你是一位Vlog编导，正在把参考视频的**结构基因（Gene）**迁移到用户素材上，生成完整剪辑方案。
 
 {gene_section}
@@ -367,6 +371,10 @@ freeze_frame     | 冻结帧+RGB   | 瞬间定格，节奏马停                
 主题：{target_topic}
 详情：{target_info}
 创作偏好：{preferences}
+
+{capabilities_section}
+
+{advanced_motion_section}
 
 【决策优先级（务必遵守）】
 1. 用户显式要求（创作偏好中的明确指示）
@@ -546,7 +554,8 @@ def build_scheme_iterate_prompt(
 {inventory_json}
 {skill_section}
 【系统能力参考】
-此系统支持 23 种转场、14 种渲染组件、4 种前景合成模式、灵活的字幕配置（见前一轮完整清单）。
+此系统支持基础转场、12 种稳定高级镜头配方、3 种高级转场、4 种前景合成模式和灵活字幕配置。
+{build_motion_catalog_prompt()}
 请充分利用这些能力，在迭代中增加多样性。
 
 【决策优先级】用户显式要求 > Reference Gene > Editing Skill > 模型自由发挥。

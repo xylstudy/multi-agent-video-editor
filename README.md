@@ -85,7 +85,7 @@ Video Claw 不是一个通用的视频编辑工具，而是一个 **AI 驱动的
 - **方案生成**：AI 编导根据素材和爆款结构，生成完整分镜方案（30+ 字段/分镜）
 - **视频渲染**：Remotion v4 渲染引擎，支持 30+ 种转场、Ken Burns 运镜、前景分割合成、8 种字幕样式，另有进阶特效示范 Composition（粒子 / 真实运动模糊 / 卡点爆发）
 - **质量闭环**：10 维度 AI 审核评分，不达标自动迭代优化（最多 3 轮）
-- **统计洞察**（2026-08 新增）：跨全部已分析爆款聚合剪辑规律——前 3 秒镜头数 / 节奏 / 镜头类型 / 情绪弧线 / 转场分布，带样本量与置信度，自包含 HTML 报告、逐镜头轨迹可钻取（见 3.4）
+- **统计洞察**：只聚合当前账号的基因分析，统计前 3 秒镜头数 / 节奏 / 镜头类型 / 情绪弧线 / 转场分布；原生深色图表支持逐镜头轨迹钻取（见 3.4）
 - **生成可溯源**（2026-08 新增）：逐镜头分析 / 知识提炼 / 方案生成全程落盘 `*_trace.json`，知识与方案携带来源推导信息，评审关联与效果统计可追根溯源（见 3.3）
 - **Web 平台**（2026-07 新增）：多用户 Web 应用——FastAPI 后端 + React 前端，基因库 / 知识库 / 统计洞察 / 项目管理 / 任务实时进度 / 作品集一体化（见第三章）
 
@@ -192,12 +192,11 @@ ALIYUN_OSS_ENDPOINT=https://oss-cn-shanghai.aliyuncs.com
 ```bash
 cd viral-structure-engine
 
-# 前置步骤：爆款分析 + 素材入库（只需执行一次）
-python analyze_video.py
-python run_material_analysis.py
+# 前置步骤：准备素材清单并完成素材入库（只需执行一次）
+python run_material_analysis.py --materials-json ../data/materials.json --topic "咖啡探店" --output data/runs/manual/material/inventory.json
 
 # 一键迁移
-python run_editing_transfer.py
+python run_editing_transfer.py --viral-video ../data/reference.mp4 --materials data/runs/manual/material/inventory.json --topic "咖啡探店"
 ```
 
 #### 方式二：多智能体流水线（需要 LLM API）
@@ -223,13 +222,13 @@ cd viral-structure-engine
 python run_video_analysis.py
 
 # 2. 照片素材入库
-python run_material_analysis.py
+python run_material_analysis.py --materials-json ../data/materials.json --output data/runs/manual/material/inventory.json
 
 # 3. 分镜方案生成
 python run_scheme_generation.py
 
-# 4. 渲染最终视频
-python run_editing_transfer.py
+# 4. 生成并渲染
+python run_editing_transfer.py --viral-video ../data/reference.mp4 --materials data/runs/manual/material/inventory.json
 ```
 
 #### 方式四：前景分割（阿里云 API）
@@ -330,19 +329,19 @@ data/runs/{run_id}/
   <img src="./assets/web/gene-detail.png" alt="基因报告" width="720">
 </p>
 
-**知识库** — 52+ 条剪辑技法知识（转场 / 剪辑技法 / 包装风格 / 特效 / 结构模板 / Hook 技法 / 节奏模式 / 情绪设计），支持类型筛选、搜索、逐条播放演示视频；生成视频时引擎自动参考这些知识：
+**知识库** — “我的知识”和“系统技法”分层展示：新账号的个人知识从 0 开始，52+ 条内置剪辑技法单独放在系统技法中；支持类型筛选、搜索、逐条播放演示视频。多智能体生成时会组合系统能力与当前用户个人知识，且不会读取其他用户的条目：
 
 <p align="center">
   <img src="./assets/web/knowledge.png" alt="知识库" width="720">
 </p>
 
-**项目详情** — 上传参考视频与照片素材，选择执行步骤（端到端 / 仅素材分析 / 仅视频分析），一键生成 Vlog；创建项目时可直接选用基因库中已分析的爆款作参考：
+**项目详情** — 上传参考视频与照片素材，选择执行步骤（完整生成 / 仅素材分析 / 仅视频分析）；创建项目时可直接选用基因库中已分析的爆款作参考：
 
 <p align="center">
   <img src="./assets/web/project-detail.png" alt="项目详情" width="720">
 </p>
 
-**任务详情** — 步骤时间线（素材分析 → 视频分析 → 渲染输出）+ WebSocket 实时日志终端 + 进度条 + 成片在线预览与下载：
+**任务详情** — 步骤时间线（素材分析 → 视频分析 → 生成分镜 → 用户确认 → 渲染输出）+ 可编辑分镜确认台 + WebSocket 实时日志 + 成片预览下载。确认台支持更换素材、修改时长/字幕/转场、上下排序和删除分镜：
 
 <p align="center">
   <img src="./assets/web/task-detail.png" alt="任务详情" width="720">
@@ -384,13 +383,14 @@ data/runs/{run_id}/
 
 ### 3.3 关键设计
 
-- **引擎零侵入**：后端以子进程方式调用引擎脚本（`cwd=viral-structure-engine/`），所有适配都在 Web 层完成，两条 CLI 路线不受影响。
+- **任务级引擎契约**：后端以子进程方式调用引擎脚本，并显式传入任务独立的输入、草案和输出路径，避免并发任务共享中间文件。
 - **实时进度**：任务队列（asyncio 单 worker）执行中把日志写入 WebSocket 广播；基因提取走独立后台任务，解析子进程输出的 `__GENE_EVENT__` 事件，前端 3 秒轮询 + 进度可视化，支持取消。
 - **知识单一事实源**：知识库不复制到 Web 数据库，每次请求直接读/写引擎的 `knowledge.json`，CLI 与 Web 看到的是同一份知识；用户提炼的知识自动签发 `k_u{user_id}_{uuid8}` 全局唯一 ID，且仅本人可见可删（用户隔离）。
 - **基因复用**：创建项目时指定 `gene_id`，后端自动把基因视频复制为项目参考素材，分析过一次的视频可无限次复用。
+- **渲染前确认**：完整任务先生成 `scheme.json` 并暂停到等待确认状态；用户保存草案后才进入纯渲染阶段，渲染阶段不调用模型 API。
 - **多用户**：bcrypt 密码哈希 + JWT（7 天有效期），项目 / 素材 / 任务 / 基因 / API Key 全部按用户隔离。
 - **生成可溯源**：逐镜头分析（`analysis_trace.json`）、知识提炼（`knowledge_extract_trace.json`）、方案生成（`planning_trace.json`）会把推理轨迹落盘——含每镜 frame_paths / prompt 版本 / 模型 / 原始返回；知识条目携带 `derivation`（来源基因、prompt 版本、模型、时间），方案携带 `knowledge_refs`（注入参考的手法 id），供审核关联、效果统计与故障排查。
-- **统计洞察**：Insights 接口每次请求即时重算跨视频统计、不缓存；扫描范围含共享示例 + 本人私有基因目录（用户隔离），报告 HTML 以 token 鉴权、前端 `<iframe>` 嵌入（详见 3.4）。
+- **统计洞察**：Insights 只扫描当前用户 `genes/`，不混入全局历史产物；接口输出已脱敏，前端使用原生 React 深色图表（详见 3.4）。
 
 ### 3.4 统计洞察（2026-08 新增）
 
@@ -406,12 +406,12 @@ data/runs/{run_id}/
 | `emotion_arc` | 5 段式情绪弧线每段主导情绪 + 整体基调 |
 | `transitions` | 高频转场及占比 |
 
-- **自包含 HTML 报告**：总览表 + 逐视频镜头时间线（点击色块钻取该镜推理轨迹）+ 情绪弧线 / 节奏双折线图 + 镜头类型 / 转场分布条形图，内联资源、零外部依赖、离线可打开。
-- **实时挖掘不缓存**：`GET /api/insights/report` 每次请求即时重算，新分析的视频立即出现；也可用 `run_insight_mining.py` 落盘 `insights.json` + `insight_report.html` 离线查看。
-- **兼容新旧产物**：统一识别新旧两代分析输出（单文件 `analysis_result.json` 与旧 `runs/*/analyst/` 结构），旧数据缺时间字段时自动回退、不下时间相关结论。
-- **用户隔离 + 报告鉴权**：扫描范围仅共享示例与本人私有基因目录，报告以 `?token=` 鉴权、前端 `<iframe>` 嵌入。
-
-> 该页面截图暂缺：将「统计洞察」页截图保存为 `assets/web/insights.png` 后回填即可。
+- **原生交互式页面**：统计指标、分布条形图、逐视频镜头时间线、情绪流和镜头详情全部由 React 渲染，与主站深色主题一致，无 iframe 和双滚动条。
+- **严格用户隔离**：`GET /api/insights` 只扫描当前用户 `storage/users/{user_id}/genes`，新账号从 0 个样本开始。
+- **兼容并去重**：统一识别 Web 的 `report.json`、CLI 的 `analysis_result.json` 与旧 `runs/*/analyst/` 结构；相同内容的报告副本只统计一次。
+- **样本语义**：0 个样本显示引导空态，1 个样本只展示单视频特征，2 个以上才展示跨视频聚合结论和置信度。
+- **接口脱敏**：前端响应不包含分析报告、视频或关键帧的本机绝对路径。
+- **离线报告保留**：`run_insight_mining.py` 仍可生成自包含 HTML，`/api/insights/report` 作为兼容接口保留，但 Web 主页面不再依赖它。
 
 ---
 

@@ -42,6 +42,16 @@ def demo_spec(entry: dict) -> tuple[str, str]:
     etype = entry.get("type", "")
     sd_id = (entry.get("structured_data") or {}).get("id", "")
 
+    # 用户分析报告自动归纳出的五类知识，映射到对应的教学型合成，
+    # 避免全部回退为无关的字幕动画。
+    if etype == "structure_template":
+        return "emotion_arc", "structure_arc"
+    if etype == "hook_technique":
+        return "montage", "hook"
+    if etype == "rhythm_pattern":
+        return "beat", "beat"
+    if etype == "emotion_design":
+        return "emotion_arc", "emotion_arc"
     if etype == "transition_type":
         return "transition", sd_id or "cut"
     if etype == "effect_type":
@@ -63,6 +73,7 @@ def render_one(entry: dict, timeout: int = 600) -> tuple[bool, str]:
     props_file.write_text(json.dumps(props, ensure_ascii=False), encoding="utf-8")
 
     out_path = DEMO_OUT_DIR / f"{entry['id']}.mp4"
+    DEMO_OUT_DIR.mkdir(parents=True, exist_ok=True)
     npx_cmd = "npx.cmd" if sys.platform == "win32" else "npx"
     cmd = [
         npx_cmd, "remotion", "render",
@@ -83,6 +94,77 @@ def render_one(entry: dict, timeout: int = 600) -> tuple[bool, str]:
         return False, f"渲染超时（>{timeout}s）"
     finally:
         props_file.unlink(missing_ok=True)
+
+
+def _source_fingerprint(path: Path) -> str:
+    stat = path.stat()
+    return f"{stat.st_size}:{stat.st_mtime_ns}"
+
+
+def render_source_demo(
+    entry: dict,
+    source_video: Path,
+    output_path: Path,
+    timeout: int = 180,
+) -> tuple[bool, str]:
+    """Create a short example from the actual reference video behind a user gene."""
+    from tools.video_tools import _find_ffmpeg
+
+    if not source_video.is_file():
+        return False, f"源视频不存在: {source_video}"
+    kind = entry.get("type", "")
+    start_by_type = {
+        "structure_template": 0.0,
+        "hook_technique": 0.0,
+        "rhythm_pattern": 2.0,
+        "emotion_design": 5.0,
+        "packaging_style": 8.0,
+    }
+    start = start_by_type.get(kind, 0.0)
+    duration = 3.0 if kind == "hook_technique" else 5.0
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    cmd = [
+        _find_ffmpeg(), "-y", "-ss", str(start), "-i", str(source_video),
+        "-t", str(duration), "-an",
+        "-vf", "scale=540:960:force_original_aspect_ratio=increase,crop=540:960",
+        "-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p",
+        str(output_path),
+    ]
+    try:
+        result = subprocess.run(
+            cmd,
+            cwd=str(VSE_DIR),
+            capture_output=True,
+            timeout=timeout,
+        )
+        # Very short references do not have an eight-second packaging window.
+        # Retry from the beginning so every extracted knowledge item still
+        # receives a clip from the user's actual video.
+        if (result.returncode != 0 or not output_path.is_file()) and start > 0:
+            output_path.unlink(missing_ok=True)
+            retry_cmd = list(cmd)
+            retry_cmd[retry_cmd.index("-ss") + 1] = "0"
+            result = subprocess.run(
+                retry_cmd,
+                cwd=str(VSE_DIR),
+                capture_output=True,
+                timeout=timeout,
+            )
+        if result.returncode == 0 and output_path.is_file() and output_path.stat().st_size > 0:
+            meta_path = output_path.with_suffix(output_path.suffix + ".source.json")
+            meta_path.write_text(
+                json.dumps({
+                    "entry_id": entry.get("id"),
+                    "source_video": str(source_video.resolve()),
+                    "source_fingerprint": _source_fingerprint(source_video),
+                }, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+            return True, f"{output_path.stat().st_size / 1024:.0f}KB"
+        stderr = (result.stderr or b"").decode("utf-8", errors="replace")
+        return False, stderr[-400:]
+    except subprocess.TimeoutExpired:
+        return False, f"渲染超时（>{timeout}s）"
 
 
 def main():

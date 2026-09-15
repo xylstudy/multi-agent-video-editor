@@ -33,6 +33,15 @@ MOONSHOT_BASE_URL = os.getenv("MOONSHOT_BASE_URL", "https://api.moonshot.cn/v1")
 ZHIPU_API_KEY = os.getenv("ZHIPU_API_KEY", "")
 ZHIPU_BASE_URL = os.getenv("ZHIPU_BASE_URL", "https://open.bigmodel.cn/api/paas/v4")
 
+# Web 端按账号选择的模型。未配置时继续兼容原有的智谱 / DeepSeek 环境变量。
+VISION_API_KEY = os.getenv("VISION_API_KEY", ZHIPU_API_KEY)
+VISION_BASE_URL = os.getenv("VISION_BASE_URL", ZHIPU_BASE_URL)
+VISION_MODEL_ID = os.getenv("VISION_MODEL_ID", "glm-4.6v-flash")
+
+TEXT_API_KEY = os.getenv("TEXT_API_KEY", DEEPSEEK_API_KEY)
+TEXT_BASE_URL = os.getenv("TEXT_BASE_URL", DEEPSEEK_BASE_URL)
+TEXT_MODEL_ID = os.getenv("TEXT_MODEL_ID", "deepseek-chat")
+
 LLM_MAX_RETRIES = 3
 LLM_TIMEOUT = 180
 

@@ -1,4 +1,5 @@
-"""素材入库分析：GLM-4.6V 逐张分析北京照片"""
+"""Analyze an image manifest and write a material inventory."""
+import argparse
 import asyncio
 import json
 import logging
@@ -15,19 +16,29 @@ from agents.material_manager import MaterialManagerAgent
 from models.material import MaterialType, MaterialInventory
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="图片素材分析")
+    parser.add_argument("--materials-json", required=True, help="待分析素材清单 JSON")
+    parser.add_argument("--topic", default="短视频", help="目标视频主题")
+    parser.add_argument("--run-id", default="material_analysis", help="本次运行 ID")
+    parser.add_argument("--output", default="", help="库存 JSON 的精确输出路径")
+    return parser.parse_args()
+
+
 async def main():
-    target_topic = "北京旅行Vlog"
-    materials_json = "./data/temp/beijing_materials.json"
-    run_id = "material_analysis"
+    args = parse_args()
+    target_topic = args.topic
+    materials_json = args.materials_json
+    run_id = args.run_id
 
     out = OutputManager(run_id=run_id)
     logger.info(f"输出目录: {out.run_dir}")
 
     # GLM-4.6V：视觉理解
     vision_llm = LLMTools(
-        api_key=settings.ZHIPU_API_KEY,
-        base_url=settings.ZHIPU_BASE_URL,
-        model="glm-4.6v",
+        api_key=settings.VISION_API_KEY,
+        base_url=settings.VISION_BASE_URL,
+        model=settings.VISION_MODEL_ID,
     )
 
     face_tools = FaceTools()
@@ -77,6 +88,13 @@ async def main():
     # 保存库存
     inventory = MaterialInventory(items=items)
     out.save_json("material", "inventory.json", inventory)
+    if args.output:
+        output_path = Path(args.output).resolve()
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(
+            json.dumps(inventory.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        logger.info("任务库存已保存至: %s", output_path)
     logger.info(f"\n入库完成: {len(items)}/{total} 成功 (失败 {fail_count})")
     logger.info(f"  含人脸: {sum(1 for i in items if i.has_face)} 张")
     logger.info(f"  质量分布: {sum(1 for i in items if i.quality.value == 'high')}高 / "

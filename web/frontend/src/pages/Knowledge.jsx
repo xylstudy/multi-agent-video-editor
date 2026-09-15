@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { BookOpen, PlayCircle, Search, Trash2 } from 'lucide-react'
+import { BookOpen, Library, PlayCircle, Search, Trash2, UserRound } from 'lucide-react'
 import { deleteKnowledge, listKnowledge, mediaUrl } from '../api.js'
 import { Badge, Card, EmptyState, SectionHeader, TextInput } from '../components/ui.jsx'
 
@@ -27,6 +27,11 @@ const TYPE_BADGE = {
 }
 
 const TYPE_LABEL = Object.fromEntries(TYPE_TABS.filter((t) => t.key).map((t) => [t.key, t.label]))
+
+const SOURCE_TABS = [
+  { key: 'mine', label: '我的知识', icon: UserRound },
+  { key: 'system', label: '系统技法', icon: Library },
+]
 
 /** 技法演示播放器：默认收起，点击后加载视频（避免整页同时加载几十个视频） */
 function DemoPlayer({ id }) {
@@ -60,18 +65,19 @@ function DemoPlayer({ id }) {
 export default function Knowledge() {
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
+  const [scope, setScope] = useState('mine')
   const [type, setType] = useState('')
   const [q, setQ] = useState('')
 
   const fetchEntries = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await listKnowledge({ ...(type ? { type } : {}), ...(q ? { q } : {}) })
+      const res = await listKnowledge({ scope, ...(type ? { type } : {}), ...(q ? { q } : {}) })
       setEntries(res.data)
     } finally {
       setLoading(false)
     }
-  }, [q, type])
+  }, [q, scope, type])
 
   // 类型切换立即刷新；搜索输入做 350ms 防抖。
   useEffect(() => {
@@ -85,12 +91,47 @@ export default function Knowledge() {
     fetchEntries()
   }
 
+  const handleScopeChange = (nextScope) => {
+    setScope(nextScope)
+    setType('')
+    setQ('')
+  }
+
+  const hasFilters = Boolean(type || q)
+  const emptyTitle = hasFilters
+    ? '没有匹配的知识条目'
+    : scope === 'mine'
+      ? '还没有个人知识'
+      : '暂无系统技法'
+  const emptyDescription = hasFilters
+    ? '换个类型或关键词试试'
+    : scope === 'mine'
+      ? '去基因库提炼知识后，它们会出现在这里'
+      : '系统暂未配置内置剪辑技法'
+
   return (
     <div>
       <SectionHeader
         title="知识库"
-        description="从爆款视频中沉淀的剪辑技法与结构经验，生成视频时会自动参考这些知识"
+        description="个人提炼的经验与系统内置技法分开管理，生成视频时按需使用"
       />
+
+      <div className="mb-4 inline-flex rounded-xl border border-[#2a2a42] bg-[#141421] p-1">
+        {SOURCE_TABS.map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            onClick={() => handleScopeChange(key)}
+            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+              scope === key
+                ? 'bg-[#7c5cfc] text-white'
+                : 'text-[#8888a8] hover:bg-[#1c1c2b] hover:text-[#c8c8e0]'
+            }`}
+          >
+            <Icon size={15} />
+            {label}
+          </button>
+        ))}
+      </div>
 
       {/* 类型 Tab + 搜索 */}
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -127,8 +168,8 @@ export default function Knowledge() {
         <Card>
           <EmptyState
             icon={BookOpen}
-            title="没有匹配的知识条目"
-            description="换个关键词试试，或去基因库提炼新知识"
+            title={emptyTitle}
+            description={emptyDescription}
           />
         </Card>
       ) : (
@@ -150,12 +191,19 @@ export default function Knowledge() {
                   <Badge color={TYPE_BADGE[e.type] || 'gray'}>
                     {TYPE_LABEL[e.type] || e.type}
                   </Badge>
-                  <Badge color={e.mine ? 'green' : 'gray'}>{e.mine ? '我的' : '公共'}</Badge>
+                  <Badge color={e.source === 'user' ? 'green' : 'gray'}>
+                    {e.source === 'user' ? '我的' : '系统'}
+                  </Badge>
                 </div>
                 <h3 className="pr-6 text-sm font-semibold text-[#e8e8f0]">{e.title}</h3>
                 <p className="mt-1.5 flex-1 text-xs leading-relaxed text-[#8888a8]">
                   {e.content}
                 </p>
+                {e.source_summary && e.source === 'user' && (
+                  <p className="mt-2 text-[11px] text-[#6f6f91]">
+                    来源：{e.source_summary}
+                  </p>
+                )}
                 {e.has_demo && <DemoPlayer id={e.id} />}
                 {e.best_when && (
                   <p className="mt-2 text-xs text-[#5a5a7a]">

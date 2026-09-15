@@ -23,6 +23,9 @@ jobs:
       - name: Downloader tests
         working-directory: get_video
         run: python -m pytest -q
+      - name: Backend tests
+        working-directory: web/backend
+        run: python -m pytest -q
       - name: Backend import smoke test
         working-directory: web/backend
         run: python -c "import main; assert main.app.title == 'Video Claw Web API'"

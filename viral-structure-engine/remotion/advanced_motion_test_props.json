@@ -1,0 +1,56 @@
+{
+  "scheme": {
+    "id": "advanced-motion-smoke-test",
+    "title": "高级动效组件冒烟测试",
+    "target_topic": "城市夜游",
+    "target_duration": 4,
+    "structure_type": "showcase",
+    "total_duration": 4,
+    "storyboard": [
+      {
+        "index": 0,
+        "shot_type": "hook",
+        "duration": 1,
+        "source_material_id": "demo",
+        "visual_description": "城市醒来之前",
+        "render_component": "custom:kinetic_warp",
+        "custom_render_config": {"accent_color": "#ff315c"},
+        "transition_in": "cut"
+      },
+      {
+        "index": 1,
+        "shot_type": "daily_moment",
+        "duration": 1,
+        "source_material_id": "demo",
+        "visual_description": "霓虹穿过夜色",
+        "render_component": "custom:neon_light_rays",
+        "custom_render_config": {"accent_color": "#00d9ff"},
+        "transition_in": "zoom_through"
+      },
+      {
+        "index": 2,
+        "shot_type": "emotion_peak",
+        "duration": 1,
+        "source_material_id": "demo",
+        "visual_description": "一秒切进高潮",
+        "render_component": "custom:beat_montage",
+        "custom_render_config": {"source_material_ids": ["demo", "demo2"], "beat_frames": [0, 8, 16, 24]},
+        "transition_in": "chromatic_aberration"
+      },
+      {
+        "index": 3,
+        "shot_type": "closing",
+        "duration": 1,
+        "source_material_id": "demo2",
+        "visual_description": "今晚，继续出发",
+        "render_component": "custom:focus_blur_resolve",
+        "custom_render_config": {"accent_color": "#ffb020"},
+        "transition_in": "liquid_warp"
+      }
+    ]
+  },
+  "material_map": {
+    "demo": "/ken_test.jpg",
+    "demo2": "/photos/88250e8474df89bdc677ba059048b55c.jpg"
+  }
+}

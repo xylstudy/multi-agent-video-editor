@@ -55,9 +55,9 @@ async def main():
 
     # GLM-4.6V：多模态分析（画面+音频）
     vision_llm = LLMTools(
-        api_key=settings.ZHIPU_API_KEY,
-        base_url=settings.ZHIPU_BASE_URL,
-        model="glm-4.6v",
+        api_key=settings.VISION_API_KEY,
+        base_url=settings.VISION_BASE_URL,
+        model=settings.VISION_MODEL_ID,
     )
 
     # 工具

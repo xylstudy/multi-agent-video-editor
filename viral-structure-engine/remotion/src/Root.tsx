@@ -3,6 +3,8 @@ import { VideoSchemeComposition } from "./VideoScheme";
 import type { RenderInput } from "./types/schema";
 // 注册所有动态组件（含 LLM 生成的自定义组件）
 import "./dynamic/index";
+// Stable, hand-authored motion recipes available to scheme.json via custom:{name}.
+import "./components/AdvancedMotion";
 import { KenBurnsTestSuite } from "./KenBurnsTest";
 import { EffectsShowcase } from "./EffectsShowcase";
 import { BeijingVlog } from "./BeijingVlog";

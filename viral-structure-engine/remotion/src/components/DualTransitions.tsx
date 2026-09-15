@@ -64,6 +64,10 @@ export function getRequiredOverlap(type: TransitionType): number {
       return 14;
     case "radial_wipe":
       return 12;
+    case "zoom_through":
+    case "liquid_warp":
+    case "chromatic_aberration":
+      return 14;
     default:
       return 6;
   }
@@ -208,6 +212,25 @@ function getOutgoingStyle(
       return {
         transform: `scale(${interpolate(p, [0, 1], [1, 1.4])})`,
         filter: `blur(${interpolate(p, [0, 1], [0, 10])}px)`,
+        opacity: 1 - p,
+      };
+    case "zoom_through":
+      return {
+        transform: `scale(${interpolate(p, [0, 1], [1, 2.35])})`,
+        filter: `blur(${interpolate(p, [0, 1], [0, 22])}px) brightness(${interpolate(p, [0, 1], [1, 1.45])})`,
+        opacity: interpolate(p, [0, .72, 1], [1, .75, 0]),
+      };
+    case "liquid_warp":
+      return {
+        transform: `scale(${interpolate(p, [0, 1], [1, 1.13])}) skewX(${interpolate(p, [0, 1], [0, -9])}deg)`,
+        filter: `blur(${interpolate(p, [0, 1], [0, 16])}px) saturate(${interpolate(p, [0, 1], [1, 1.5])})`,
+        clipPath: `ellipse(${interpolate(p, [0, 1], [90, 10])}% ${interpolate(p, [0, 1], [90, 35])}% at ${interpolate(p, [0, 1], [50, 10])}% 50%)`,
+        opacity: 1 - p * .45,
+      };
+    case "chromatic_aberration":
+      return {
+        transform: `translateX(${interpolate(p, [0, 1], [0, -85])}px) scale(${interpolate(p, [0, 1], [1, 1.08])})`,
+        filter: `contrast(${interpolate(p, [0, 1], [1, 1.35])}) saturate(${interpolate(p, [0, 1], [1, 1.6])}) blur(${interpolate(p, [0, 1], [0, 7])}px)`,
         opacity: 1 - p,
       };
     case "light_leak":
@@ -386,6 +409,25 @@ function getIncomingStyle(
           extrapolateLeft: "clamp",
         }),
       };
+    case "zoom_through":
+      return {
+        transform: `scale(${interpolate(p, [0, 1], [.42, 1])})`,
+        filter: `blur(${interpolate(p, [0, 1], [25, 0])}px) brightness(${interpolate(p, [0, 1], [1.4, 1])})`,
+        opacity: interpolate(p, [0, .2, 1], [0, .5, 1]),
+      };
+    case "liquid_warp":
+      return {
+        transform: `scale(${interpolate(p, [0, 1], [1.16, 1])}) skewX(${interpolate(p, [0, 1], [10, 0])}deg)`,
+        filter: `blur(${interpolate(p, [0, 1], [18, 0])}px) saturate(${interpolate(p, [0, 1], [1.55, 1])})`,
+        clipPath: `ellipse(${interpolate(p, [0, 1], [4, 95])}% ${interpolate(p, [0, 1], [30, 95])}% at ${interpolate(p, [0, 1], [92, 50])}% 50%)`,
+        opacity: p,
+      };
+    case "chromatic_aberration":
+      return {
+        transform: `translateX(${interpolate(p, [0, 1], [85, 0])}px) scale(${interpolate(p, [0, 1], [1.08, 1])})`,
+        filter: `contrast(${interpolate(p, [0, 1], [1.35, 1])}) saturate(${interpolate(p, [0, 1], [1.6, 1])}) blur(${interpolate(p, [0, 1], [7, 0])}px)`,
+        opacity: p,
+      };
     case "light_leak":
       return { opacity: lp };
     case "freeze_frame":
@@ -543,6 +585,26 @@ function getOverlay(
         );
       }
       return null;
+    }
+    case "zoom_through": {
+      const flash = interpolate(frame, [0, overlap * .45, overlap], [0, .42, 0], {
+        extrapolateLeft: "clamp",
+        extrapolateRight: "clamp",
+      });
+      return <AbsoluteFill style={{ pointerEvents: "none", opacity: flash, background: "radial-gradient(circle, #fff 0%, rgba(150,210,255,.7) 22%, transparent 68%)", mixBlendMode: "screen" }} />;
+    }
+    case "liquid_warp": {
+      const x = interpolate(frame, [0, overlap], [-35, 135], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+      return <div style={{ position: "absolute", pointerEvents: "none", left: `${x}%`, top: "-20%", width: "30%", height: "140%", borderRadius: "50%", background: "linear-gradient(90deg, transparent, rgba(255,255,255,.35), rgba(80,220,255,.24), transparent)", filter: "blur(35px)", transform: "rotate(12deg)", mixBlendMode: "screen" }} />;
+    }
+    case "chromatic_aberration": {
+      const strength = interpolate(frame, [0, overlap * .45, overlap], [0, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+      return (
+        <AbsoluteFill style={{ pointerEvents: "none", mixBlendMode: "screen", opacity: strength * .32 }}>
+          <AbsoluteFill style={{ background: "#00e5ff", transform: `translateX(${strength * 15}px)` }} />
+          <AbsoluteFill style={{ background: "#ff1744", transform: `translateX(${-strength * 15}px)`, opacity: .8 }} />
+        </AbsoluteFill>
+      );
     }
     default:
       return null;

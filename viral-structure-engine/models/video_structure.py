@@ -51,6 +51,9 @@ class TransitionType(str, Enum):
     FREEZE_FRAME = "freeze_frame"
     FLIP_3D = "flip_3d"
     RADIAL_WIPE = "radial_wipe"
+    ZOOM_THROUGH = "zoom_through"
+    LIQUID_WARP = "liquid_warp"
+    CHROMATIC_ABERRATION = "chromatic_aberration"
     NONE = "none"
 
 

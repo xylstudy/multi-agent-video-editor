@@ -36,11 +36,11 @@ if errorlevel 1 (
 if /I "%~1"=="--check" exit /b 0
 
 if "%USE_CONDA%"=="1" (
-    start "VideoClaw-Backend :8000" cmd /k "cd /d ""%PROJECT_ROOT%web\backend"" ^&^& conda run --no-capture-output -n video-claw python -m uvicorn main:app --host 127.0.0.1 --port 8000"
-    start "VideoClaw-Frontend :5173" cmd /k "cd /d ""%PROJECT_ROOT%web\frontend"" ^&^& conda run --no-capture-output -n video-claw npm run dev"
+    start "VideoClaw-Backend :8000" /D "%PROJECT_ROOT%web\backend" cmd /k "conda run --no-capture-output -n video-claw python -m uvicorn main:app --host 127.0.0.1 --port 8000"
+    start "VideoClaw-Frontend :5173" /D "%PROJECT_ROOT%web\frontend" cmd /k "conda run --no-capture-output -n video-claw npm run dev"
 ) else (
-    start "VideoClaw-Backend :8000" cmd /k "cd /d ""%PROJECT_ROOT%web\backend"" ^&^& ""%PYTHON_EXE%"" -m uvicorn main:app --host 127.0.0.1 --port 8000"
-    start "VideoClaw-Frontend :5173" cmd /k "cd /d ""%PROJECT_ROOT%web\frontend"" ^&^& npm run dev"
+    start "VideoClaw-Backend :8000" /D "%PROJECT_ROOT%web\backend" cmd /k ""%PYTHON_EXE%" -m uvicorn main:app --host 127.0.0.1 --port 8000"
+    start "VideoClaw-Frontend :5173" /D "%PROJECT_ROOT%web\frontend" cmd /k "npm run dev"
 )
 
 echo.
@@ -49,3 +49,5 @@ echo Frontend: http://localhost:5173
 echo Stop services by closing the two command windows.
 echo.
 endlocal
+
+pause

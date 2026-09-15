@@ -61,9 +61,9 @@ async def analyze_video():
     )
 
     llm = LLMTools(
-        api_key=settings.ZHIPU_API_KEY,
-        base_url=settings.ZHIPU_BASE_URL,
-        model="glm-4.6v-flash",
+        api_key=settings.VISION_API_KEY,
+        base_url=settings.VISION_BASE_URL,
+        model=settings.VISION_MODEL_ID,
     )
     video = VideoTools()
     face = FaceTools()

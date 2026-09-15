@@ -23,10 +23,9 @@ from sqlmodel import Session
 from database import engine
 from db_models import Gene, GeneStatus
 from pipeline_runner import (
-    _get_effective_api_keys,
+    _get_effective_model_env,
     kill_active_process,
     run_command,
-    setup_api_keys_for_user,
 )
 from vse import VSE_DIR
 
@@ -181,12 +180,11 @@ async def run_gene_extraction(gene_id: int, user_id: int):
 
     try:
         # 用户 API Key 覆盖 + 预检
-        setup_api_keys_for_user(user_id)
-        effective_keys = _get_effective_api_keys(user_id)
-        if not effective_keys.get("ZHIPU_API_KEY"):
+        model_env = _get_effective_model_env(user_id)
+        if not model_env.get("VISION_CONFIGURED"):
             raise RuntimeError(
-                "未配置 ZHIPU_API_KEY。请在「设置」页面上传智谱 API Key，"
-                "或由管理员在 viral-structure-engine/.env 中配置。"
+                "未配置视觉分析模型。请在「模型与 API」页面添加支持图片输入的模型，"
+                "并将它设为视觉分析默认模型。"
             )
 
         await run_command(
@@ -204,6 +202,7 @@ async def run_gene_extraction(gene_id: int, user_id: int):
             start_percent=0,
             end_percent=100,
             proc_key=f"gene_{gene_id}",
+            env_overrides=model_env,
         )
 
         report = json.loads(Path(report_path).read_text(encoding="utf-8"))

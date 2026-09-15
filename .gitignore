@@ -56,4 +56,5 @@ get_video/frames_analysis/
 
 # 本地工具/临时文件
 .workbuddy/
+.local/
 vc_proj.json

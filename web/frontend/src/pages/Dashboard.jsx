@@ -17,7 +17,7 @@ import { Button, Card, SectionHeader, StatusPill } from '../components/ui.jsx'
 const STAT_CARDS = [
   { key: 'projects', label: '我的项目', icon: FolderOpen, to: '/projects', color: 'text-[#b49aff]', bg: 'bg-[rgba(124,92,252,0.12)]' },
   { key: 'genes', label: '视频基因', icon: Dna, to: '/genes', color: 'text-[#66e0ff]', bg: 'bg-[rgba(0,212,255,0.12)]' },
-  { key: 'knowledge', label: '知识条目', icon: BookOpen, to: '/knowledge', color: 'text-[#6ee7b7]', bg: 'bg-[rgba(52,211,153,0.12)]' },
+  { key: 'knowledge', label: '我的知识', icon: BookOpen, to: '/knowledge', color: 'text-[#6ee7b7]', bg: 'bg-[rgba(52,211,153,0.12)]' },
   { key: 'works', label: '生成成片', icon: PlaySquare, to: '/works', color: 'text-[#fcd34d]', bg: 'bg-[rgba(251,191,36,0.12)]' },
 ]
 

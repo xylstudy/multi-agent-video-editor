@@ -14,6 +14,17 @@ logger = logging.getLogger(__name__)
 _FFMPEG_PATH: str | None = None
 
 
+def _imwrite(image_path: str, image) -> None:
+    """Write an image through NumPy so Windows Unicode paths work reliably."""
+    target = Path(image_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    extension = target.suffix or ".jpg"
+    ok, encoded = cv2.imencode(extension, image)
+    if not ok:
+        raise ValueError(f"Cannot encode image: {image_path}")
+    encoded.tofile(str(target))
+
+
 def _find_ffmpeg() -> str:
     global _FFMPEG_PATH
     if _FFMPEG_PATH:
@@ -99,7 +110,7 @@ class VideoTools:
 
         stem = Path(video_path).stem
         output_path = str(Path(self.work_dir) / f"frame_{stem}_{int(time_sec * 10)}.jpg")
-        cv2.imwrite(output_path, frame)
+        _imwrite(output_path, frame)
         return output_path
 
     def extract_audio(self, video_path: str) -> str:
@@ -131,7 +142,7 @@ class VideoTools:
                     continue
                 stem = Path(video_path).stem
                 output = str(Path(self.work_dir) / f"frame_{stem}_s{shot_idx}_{i}.jpg")
-                cv2.imwrite(output, frame)
+                _imwrite(output, frame)
                 paths.append(output)
 
             if not paths:
@@ -409,5 +420,5 @@ class VideoTools:
         crop = img[y:y+h, x:x+w]
         stem = Path(image_path).stem
         output_path = str(Path(self.work_dir) / f"crop_{stem}.jpg")
-        cv2.imwrite(output_path, crop)
+        _imwrite(output_path, crop)
         return output_path

@@ -39,18 +39,18 @@ def _get_out(state: ViralEngineState) -> OutputManager:
 def _create_llm() -> LLMTools:
     """默认文本 LLM（DeepSeek），用于各类 Agent 文本推理"""
     return LLMTools(
-        api_key=settings.DEEPSEEK_API_KEY,
-        base_url=settings.DEEPSEEK_BASE_URL,
-        model="deepseek-chat",
+        api_key=settings.TEXT_API_KEY,
+        base_url=settings.TEXT_BASE_URL,
+        model=settings.TEXT_MODEL_ID,
     )
 
 
 def _create_vision_llm() -> LLMTools:
     """使用智谱 GLM-4.6V 进行爆款视频画面理解"""
     return LLMTools(
-        api_key=settings.ZHIPU_API_KEY,
-        base_url=settings.ZHIPU_BASE_URL,
-        model="glm-4.6v",
+        api_key=settings.VISION_API_KEY,
+        base_url=settings.VISION_BASE_URL,
+        model=settings.VISION_MODEL_ID,
     )
 
 

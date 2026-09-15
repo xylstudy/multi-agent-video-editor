@@ -103,6 +103,18 @@ export function getTask(taskId) {
   return api.get(`/tasks/${taskId}`)
 }
 
+export function getStoryboard(taskId) {
+  return api.get(`/tasks/${taskId}/storyboard`)
+}
+
+export function updateStoryboard(taskId, data) {
+  return api.put(`/tasks/${taskId}/storyboard`, data)
+}
+
+export function confirmStoryboard(taskId) {
+  return api.post(`/tasks/${taskId}/storyboard/confirm`)
+}
+
 export function deleteTask(taskId) {
   return api.delete(`/tasks/${taskId}`)
 }
@@ -121,6 +133,31 @@ export function saveApiKey(provider, keyValue) {
 
 export function deleteApiKey(provider) {
   return api.delete(`/api-keys/${provider}`)
+}
+
+/* ---------- 模型配置 ---------- */
+export function listModels() {
+  return api.get('/models')
+}
+
+export function createModel(data) {
+  return api.post('/models', data)
+}
+
+export function updateModel(id, data) {
+  return api.put(`/models/${id}`, data)
+}
+
+export function deleteModel(id) {
+  return api.delete(`/models/${id}`)
+}
+
+export function testModel(data) {
+  return api.post('/models/test', data)
+}
+
+export function setDefaultModel(id, purpose) {
+  return api.post(`/models/${id}/default/${purpose}`)
 }
 
 /* ---------- 视频基因库 ---------- */
