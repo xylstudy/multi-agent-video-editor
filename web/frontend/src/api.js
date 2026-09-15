@@ -205,3 +205,28 @@ export function listWorks() {
 export function getStats() {
   return api.get('/stats')
 }
+
+/* ---------- 智能助手 ---------- */
+export function listChatSessions() {
+  return api.get('/chat/sessions')
+}
+
+export function createChatSession(data = {}) {
+  return api.post('/chat/sessions', data)
+}
+
+export function listChatMessages(sessionId) {
+  return api.get(`/chat/sessions/${sessionId}/messages`)
+}
+
+export function sendChatMessage(sessionId, content, context = {}) {
+  return api.post(`/chat/sessions/${sessionId}/messages`, { content, context })
+}
+
+export function uploadChatAttachment(sessionId, file) {
+  const form = new FormData()
+  form.append('file', file)
+  return api.post(`/chat/sessions/${sessionId}/attachments`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+}

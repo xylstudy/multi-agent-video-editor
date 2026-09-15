@@ -184,6 +184,77 @@ class ModelConnectionTest(SQLModel):
     model_config_id: Optional[int] = None
 
 
+class ChatSession(SQLModel, table=True):
+    """A user-owned assistant conversation."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    title: str = Field(default="新对话")
+    context_json: str = Field(default="{}", sa_column=Column(Text))
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class ChatSessionCreate(SQLModel):
+    title: str = "新对话"
+    context: dict = Field(default_factory=dict)
+
+
+class ChatSessionRead(SQLModel):
+    id: int
+    title: str
+    context: dict
+    created_at: datetime
+    updated_at: datetime
+
+
+class ChatAttachment(SQLModel, table=True):
+    """A media file temporarily uploaded through the assistant."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    session_id: int = Field(foreign_key="chatsession.id", index=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    filename: str
+    media_type: str
+    storage_path: str
+    status: str = Field(default="pending", index=True)
+    material_id: Optional[int] = Field(default=None, foreign_key="material.id", index=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class ChatMessage(SQLModel, table=True):
+    """Persisted chat messages; metadata contains safe UI/action details."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    session_id: int = Field(foreign_key="chatsession.id", index=True)
+    role: str = Field(index=True)  # user / assistant / system
+    content: str = Field(sa_column=Column(Text))
+    message_type: str = Field(default="text")
+    metadata_json: str = Field(default="{}", sa_column=Column(Text))
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class ChatMessageCreate(SQLModel):
+    content: str
+    context: dict = Field(default_factory=dict)
+
+
+class ChatAction(SQLModel, table=True):
+    """Audit trail and confirmation state for assistant side effects."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    session_id: int = Field(foreign_key="chatsession.id", index=True)
+    message_id: Optional[int] = Field(default=None, foreign_key="chatmessage.id", index=True)
+    task_id: Optional[int] = Field(default=None, foreign_key="task.id", index=True)
+    action_type: str = Field(index=True)
+    status: str = Field(default="completed", index=True)
+    requires_confirmation: bool = False
+    payload_json: str = Field(default="{}", sa_column=Column(Text))
+    result_json: str = Field(default="{}", sa_column=Column(Text))
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    confirmed_at: Optional[datetime] = None
+
+
 class ProjectBase(SQLModel):
     name: str
     topic: str = Field(default="")

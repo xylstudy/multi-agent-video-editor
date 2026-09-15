@@ -325,6 +325,7 @@ export default function GeneDetail() {
       <SectionHeader
         title={gene.title}
         description={gene.source_filename}
+        backTo="/genes"
         actions={
           <>
             {gene.status === 'done' && (

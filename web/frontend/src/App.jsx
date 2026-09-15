@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
+import Assistant from './pages/Assistant.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import GeneDetail from './pages/GeneDetail.jsx'
 import Genes from './pages/Genes.jsx'
@@ -35,6 +36,7 @@ function App() {
         }
       >
         <Route index element={<Dashboard />} />
+        <Route path="assistant" element={<Assistant />} />
         <Route path="projects" element={<Projects />} />
         <Route path="projects/:id" element={<ProjectDetail />} />
         <Route path="tasks/:id" element={<TaskDetail />} />

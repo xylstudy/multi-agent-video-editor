@@ -3,6 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 import {
   BarChart3,
   BookOpen,
+  Bot,
   Clapperboard,
   Dna,
   FolderOpen,
@@ -16,6 +17,7 @@ import {
 import { useAuth } from '../context/auth-context.js'
 
 const NAV_ITEMS = [
+  { to: '/assistant', label: '智能助手', icon: Bot },
   { to: '/', label: '工作台', icon: LayoutDashboard, end: true },
   { to: '/projects', label: '项目', icon: FolderOpen },
   { to: '/genes', label: '基因库', icon: Dna },

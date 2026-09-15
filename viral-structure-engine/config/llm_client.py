@@ -44,14 +44,28 @@ class LLMTools:
         temperature: float = 0.7,
         max_tokens: int = 4096,
     ) -> str:
-        if not self.api_key and not self._can_call_without_key():
-            logger.warning("No API key configured, returning mock response")
-            return self._mock_response(prompt)
-
         messages = []
         if system:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
+        return await self.chat_messages(
+            messages,
+            response_format=response_format,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+
+    async def chat_messages(
+        self,
+        messages: list[dict],
+        response_format: str = "",
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+    ) -> str:
+        """Send a multi-turn conversation to the configured chat endpoint."""
+        if not self.api_key and not self._can_call_without_key():
+            logger.warning("No API key configured, returning mock response")
+            return self._mock_response(json.dumps(messages, ensure_ascii=False))
 
         body = {
             "model": self.model,
@@ -160,7 +174,13 @@ class LLMTools:
     async def _post(self, body: dict) -> str:
         for attempt in range(10):
             try:
-                async with httpx.AsyncClient(timeout=settings.LLM_TIMEOUT) as client:
+                # Ignore stale process proxy variables. The web app stores an
+                # explicit model endpoint, and routing it through an unrelated
+                # localhost proxy makes both chatbot and workflow calls fail.
+                async with httpx.AsyncClient(
+                    timeout=settings.LLM_TIMEOUT,
+                    trust_env=False,
+                ) as client:
                     headers = {"Content-Type": "application/json"}
                     if self.api_key:
                         headers["Authorization"] = f"Bearer {self.api_key}"

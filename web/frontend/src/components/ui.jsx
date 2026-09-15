@@ -1,4 +1,5 @@
-import { Loader2 } from 'lucide-react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 /* ---------- Button ---------- */
 const btnBase =
@@ -135,12 +136,38 @@ export function EmptyState({ icon: Icon, title, description, children }) {
 }
 
 /* ---------- SectionHeader ---------- */
-export function SectionHeader({ title, description, actions }) {
+export function SectionHeader({ title, description, actions, backTo }) {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const handleBack = () => {
+    // Keep the user's actual in-app path when possible. A direct link or a
+    // refreshed detail page falls back to its owning list page.
+    if (location.key !== 'default') {
+      navigate(-1)
+      return
+    }
+    navigate(backTo || '/')
+  }
+
   return (
     <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h1 className="text-xl font-semibold text-[#e8e8f0]">{title}</h1>
-        {description && <p className="mt-1 text-sm text-[#8888a8]">{description}</p>}
+      <div className="flex min-w-0 items-start gap-3">
+        {backTo && (
+          <button
+            type="button"
+            onClick={handleBack}
+            className="mt-0.5 inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#2a2a42] bg-[#14141f] px-2.5 py-1.5 text-xs font-medium text-[#8888a8] transition-colors hover:border-[#35355a] hover:bg-[#1c1c2b] hover:text-[#e8e8f0]"
+            aria-label="返回上一页"
+          >
+            <ArrowLeft size={14} />
+            返回
+          </button>
+        )}
+        <div className="min-w-0">
+          <h1 className="text-xl font-semibold text-[#e8e8f0]">{title}</h1>
+          {description && <p className="mt-1 text-sm text-[#8888a8]">{description}</p>}
+        </div>
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>

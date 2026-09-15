@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Download, Trash2 } from 'lucide-react'
+import { Bot, Download, Trash2 } from 'lucide-react'
 import { deleteTask, downloadTaskResult, getStoryboard, getTask, mediaUrl } from '../api.js'
 import {
   Button,
@@ -119,7 +119,7 @@ export default function TaskDetail() {
   const handleDelete = async () => {
     if (!confirm('确定删除该任务？')) return
     await deleteTask(id)
-    navigate('/')
+    navigate(task.project_id ? `/projects/${task.project_id}` : '/')
   }
 
   if (!task) {
@@ -134,8 +134,16 @@ export default function TaskDetail() {
       <SectionHeader
         title={`任务 #${task.id}`}
         description={typeLabel}
+        backTo={task.project_id ? `/projects/${task.project_id}` : '/'}
         actions={
           <>
+            <Button
+              variant="secondary"
+              icon={Bot}
+              onClick={() => navigate(`/assistant?project_id=${task.project_id}&task_id=${task.id}`)}
+            >
+              智能助手
+            </Button>
             {isSuccess && (
               <Button icon={Download} onClick={handleDownload}>
                 {task.type === 'end_to_end' ? '下载视频' : '下载结果'}

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   ChevronRight,
+  Bot,
   FileAudio,
   Film,
   Image as ImageIcon,
@@ -170,7 +171,19 @@ export default function ProjectDetail() {
       <SectionHeader
         title={project.name}
         description={project.topic || '未设置主题'}
-        actions={<Badge color={modeMeta.color}>{modeMeta.label}</Badge>}
+        backTo="/projects"
+        actions={(
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              icon={Bot}
+              onClick={() => navigate(`/assistant?project_id=${id}`)}
+            >
+              智能助手
+            </Button>
+            <Badge color={modeMeta.color}>{modeMeta.label}</Badge>
+          </div>
+        )}
       />
 
       <div className="grid gap-6 lg:grid-cols-5">

@@ -10,7 +10,7 @@ from database import create_db_and_tables
 from gene_sync import reconcile_completed_task_genes
 from knowledge_sync import reconcile_gene_knowledge
 from queue_manager import queue
-from routers import auth, api_keys, genes, insights, knowledge, materials, models, projects, stats, tasks, works
+from routers import auth, api_keys, chat, genes, insights, knowledge, materials, models, projects, stats, tasks, works
 
 logging.basicConfig(
     level=logging.INFO,
@@ -48,6 +48,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(api_keys.router)
+app.include_router(chat.router)
 app.include_router(models.router)
 app.include_router(projects.router)
 app.include_router(materials.router)

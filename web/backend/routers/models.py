@@ -301,7 +301,14 @@ async def test_model_connection(
     }
     tested_at = datetime.utcnow()
     try:
-        async with httpx.AsyncClient(timeout=20, follow_redirects=False) as client:
+        # Local development environments may export a stale HTTP(S)_PROXY
+        # (for example 127.0.0.1:9). Model endpoints must not silently route
+        # through an unavailable proxy and look like a bad API-key error.
+        async with httpx.AsyncClient(
+            timeout=20,
+            follow_redirects=False,
+            trust_env=False,
+        ) as client:
             response = await client.post(chat_url, headers=headers, json=body)
         if response.is_success:
             result = {"success": True, "message": "连接成功，模型已返回响应"}
